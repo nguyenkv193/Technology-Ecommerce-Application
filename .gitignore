@@ -1,0 +1,54 @@
+# OS & IDE Files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+
+# Environment Variables & Secrets
+.env
+.env.local
+*.secret
+*.pem
+*.key
+
+# Gradle & Java Build Outputs
+.gradle/
+build/
+bin/
+out/
+target/
+*.class
+*.jar
+*.war
+*.ear
+
+# Node & Vue Frontend Build Outputs
+node_modules/
+dist/
+dist-ssr/
+*.local
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Python & AI Service
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+venv/
+*.ipynb_checkpoints/
+.pytest_cache/
+
+# Docker & Database local volumes
+infrastructure/data/
+esdata/
+pgdata/

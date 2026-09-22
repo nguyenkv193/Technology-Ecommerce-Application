@@ -1,0 +1,8 @@
+# Temporary main-branch folder marker.
+# Remove this file before adding the real module files on develop.
+*
+!*/
+!.gitignore
+!.gitkeep
+!**/.gitignore
+!**/.gitkeep
