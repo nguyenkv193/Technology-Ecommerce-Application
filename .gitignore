@@ -52,3 +52,5 @@ venv/
 infrastructure/data/
 esdata/
 pgdata/
+
+.agents/
