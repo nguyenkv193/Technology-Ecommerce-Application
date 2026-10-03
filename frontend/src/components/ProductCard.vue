@@ -3,10 +3,11 @@
     <div>
       <!-- Product Image Canvas -->
       <div
+        ref="imageFrame"
         class="product-image-frame relative overflow-hidden rounded-xl bg-[#f6f6f8] aspect-square flex items-center justify-center mb-3.5 select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:ring-offset-2"
         tabindex="0"
         role="group"
-        :aria-label="`Ảnh ${product.name}. Dùng phím mũi tên để xem các góc, Escape để thu nhỏ.`"
+        :aria-label="`Ảnh ${product.name}. Ô phóng to riêng: dùng phím mũi tên để xem các góc, Escape để đóng.`"
         @pointerenter="updateImageZoom"
         @pointermove="updateImageZoom"
         @pointerleave="resetImageZoom"
@@ -19,10 +20,11 @@
           :src="productThumbnail" 
           :alt="product.name"
           class="product-zoom-image block h-full w-full object-contain pointer-events-none select-none"
-          :style="imageZoomStyle"
           :draggable="false"
           loading="lazy"
         />
+
+        <div v-if="imageZoomed" aria-hidden="true" class="absolute left-0 top-0 pointer-events-none rounded border border-zinc-900/50 bg-white/10" :style="zoomLensStyle" />
 
         <!-- Wishlist Button -->
         <button 
@@ -43,6 +45,19 @@
           </span>
         </div>
       </div>
+
+      <Teleport to="body">
+        <div
+          v-if="imageZoomed"
+          data-testid="product-zoom-preview"
+          aria-hidden="true"
+          class="fixed z-[60] pointer-events-none overflow-hidden rounded-xl bg-[#f6f6f8] shadow-xl ring-1 ring-zinc-900/15"
+          :style="zoomPreviewStyle"
+        >
+          <img :src="productThumbnail" alt="" :draggable="false" class="absolute left-0 top-0 max-w-none object-contain select-none" :style="zoomPreviewImageStyle" />
+          <span class="absolute right-2 top-2 rounded-md bg-white/90 px-2 py-0.5 text-[10px] font-semibold text-zinc-700 shadow-xs">2×</span>
+        </div>
+      </Teleport>
 
       <!-- Product Meta -->
       <div class="space-y-1">
@@ -107,22 +122,81 @@ import { useWishlistStore } from '@/stores/wishlist'
 import type { Product, ProductVariant } from '@/types'
 
 const imageZoomed = ref(false)
+const imageFrame = ref<HTMLElement | null>(null)
 const imageZoomOrigin = ref({ x: 50, y: 50 })
-const imageZoomStyle = computed(() => ({
-  transform: `scale(${imageZoomed.value ? 2 : 1})`,
-  transformOrigin: `${imageZoomOrigin.value.x}% ${imageZoomOrigin.value.y}%`
+const zoomFrameSize = ref({ width: 1, height: 1 })
+const zoomPreview = ref({ left: 0, top: 0, size: 220 })
+const zoomRegion = computed(() => {
+  const { width, height } = zoomFrameSize.value
+  const lensWidth = Math.min(width, zoomPreview.value.size / 2)
+  const lensHeight = Math.min(height, zoomPreview.value.size / 2)
+  return {
+    width: lensWidth,
+    height: lensHeight,
+    left: Math.max(0, Math.min(width - lensWidth, imageZoomOrigin.value.x / 100 * width - lensWidth / 2)),
+    top: Math.max(0, Math.min(height - lensHeight, imageZoomOrigin.value.y / 100 * height - lensHeight / 2))
+  }
+})
+const zoomLensStyle = computed(() => ({
+  width: `${zoomRegion.value.width}px`, height: `${zoomRegion.value.height}px`,
+  transform: `translate(${zoomRegion.value.left}px, ${zoomRegion.value.top}px)`
+}))
+const zoomPreviewStyle = computed(() => ({
+  left: `${zoomPreview.value.left}px`, top: `${zoomPreview.value.top}px`,
+  width: `${zoomPreview.value.size}px`, height: `${zoomPreview.value.size}px`
+}))
+const zoomPreviewImageStyle = computed(() => ({
+  width: `${zoomFrameSize.value.width * 2}px`, height: `${zoomFrameSize.value.height * 2}px`,
+  transform: `translate(${-zoomRegion.value.left * 2}px, ${-zoomRegion.value.top * 2}px)`
 }))
 
 const clampZoomPosition = (value: number) => Math.max(0, Math.min(100, value))
 
 const resetImageZoom = () => { imageZoomed.value = false }
 
+const positionZoomPreview = () => {
+  const frame = imageFrame.value?.getBoundingClientRect()
+  if (!frame || frame.width <= 0 || frame.height <= 0) return null
+  const margin = 8, gap = 12
+  const size = Math.max(1, Math.min(220, window.innerWidth - margin * 2, window.innerHeight - margin * 2))
+  let left = frame.right + gap
+  let top = frame.top + (frame.height - size) / 2
+  if (left + size > window.innerWidth - margin) {
+    left = frame.left - size - gap
+    if (left < margin) {
+      left = frame.left + (frame.width - size) / 2
+      top = frame.bottom + gap + size <= window.innerHeight - margin
+        ? frame.bottom + gap : frame.top - size - gap
+    }
+  }
+  zoomFrameSize.value = { width: frame.width, height: frame.height }
+  zoomPreview.value = {
+    size,
+    left: Math.max(margin, Math.min(window.innerWidth - size - margin, left)),
+    top: Math.max(margin, Math.min(window.innerHeight - size - margin, top))
+  }
+  return frame
+}
+
+// Only an open preview needs listeners; Vue cleans them up on unmount too.
+watch(imageZoomed, (visible, _previous, onCleanup) => {
+  if (!visible) return
+  window.addEventListener('scroll', resetImageZoom, { capture: true, passive: true })
+  window.addEventListener('resize', resetImageZoom)
+  onCleanup(() => {
+    window.removeEventListener('scroll', resetImageZoom, true)
+    window.removeEventListener('resize', resetImageZoom)
+  })
+})
+
 const updateImageZoom = (event: PointerEvent) => {
   if (event.pointerType !== 'mouse' || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return
-  // The wishlist button remains usable without moving the inspection area.
-  if ((event.target as HTMLElement).closest('button')) return
-  const frame = (event.currentTarget as HTMLElement).getBoundingClientRect()
-  if (frame.width <= 0 || frame.height <= 0) return
+  if ((event.target as HTMLElement).closest('button')) {
+    resetImageZoom()
+    return
+  }
+  const frame = positionZoomPreview()
+  if (!frame) return
   imageZoomOrigin.value = {
     x: clampZoomPosition((event.clientX - frame.left) / frame.width * 100),
     y: clampZoomPosition((event.clientY - frame.top) / frame.height * 100)
@@ -132,6 +206,7 @@ const updateImageZoom = (event: PointerEvent) => {
 
 const focusImageZoom = (event: FocusEvent) => {
   if (!(event.currentTarget as HTMLElement).matches(':focus-visible')) return
+  if (!positionZoomPreview()) return
   imageZoomOrigin.value = { x: 50, y: 50 }
   imageZoomed.value = true
 }
@@ -150,6 +225,7 @@ const handleImageZoomKey = (event: KeyboardEvent) => {
   const direction = directions[event.key]
   if (!direction) return
   event.preventDefault()
+  if (!positionZoomPreview()) return
   imageZoomOrigin.value = {
     x: clampZoomPosition(imageZoomOrigin.value.x + direction[0]),
     y: clampZoomPosition(imageZoomOrigin.value.y + direction[1])
@@ -190,6 +266,7 @@ const selectedVariant = ref<ProductVariant | null>(null)
 
 watch(() => props.product.id, () => {
   selectedVariant.value = null
+  resetImageZoom()
 })
 
 const activeVariant = computed<ProductVariant | null>(() => {
@@ -281,19 +358,10 @@ const formatPrice = (value?: number | null): string => {
 </script>
 
 <style scoped>
-.product-zoom-image {
-  transition: transform 180ms ease-out;
-}
-
 @media (hover: hover) and (pointer: fine) {
   .product-image-frame {
     cursor: zoom-in;
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .product-zoom-image {
-    transition: none;
-  }
-}
 </style>
