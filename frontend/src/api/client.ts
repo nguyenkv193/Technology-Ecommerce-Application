@@ -9,14 +9,6 @@ const apiClient = axios.create({
   }
 })
 
-// Axios instance cho AI Recommendation Service (FastAPI)
-const aiClient = axios.create({
-  baseURL: '/ai-api',
-  headers: {
-    'Content-Type': 'application/json'
-  }
-})
-
 // Request Interceptor: Tự động đính kèm Bearer Token nếu có
 apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const token = localStorage.getItem('techstore_access_token')
@@ -41,11 +33,4 @@ apiClient.interceptors.response.use(
   }
 )
 
-aiClient.interceptors.response.use(
-  (response: AxiosResponse) => response.data,
-  (error) => {
-    return Promise.reject(error)
-  }
-)
-
-export { apiClient, aiClient }
+export { apiClient }

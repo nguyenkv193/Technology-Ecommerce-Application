@@ -251,12 +251,12 @@ import { useRoute } from 'vue-router'
 import RecommendationCarousel from '@/components/RecommendationCarousel.vue'
 import HardwareSpecsTable from '@/components/HardwareSpecsTable.vue'
 import { catalogApi } from '@/api/catalogApi'
-import { aiApi } from '@/api/aiApi'
+import { recommendationApi } from '@/api/recommendationApi'
 import { behaviorApi } from '@/api/behaviorApi'
 import { useCartStore } from '@/stores/cart'
 import { useWishlistStore } from '@/stores/wishlist'
 import { useAuthStore } from '@/stores/auth'
-import type { Product, ProductVariant, Review, ReviewSummary } from '@/types'
+import type { Product, ProductVariant, ProductReview, ProductReviewSummary } from '@/types'
 
 const route = useRoute()
 const cartStore = useCartStore()
@@ -276,8 +276,11 @@ const toastMessage = ref<string>('')
 const similarProducts = ref<EnrichedProduct[]>([])
 const loadingSimilar = ref<boolean>(false)
 
-const reviews = ref<Review[]>([])
-const reviewSummary = ref<ReviewSummary>({ averageRating: 5.0, totalReviews: 0 })
+const reviews = ref<ProductReview[]>([])
+const reviewSummary = ref<ProductReviewSummary>({
+  productId: 0, averageRating: 0, totalReviews: 0,
+  reviews: { content: [], page: 0, size: 10, totalElements: 0, totalPages: 0, last: true }
+})
 const newReview = ref<{ rating: number; comment: string }>({ rating: 5, comment: '' })
 const submittingReview = ref<boolean>(false)
 
@@ -314,7 +317,7 @@ const handleAddToCart = async () => {
 const loadProductData = async (id: number | string) => {
   loading.value = true
   try {
-    const res = await catalogApi.getProductById(id)
+    const res = await catalogApi.getProductById(Number(id))
     if (res.success && res.data) {
       product.value = res.data
       if (product.value.variants && product.value.variants.length > 0) {
@@ -335,38 +338,21 @@ const loadProductData = async (id: number | string) => {
   }
 }
 
+let similarRequestId = 0
 const loadSimilarProducts = async (productId: number) => {
+  const requestId = ++similarRequestId
   loadingSimilar.value = true
+  similarProducts.value = []
   try {
-    const res = await aiApi.getSimilar(productId, 4)
-    if (res.recommendations) {
-      const enriched: EnrichedProduct[] = []
-      for (const item of res.recommendations) {
-        try {
-          const pRes = await catalogApi.getProductById(item.product_id)
-          if (pRes.success && pRes.data) {
-            enriched.push({ ...pRes.data })
-          }
-        } catch {
-          enriched.push({
-            id: item.product_id,
-            name: `Thiết bị tương đồng #${item.product_id}`,
-            slug: `similar-${item.product_id}`,
-            description: '',
-            shortDescription: '',
-            active: true,
-            minPrice: 28990000,
-            brandName: 'Tech Brand',
-            thumbnailUrl: defaultImage
-          })
-        }
-      }
-      similarProducts.value = enriched
-    }
-  } catch (e) {
-    console.error('Lỗi tải sản phẩm tương tự:', e)
+    const res = await recommendationApi.getSimilar(productId, 4)
+    if (requestId !== similarRequestId || product.value?.id !== productId) return
+    similarProducts.value = res.data.recommendations.map(item => ({
+      ...item.product, reason: item.reason, aiScore: item.score ?? undefined
+    }))
+  } catch (error) {
+    console.error('Lỗi tải sản phẩm tương tự:', error)
   } finally {
-    loadingSimilar.value = false
+    if (requestId === similarRequestId) loadingSimilar.value = false
   }
 }
 

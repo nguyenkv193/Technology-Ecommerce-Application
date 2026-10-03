@@ -2,18 +2,44 @@
   <div class="group relative bg-white border border-zinc-200/80 hover:border-zinc-300 rounded-2xl p-4 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 flex flex-col justify-between">
     <div>
       <!-- Product Image Canvas -->
-      <div class="relative overflow-hidden rounded-xl bg-[#f6f6f8] aspect-square flex items-center justify-center p-5 mb-3.5">
+      <div
+        ref="imageFrame"
+        class="product-image-frame relative overflow-hidden rounded-xl bg-[#f6f6f8] aspect-square flex items-center justify-center mb-3.5 select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:ring-offset-2"
+        tabindex="0"
+        role="group"
+        :aria-label="`Ảnh ${product.name}. Kính lúp: dùng phím mũi tên để xem các góc, Escape để đóng.`"
+        @pointerenter="updateImageZoom"
+        @pointermove="updateImageZoom"
+        @pointerleave="resetImageZoom"
+        @pointercancel="resetImageZoom"
+        @focus="focusImageZoom"
+        @blur="resetImageZoom"
+        @keydown="handleImageZoomKey"
+      >
         <img 
           :src="productThumbnail" 
           :alt="product.name"
-          class="object-contain max-h-full max-w-full group-hover:scale-105 transition-transform duration-300"
+          class="product-zoom-image block h-full w-full object-contain pointer-events-none select-none"
+          :draggable="false"
           loading="lazy"
         />
+
+        <Transition name="magnifier">
+          <div
+            v-if="imageZoomed"
+            data-testid="product-zoom-preview"
+            aria-hidden="true"
+            class="product-magnifier absolute z-10 pointer-events-none overflow-hidden rounded-full bg-[#f6f6f8]"
+            :style="zoomPreviewStyle"
+          >
+            <img :src="productThumbnail" alt="" :draggable="false" class="absolute left-0 top-0 max-w-none object-contain select-none" :style="zoomPreviewImageStyle" />
+          </div>
+        </Transition>
 
         <!-- Wishlist Button -->
         <button 
           @click.stop.prevent="handleToggleWishlist"
-          class="absolute top-2.5 right-2.5 p-1.5 rounded-full bg-white/90 hover:bg-white border border-zinc-200/80 transition text-zinc-400 hover:text-red-500 shadow-xs cursor-pointer"
+          class="absolute z-20 top-2.5 right-2.5 p-1.5 rounded-full bg-white/90 hover:bg-white border border-zinc-200/80 transition text-zinc-400 hover:text-red-500 shadow-xs cursor-pointer"
           :class="{ 'text-red-500': isFav }"
           title="Thêm vào yêu thích"
         >
@@ -92,6 +118,102 @@ import { ref, computed, watch } from 'vue'
 import { useWishlistStore } from '@/stores/wishlist'
 import type { Product, ProductVariant } from '@/types'
 
+const imageZoomed = ref(false)
+const imageFrame = ref<HTMLElement | null>(null)
+const imageZoomOrigin = ref({ x: 50, y: 50 })
+const zoomFrameSize = ref({ width: 1, height: 1 })
+const zoomPreview = ref({ size: 132 })
+const zoomRegion = computed(() => {
+  const { width, height } = zoomFrameSize.value
+  const lensWidth = Math.min(width, zoomPreview.value.size / 2)
+  const lensHeight = Math.min(height, zoomPreview.value.size / 2)
+  return {
+    width: lensWidth,
+    height: lensHeight,
+    left: Math.max(0, Math.min(width - lensWidth, imageZoomOrigin.value.x / 100 * width - lensWidth / 2)),
+    top: Math.max(0, Math.min(height - lensHeight, imageZoomOrigin.value.y / 100 * height - lensHeight / 2))
+  }
+})
+const zoomPreviewStyle = computed(() => {
+  const size = zoomPreview.value.size
+  const { width, height } = zoomFrameSize.value
+  const left = Math.max(6, Math.min(width - size - 6, imageZoomOrigin.value.x / 100 * width - size / 2))
+  const top = Math.max(6, Math.min(height - size - 6, imageZoomOrigin.value.y / 100 * height - size / 2))
+  return { left: `${left}px`, top: `${top}px`, width: `${size}px`, height: `${size}px` }
+})
+const zoomPreviewImageStyle = computed(() => ({
+  width: `${zoomFrameSize.value.width * 2}px`, height: `${zoomFrameSize.value.height * 2}px`,
+  transform: `translate(${-zoomRegion.value.left * 2}px, ${-zoomRegion.value.top * 2}px)`
+}))
+
+const clampZoomPosition = (value: number) => Math.max(0, Math.min(100, value))
+
+const resetImageZoom = () => { imageZoomed.value = false }
+
+const positionZoomPreview = () => {
+  const frame = imageFrame.value?.getBoundingClientRect()
+  if (!frame || frame.width <= 0 || frame.height <= 0) return null
+  zoomFrameSize.value = { width: frame.width, height: frame.height }
+  // Keep the magnifier and its white rim inside the image frame.
+  zoomPreview.value = { size: Math.max(1, Math.min(132, frame.width - 12, frame.height - 12)) }
+  return frame
+}
+
+// Only an open preview needs listeners; Vue cleans them up on unmount too.
+watch(imageZoomed, (visible, _previous, onCleanup) => {
+  if (!visible) return
+  window.addEventListener('scroll', resetImageZoom, { capture: true, passive: true })
+  window.addEventListener('resize', resetImageZoom)
+  onCleanup(() => {
+    window.removeEventListener('scroll', resetImageZoom, true)
+    window.removeEventListener('resize', resetImageZoom)
+  })
+})
+
+const updateImageZoom = (event: PointerEvent) => {
+  if (event.pointerType !== 'mouse' || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return
+  if ((event.target as HTMLElement).closest('button')) {
+    resetImageZoom()
+    return
+  }
+  const frame = positionZoomPreview()
+  if (!frame) return
+  imageZoomOrigin.value = {
+    x: clampZoomPosition((event.clientX - frame.left) / frame.width * 100),
+    y: clampZoomPosition((event.clientY - frame.top) / frame.height * 100)
+  }
+  imageZoomed.value = true
+}
+
+const focusImageZoom = (event: FocusEvent) => {
+  if (!(event.currentTarget as HTMLElement).matches(':focus-visible')) return
+  if (!positionZoomPreview()) return
+  imageZoomOrigin.value = { x: 50, y: 50 }
+  imageZoomed.value = true
+}
+
+const handleImageZoomKey = (event: KeyboardEvent) => {
+  // Do not intercept keyboard events from the nested wishlist button.
+  if (event.target !== event.currentTarget) return
+  if (event.key === 'Escape') {
+    event.preventDefault()
+    resetImageZoom()
+    return
+  }
+  const directions: Record<string, [number, number]> = {
+    ArrowLeft: [-10, 0], ArrowRight: [10, 0], ArrowUp: [0, -10], ArrowDown: [0, 10]
+  }
+  const direction = directions[event.key]
+  if (!direction) return
+  event.preventDefault()
+  if (!positionZoomPreview()) return
+  imageZoomOrigin.value = {
+    x: clampZoomPosition(imageZoomOrigin.value.x + direction[0]),
+    y: clampZoomPosition(imageZoomOrigin.value.y + direction[1])
+  }
+  imageZoomed.value = true
+}
+
 const props = withDefaults(defineProps<{
   product: Product
   reason?: string
@@ -113,6 +235,11 @@ const productThumbnail = computed(() => {
   return defaultImage
 })
 
+watch(productThumbnail, () => {
+  resetImageZoom()
+  imageZoomOrigin.value = { x: 50, y: 50 }
+})
+
 const wishlistStore = useWishlistStore()
 const isFav = computed(() => wishlistStore.isWishlisted(props.product.id))
 
@@ -120,6 +247,7 @@ const selectedVariant = ref<ProductVariant | null>(null)
 
 watch(() => props.product.id, () => {
   selectedVariant.value = null
+  resetImageZoom()
 })
 
 const activeVariant = computed<ProductVariant | null>(() => {
@@ -209,3 +337,32 @@ const formatPrice = (value?: number | null): string => {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value)
 }
 </script>
+
+<style scoped>
+.product-magnifier {
+  box-shadow: 0 0 0 3px rgb(255 255 255 / 95%), 0 5px 18px rgb(24 24 27 / 18%);
+}
+
+.magnifier-enter-active,
+.magnifier-leave-active {
+  transition: opacity 140ms ease;
+}
+
+.magnifier-enter-from,
+.magnifier-leave-to {
+  opacity: 0;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .product-image-frame {
+    cursor: crosshair;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .magnifier-enter-active,
+  .magnifier-leave-active {
+    transition: none;
+  }
+}
+</style>

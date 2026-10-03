@@ -60,8 +60,8 @@ public class BehaviorService {
     }
 
     @Transactional(readOnly = true)
-    public List<UserInteractionExportDto> exportInteractionsForAi() {
-        List<Object[]> rows = userBehaviorRepository.aggregateUserProductInteractions();
+    public List<UserInteractionExportDto> getInteractionsForUser(Long userId) {
+        List<Object[]> rows = userBehaviorRepository.aggregateUserProductInteractions(userId);
         return rows.stream().map(row -> UserInteractionExportDto.builder()
                 .userId(((Number) row[0]).longValue())
                 .productId(((Number) row[1]).longValue())

@@ -30,6 +30,16 @@ export interface User {
   createdAt?: string
 }
 
+export interface LoginRequest {
+  email: string
+  password: string
+}
+
+export interface RegisterRequest extends LoginRequest {
+  fullName: string
+  phoneNumber?: string
+}
+
 export interface Category {
   id: number
   name: string
@@ -121,6 +131,7 @@ export interface Cart {
 
 export interface OrderItem {
   id: number
+  productId: number
   variantId: number
   productName: string
   variantName: string
@@ -168,49 +179,18 @@ export interface ProductReviewSummary {
   reviews: PageResponse<ProductReview>
 }
 
-// AI Recommendation Interfaces
-export interface AIRecommendationItem {
-  product_id: number
-  score: number
+// Recommendation data is enriched by the backend, including fallback provenance.
+export type RecommendationSource = 'content_based' | 'best_seller' | 'catalog'
+
+export interface RecommendationItem {
+  product: Product
+  source: RecommendationSource
+  score: number | null
   reason: string
 }
 
-export interface AIRecommendationResponse {
-  algorithm: string
-  user_id?: number
-  target_product_id?: number
-  total: number
-  recommendations: AIRecommendationItem[]
-}
-
-export interface AIEvaluationResponse {
-  algorithm: string
-  k: number
-  precision_at_k: number
-  recall_at_k: number
-  ndcg_at_k: number
-  hit_rate: number
-  total_users_evaluated: number
-}
-
-export interface UserClusterItem {
-  user_id: number
-  cluster_id: number
-  persona_name: string
-  avg_score: number
-  total_interactions: number
-}
-
-export interface ClusterSummary {
-  cluster_id: number
-  persona_name: string
-  member_count: number
-  avg_total_score: number
-  avg_interactions: number
-}
-
-export interface AIClusterAnalysisResponse {
-  total_clusters: number
-  clusters: ClusterSummary[]
-  user_assignments: UserClusterItem[]
+export interface RecommendationResponse {
+  source: RecommendationSource
+  fallbackReason: 'no_history' | 'ai_unavailable' | 'insufficient_matches' | null
+  recommendations: RecommendationItem[]
 }

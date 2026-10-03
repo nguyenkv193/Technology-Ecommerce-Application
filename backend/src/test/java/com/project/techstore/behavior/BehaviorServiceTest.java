@@ -80,11 +80,11 @@ class BehaviorServiceTest {
     }
 
     @Test
-    void testExportInteractionsForAi() {
+    void testInteractionsAreScopedToCurrentUser() {
         Object[] mockRow = new Object[]{1L, 50L, 8.5, 4L, Instant.now()};
-        when(userBehaviorRepository.aggregateUserProductInteractions()).thenReturn(List.<Object[]>of(mockRow));
+        when(userBehaviorRepository.aggregateUserProductInteractions(1L)).thenReturn(List.<Object[]>of(mockRow));
 
-        List<UserInteractionExportDto> matrix = behaviorService.exportInteractionsForAi();
+        List<UserInteractionExportDto> matrix = behaviorService.getInteractionsForUser(1L);
 
         assertNotNull(matrix);
         assertEquals(1, matrix.size());
@@ -92,5 +92,6 @@ class BehaviorServiceTest {
         assertEquals(50L, matrix.get(0).getProductId());
         assertEquals(8.5, matrix.get(0).getScore());
         assertEquals(4L, matrix.get(0).getInteractionCount());
+        verify(userBehaviorRepository).aggregateUserProductInteractions(1L);
     }
 }

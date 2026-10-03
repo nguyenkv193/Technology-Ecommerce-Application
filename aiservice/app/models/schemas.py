@@ -1,51 +1,37 @@
-from pydantic import BaseModel, Field
-from typing import List, Optional, Dict, Any
+from pydantic import BaseModel, ConfigDict, Field
+
 
 class ProductFeatureItem(BaseModel):
-    id: int
+    model_config = ConfigDict(populate_by_name=True)
+    id: int = Field(gt=0)
     name: str
     slug: str
+    category_id: int | None = Field(default=None, alias="categoryId")
     category: str = ""
     brand: str = ""
     description: str = ""
-    attributes: List[Dict[str, str]] = []
-    min_price: Optional[float] = 0.0
+    attributes: list[dict[str, str]] = Field(default_factory=list)
+
 
 class UserInteractionItem(BaseModel):
-    user_id: int
-    product_id: int
-    score: float
-    interaction_count: int = 1
+    model_config = ConfigDict(allow_inf_nan=False)
+    product_id: int = Field(gt=0)
+    score: float = Field(gt=0)
+
+
+class PersonalizedRequest(BaseModel):
+    interactions: list[UserInteractionItem]
+    limit: int = Field(default=10, ge=1, le=50)
+
 
 class ProductRecommendationItem(BaseModel):
     product_id: int
-    score: float = Field(..., description="Điểm số phù hợp được thuật toán tính toán")
-    reason: str = Field(..., description="Giải thích lý do gợi ý (Explainability)")
+    score: float
+    reason: str
+
 
 class RecommendationResponse(BaseModel):
-    algorithm: str
-    user_id: Optional[int] = None
-    target_product_id: Optional[int] = None
+    source: str = "content_based"
+    target_product_id: int | None = None
     total: int
-    recommendations: List[ProductRecommendationItem]
-
-class EvaluationMetricsResponse(BaseModel):
-    algorithm: str
-    k: int
-    precision_at_k: float
-    recall_at_k: float
-    ndcg_at_k: float
-    hit_rate: float
-    total_users_evaluated: int
-
-class UserClusterItem(BaseModel):
-    user_id: int
-    cluster_id: int
-    persona_name: str
-    avg_score: float
-    total_interactions: int
-
-class ClusterAnalysisResponse(BaseModel):
-    total_clusters: int
-    clusters: List[Dict[str, Any]]
-    user_assignments: List[UserClusterItem]
+    recommendations: list[ProductRecommendationItem]

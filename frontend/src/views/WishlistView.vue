@@ -27,8 +27,6 @@
           name: item.productName,
           slug: '',
           description: '',
-          shortDescription: '',
-          active: true,
           thumbnailUrl: item.thumbnailUrl,
           minPrice: item.minPrice,
           brandName: item.brandName,

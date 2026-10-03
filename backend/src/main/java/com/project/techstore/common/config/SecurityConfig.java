@@ -84,7 +84,7 @@ public class SecurityConfig {
                                 "/api/v1/brands/**",
                                 "/api/v1/products/**",
                                 "/api/v1/reviews/**",
-                                "/api/v1/behaviors/export-interactions"
+                                "/api/v1/recommendations/**"
                         ).permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.POST,
                                 "/api/v1/behaviors/track"

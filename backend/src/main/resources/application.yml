@@ -9,6 +9,10 @@ spring:
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
 
+ai:
+  service-url: ${AI_SERVICE_URL:http://localhost:8001/api/v1}
+  timeout-ms: ${AI_TIMEOUT_MS:1500}
+
 # Cấu hình tài liệu Swagger OpenAPI
 springdoc:
   api-docs:

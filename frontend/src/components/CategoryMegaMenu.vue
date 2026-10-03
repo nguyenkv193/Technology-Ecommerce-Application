@@ -151,7 +151,7 @@
                   <router-link
                     v-for="brand in currentCat.brands"
                     :key="brand.id"
-                    :to="brand.link || `/products?categoryId=${currentCat.id}&brandId=${brand.id}`"
+                    :to="`/products?categoryId=${currentCat.id}&brandId=${brand.id}`"
                     @click="closeMenu"
                     class="h-8 w-[72px] sm:w-[78px] rounded-xl bg-white hover:bg-zinc-50 border border-zinc-200/90 hover:border-zinc-300 shadow-2xs hover:shadow-xs flex items-center justify-center px-2 py-1 transition-all cursor-pointer group shrink-0"
                     :title="brand.name"
