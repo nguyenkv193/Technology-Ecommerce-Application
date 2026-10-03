@@ -2,11 +2,11 @@
   <div class="group relative bg-white border border-zinc-200/80 hover:border-zinc-300 rounded-2xl p-4 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 flex flex-col justify-between">
     <div>
       <!-- Product Image Canvas -->
-      <div class="relative overflow-hidden rounded-xl bg-[#f6f6f8] aspect-square flex items-center justify-center p-5 mb-3.5">
+      <div class="relative overflow-hidden rounded-xl bg-[#f6f6f8] aspect-square flex items-center justify-center mb-3.5">
         <img 
           :src="productThumbnail" 
           :alt="product.name"
-          class="object-contain max-h-full max-w-full group-hover:scale-105 transition-transform duration-300"
+          class="block h-full w-full object-contain group-hover:scale-105 transition-transform duration-300"
           loading="lazy"
         />
 
