@@ -218,13 +218,39 @@
 
     <!-- Sản phẩm Nổi Bật -->
     <RecommendationCarousel
-      v-if="loadingBestSellers || bestSellerProducts.length > 0"
       title="Sản Phẩm Bán Chạy"
       subtitle="Các sản phẩm bán nhiều nhất từ đơn hàng đã giao và thanh toán"
       badge="Nổi bật"
       :items="bestSellerProducts"
       :loading="loadingBestSellers"
-    />
+      empty-message="Chưa có dữ liệu bán chạy từ đơn hàng đã giao và thanh toán. Bạn có thể khám phá các sản phẩm bên dưới."
+      :error-message="bestSellerError"
+      @retry="loadBestSellers"
+    >
+      <template #action>
+        <router-link to="/products" class="catalog-shelf-link">Khám phá sản phẩm <span aria-hidden="true">→</span></router-link>
+      </template>
+    </RecommendationCarousel>
+
+    <template v-for="shelf in catalogShelves" :key="shelf.key">
+      <RecommendationCarousel
+        v-if="shelf.key === 'newest' || shelf.loading || shelf.error || shelf.products.length > 0"
+        :title="shelf.title"
+        :subtitle="shelf.subtitle"
+        :badge="shelf.key === 'newest' ? 'Mới lên kệ' : 'Khám phá'"
+        :items="shelf.products"
+        :loading="shelf.loading"
+        :error-message="shelf.error"
+        empty-message="Chưa có sản phẩm trong danh sách này. Vui lòng quay lại sau."
+        @retry="retryCatalogShelf(shelf)"
+      >
+        <template #action>
+          <router-link :to="shelf.href" :aria-label="`Xem tất cả: ${shelf.title}`" class="catalog-shelf-link">
+            Xem tất cả <span aria-hidden="true">→</span>
+          </router-link>
+        </template>
+      </RecommendationCarousel>
+    </template>
   </div>
 </template>
 
@@ -235,7 +261,7 @@ import FeaturedCategoriesGrid from '@/components/FeaturedCategoriesGrid.vue'
 import { recommendationApi } from '@/api/recommendationApi'
 import { catalogApi } from '@/api/catalogApi'
 import { useAuthStore } from '@/stores/auth'
-import type { Product } from '@/types'
+import type { Product, Category } from '@/types'
 
 const authStore = useAuthStore()
 
@@ -244,7 +270,83 @@ type EnrichedProduct = Product & { reason?: string; aiScore?: number }
 const personalizedProducts = ref<EnrichedProduct[]>([])
 const bestSellerProducts = ref<EnrichedProduct[]>([])
 const loadingPersonalized = ref<boolean>(false)
-const loadingBestSellers = ref<boolean>(false)
+const loadingBestSellers = ref<boolean>(true)
+const bestSellerError = ref('')
+
+interface CatalogShelf {
+  key: string
+  title: string
+  subtitle: string
+  categorySlugs: string[]
+  categoryId?: number
+  href: string
+  products: Product[]
+  loading: boolean
+  error: string
+}
+
+const catalogShelves = ref<CatalogShelf[]>([
+  { key: 'newest', title: 'Sản Phẩm Mới Lên Kệ', subtitle: 'Những sản phẩm vừa được cập nhật trong cửa hàng', categorySlugs: [] },
+  { key: 'phones', title: 'Điện Thoại', subtitle: 'Khám phá các dòng điện thoại và cấu hình đang có tại TechStore', categorySlugs: ['dien-thoai'] },
+  { key: 'laptops', title: 'Laptop', subtitle: 'Tìm chiếc laptop phù hợp cho công việc, học tập và giải trí', categorySlugs: ['laptop'] },
+  { key: 'tablets', title: 'Máy Tính Bảng', subtitle: 'Thiết bị gọn nhẹ cho học tập, sáng tạo và sử dụng hằng ngày', categorySlugs: ['may-tinh-bang'] },
+  { key: 'accessories', title: 'Linh Kiện & Phụ Kiện', subtitle: 'Hoàn thiện góc làm việc và nâng cấp trải nghiệm của bạn', categorySlugs: ['linh-kien-phu-kien'] },
+  { key: 'audio', title: 'Tai Nghe & Âm Thanh', subtitle: 'Khám phá các thiết bị nghe nhạc và giải trí', categorySlugs: ['tai-nghe', 'am-thanh'] }
+].map(shelf => ({ ...shelf, href: '/products', products: [], loading: true, error: '' })))
+
+const flattenCategories = (categories: Category[]): Category[] =>
+  categories.flatMap(category => [category, ...flattenCategories(category.children ?? [])])
+
+const loadCatalogShelf = async (shelf: CatalogShelf) => {
+  shelf.loading = true
+  shelf.error = ''
+  try {
+    const res = await catalogApi.getProducts({
+      page: 0, size: 8, status: 'ACTIVE', sortBy: 'createdAt', sortDirection: 'DESC',
+      ...(shelf.categoryId !== undefined ? { categoryId: shelf.categoryId } : {})
+    })
+    if (!res.success) throw new Error('Catalog request failed')
+    shelf.products = res.data.content
+  } catch {
+    shelf.error = 'Chưa thể tải danh sách sản phẩm. Vui lòng thử lại.'
+  } finally {
+    shelf.loading = false
+  }
+}
+
+const loadCategoryShelves = async () => {
+  const shelves = catalogShelves.value.filter(shelf => shelf.categorySlugs.length > 0)
+  shelves.forEach(shelf => { shelf.loading = true; shelf.error = '' })
+  try {
+    const res = await catalogApi.getCategories()
+    if (!res.success) throw new Error('Categories request failed')
+    const categories = flattenCategories(res.data)
+    await Promise.allSettled(shelves.map(async shelf => {
+      const category = shelf.categorySlugs.map(slug => categories.find(item => item.slug === slug)).find(Boolean)
+      if (!category) {
+        shelf.products = []
+        shelf.loading = false
+        return
+      }
+      shelf.categoryId = category.id
+      shelf.href = `/products?categoryId=${category.id}`
+      await loadCatalogShelf(shelf)
+    }))
+  } catch {
+    shelves.forEach(shelf => {
+      shelf.loading = false
+      shelf.error = 'Chưa thể tải danh mục sản phẩm. Vui lòng thử lại.'
+    })
+  }
+}
+
+const retryCatalogShelf = (shelf: CatalogShelf) => {
+  if (shelf.categorySlugs.length > 0 && shelf.categoryId === undefined) {
+    void loadCategoryShelves()
+  } else {
+    void loadCatalogShelf(shelf)
+  }
+}
 
 // Flagship Showcase Slides
 interface FeaturedSlide {
@@ -382,11 +484,13 @@ const formatCurrency = (value?: number | null): string => {
 
 const loadBestSellers = async () => {
   loadingBestSellers.value = true
+  bestSellerError.value = ''
   try {
     const res = await catalogApi.getBestSellers(4)
     bestSellerProducts.value = res.data
   } catch (error) {
     bestSellerProducts.value = []
+    bestSellerError.value = 'Chưa thể tải sản phẩm bán chạy. Vui lòng thử lại.'
     console.error('Không thể tải sản phẩm bán chạy:', error)
   } finally {
     loadingBestSellers.value = false
@@ -417,6 +521,9 @@ watch(() => authStore.token, loadPersonalized, { immediate: true })
 
 onMounted(() => {
   loadBestSellers()
+  const newest = catalogShelves.value.find(shelf => shelf.key === 'newest')
+  if (newest) void loadCatalogShelf(newest)
+  void loadCategoryShelves()
   startSlideTimer()
 })
 
@@ -427,6 +534,10 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+.catalog-shelf-link {
+  @apply inline-flex items-center justify-center gap-2 self-start sm:self-auto shrink-0 rounded-lg border border-zinc-200 bg-white px-4 py-2 text-xs font-semibold text-zinc-700 transition-colors hover:border-zinc-400 hover:text-zinc-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:ring-offset-2;
+}
+
 /* Card Slide Transition */
 .fade-slide-enter-active,
 .fade-slide-leave-active {

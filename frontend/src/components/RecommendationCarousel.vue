@@ -1,5 +1,5 @@
 <template>
-  <section class="py-6 sm:py-8">
+  <section :aria-label="title" :aria-busy="loading" class="py-6 sm:py-8">
     <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-6 gap-3 pb-3 border-b border-zinc-200/60">
       <div>
         <div v-if="badge" class="flex items-center gap-2 mb-1.5">
@@ -28,9 +28,16 @@
       </div>
     </div>
 
+    <div v-else-if="errorMessage" role="alert" class="p-6 sm:p-8 bg-white rounded-2xl border border-zinc-200/80 text-center space-y-3">
+      <p class="text-sm text-zinc-600">{{ errorMessage }}</p>
+      <button type="button" @click="$emit('retry')" class="px-4 py-2 rounded-lg border border-zinc-300 text-xs font-semibold text-zinc-800 hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:ring-offset-2">
+        Thử lại
+      </button>
+    </div>
+
     <!-- Empty State -->
     <div v-else-if="!items || items.length === 0" class="p-8 text-center bg-white rounded-2xl border border-zinc-200/80 text-zinc-400 text-xs">
-      Đang cập nhật các gợi ý sản phẩm công nghệ phù hợp...
+      {{ emptyMessage }}
     </div>
 
     <!-- Products Grid -->
@@ -49,16 +56,22 @@
 import ProductCard from './ProductCard.vue'
 import type { Product } from '@/types'
 
+defineEmits<{ retry: [] }>()
+
 withDefaults(defineProps<{
   title: string
   subtitle?: string
   badge?: string
   items?: (Product & { reason?: string })[]
   loading?: boolean
+  emptyMessage?: string
+  errorMessage?: string
 }>(), {
   subtitle: '',
   badge: '',
   items: () => [],
-  loading: false
+  loading: false,
+  emptyMessage: 'Đang cập nhật các gợi ý sản phẩm công nghệ phù hợp...',
+  errorMessage: ''
 })
 </script>

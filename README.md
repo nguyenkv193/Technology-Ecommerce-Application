@@ -22,7 +22,11 @@ Frontend luôn giữ mục **Gợi Ý Dành Riêng Cho Bạn** và gọi backend
 Best seller được xếp theo tổng `order_items.quantity`, gộp các biến thể của cùng sản phẩm,
 chỉ tính đơn `DELIVERED` và `PAID`. Khi chưa có doanh số hợp lệ, fallback dùng sản phẩm thật
 đang bán và còn hàng với nguồn `catalog`; không gắn nhãn bán chạy hoặc tạo điểm AI giả.
-Mục **Sản Phẩm Bán Chạy** riêng chỉ hiển thị sản phẩm có doanh số hợp lệ.
+Mục **Sản Phẩm Bán Chạy** riêng chỉ lấy sản phẩm có doanh số hợp lệ; khi chưa có dữ liệu,
+vẫn giữ mục trên trang chủ và hiển thị thông báo rõ ràng.
+Trang chủ còn có các danh sách **Sản Phẩm Mới Lên Kệ**, điện thoại, laptop, máy tính bảng,
+linh kiện/phụ kiện và tai nghe/âm thanh. Các danh sách lấy catalog ACTIVE có phân trang,
+xác định danh mục từ slug và có liên kết **Xem tất cả**, trạng thái tải và nút thử lại khi lỗi.
 
 Trang chi tiết ưu tiên sản phẩm tương tự cùng danh mục; fallback cũng giới hạn trong danh mục đó
 và loại sản phẩm đang xem. AI chỉ tính mức tương đồng; backend kiểm tra dữ liệu bán hàng và bổ sung fallback.
