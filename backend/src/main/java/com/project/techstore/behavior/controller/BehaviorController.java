@@ -2,7 +2,6 @@ package com.project.techstore.behavior.controller;
 
 import com.project.techstore.behavior.dto.TrackBehaviorRequest;
 import com.project.techstore.behavior.dto.UserBehaviorResponse;
-import com.project.techstore.behavior.dto.UserInteractionExportDto;
 import com.project.techstore.behavior.service.BehaviorService;
 import com.project.techstore.common.response.ApiResponse;
 import com.project.techstore.user.entity.User;
@@ -20,7 +19,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/behaviors")
 @RequiredArgsConstructor
-@Tag(name = "User Behavior Tracking", description = "Thu thập dữ liệu hành vi người dùng & Xuất ma trận tương tác cho AI Recommendation")
+@Tag(name = "User Behavior Tracking", description = "Thu thập dữ liệu hành vi người dùng phục vụ gợi ý sản phẩm")
 public class BehaviorController {
 
     private final BehaviorService behaviorService;
@@ -43,9 +42,4 @@ public class BehaviorController {
         return ResponseEntity.ok(ApiResponse.success(behaviorService.getUserRecentBehaviors(currentUser.getId())));
     }
 
-    @GetMapping("/export-interactions")
-    @Operation(summary = "Xuất ma trận tương tác User-Item (Implicit Feedback Matrix) cho Python FastAPI AI Service")
-    public ResponseEntity<ApiResponse<List<UserInteractionExportDto>>> exportInteractions() {
-        return ResponseEntity.ok(ApiResponse.success(behaviorService.exportInteractionsForAi()));
-    }
 }

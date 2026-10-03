@@ -1,56 +1,56 @@
+import asyncio
 import logging
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, suppress
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from app.config import settings
-from app.routers import recommendations
-from app.routers.recommendations import train_all_models
+from app.routers.recommendations import model_state, router
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
-)
-logger = logging.getLogger("techstore-ai")
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
+
+
+async def refresh_catalog():
+    while True:
+        success = await asyncio.to_thread(model_state.refresh)
+        await asyncio.sleep(settings.refresh_seconds if success else settings.retry_seconds)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logger.info("Khởi động TechStore AI Recommendation Service...")
-    train_all_models()
-    yield
-    logger.info("Dừng TechStore AI Recommendation Service.")
+    refresh_task = asyncio.create_task(refresh_catalog())
+    try:
+        yield
+    finally:
+        refresh_task.cancel()
+        with suppress(asyncio.CancelledError):
+            await refresh_task
+
 
 app = FastAPI(
     title=settings.app_name,
     version=settings.version,
-    description="Dịch vụ AI Phân tích Hành vi Người dùng & Gợi ý Sản phẩm Công nghệ (Cosine Similarity, Collaborative Filtering, K-Means Clustering, Hybrid Recommender)",
-    lifespan=lifespan
+    description="Gợi ý sản phẩm bằng Content-Based Filtering (TF-IDF & Cosine Similarity)",
+    lifespan=lifespan,
 )
+app.include_router(router)
 
-# Cấu hình CORS mở rộng cho Vue.js Frontend và Spring Boot Backend
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
-# Đăng ký các router
-app.include_router(recommendations.router)
-
-@app.get("/", tags=["Health Check"])
+@app.get("/")
 def root():
-    return {
-        "service": settings.app_name,
-        "version": settings.version,
-        "status": "UP",
-        "docs_url": "/docs"
-    }
+    return {"service": settings.app_name, "version": settings.version, **model_state.status()}
 
-@app.get("/health", tags=["Health Check"])
+
+@app.get("/health")
 def health():
-    return {"status": "HEALTHY"}
+    return model_state.status()
+
+
+@app.get("/ready")
+def readiness():
+    state = model_state.status()
+    return JSONResponse(state, status_code=200 if state["ready"] else 503)
+
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("app.main:app", host="0.0.0.0", port=settings.port, reload=True)
+    uvicorn.run("app.main:app", host="0.0.0.0", port=settings.port)

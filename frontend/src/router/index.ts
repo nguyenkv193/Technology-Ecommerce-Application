@@ -5,7 +5,6 @@ import ProductDetailView from '@/views/ProductDetailView.vue'
 import CartView from '@/views/CartView.vue'
 import OrdersView from '@/views/OrdersView.vue'
 import WishlistView from '@/views/WishlistView.vue'
-import AdminDashboardView from '@/views/AdminDashboardView.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -37,11 +36,6 @@ const routes: Array<RouteRecordRaw> = [
     path: '/wishlist',
     name: 'wishlist',
     component: WishlistView
-  },
-  {
-    path: '/admin',
-    name: 'admin-dashboard',
-    component: AdminDashboardView
   },
   {
     path: '/login',

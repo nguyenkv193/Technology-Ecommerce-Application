@@ -39,6 +39,12 @@ public class ProductService {
     private final BrandService brandService;
 
     @Transactional(readOnly = true)
+    public PageResponse<ProductRecommendationFeature> getRecommendationFeatures(int page, int size) {
+        return PageResponse.of(productRepository.findByStatus(ProductStatus.ACTIVE,
+                PageRequest.of(page, size, Sort.by("id"))).map(ProductRecommendationFeature::from));
+    }
+
+    @Transactional(readOnly = true)
     public PageResponse<ProductResponse> filterProducts(ProductFilterRequest filter) {
         Specification<Product> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();

@@ -1,127 +1,78 @@
+import re
 import numpy as np
-import pandas as pd
-from typing import List, Dict
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-from app.models.schemas import ProductRecommendationItem, ProductFeatureItem
+from app.models.schemas import ProductFeatureItem, ProductRecommendationItem, UserInteractionItem
+
 
 class ContentBasedRecommender:
-    """
-    Thuật toán lọc dựa trên nội dung (Content-Based Filtering với Cosine Similarity).
-    Sử dụng TF-IDF để vector hóa các thuộc tính kỹ thuật động (CPU, RAM, GPU, Màn hình),
-    tên sản phẩm, thương hiệu và mô tả để tìm kiếm sản phẩm tương đồng về cấu hình và tính năng.
-    """
+    """A single TF-IDF model for product similarity and weighted user preferences."""
 
     def __init__(self):
-        self.vectorizer = TfidfVectorizer(token_pattern=r'(?u)\b\w+\b')
+        self.vectorizer = TfidfVectorizer(token_pattern=r"(?u)\b\w+\b")
         self.tfidf_matrix = None
-        self.similarity_matrix = None
-        self.product_id_to_idx: Dict[int, int] = {}
-        self.idx_to_product_id: Dict[int, int] = {}
-        self.products: List[ProductFeatureItem] = []
+        self.products: list[ProductFeatureItem] = []
+        self.product_id_to_idx: dict[int, int] = {}
 
-    def _extract_content_text(self, item: ProductFeatureItem) -> str:
-        tokens = [item.name, item.brand, item.category, item.description]
-        for attr in item.attributes:
-            name = attr.get('name', '')
-            val = attr.get('value', '')
-            tokens.append(f"{name} {val} {name}_{val}")
-        return " ".join(filter(None, tokens))
+    def _extract_content_text(self, product: ProductFeatureItem) -> str:
+        description = re.sub(r"<[^>]+>", " ", product.description)
+        tokens = [product.name, product.brand, product.category, description]
+        for attribute in product.attributes:
+            name, value = attribute.get("name", ""), attribute.get("value", "")
+            tokens.append(f"{name} {value} {name}_{value}")
+        return " ".join(tokens)
 
-    def fit(self, products: List[ProductFeatureItem]):
-        if not products:
-            return
-
-        self.products = products
+    def fit(self, products: list[ProductFeatureItem]):
+        self.products = list(products)
         self.product_id_to_idx = {p.id: idx for idx, p in enumerate(products)}
-        self.idx_to_product_id = {idx: p.id for idx, p in enumerate(products)}
+        self.tfidf_matrix = None
+        if products:
+            self.tfidf_matrix = self.vectorizer.fit_transform(
+                [self._extract_content_text(p) for p in products]
+            )
 
-        corpus = [self._extract_content_text(p) for p in products]
-        self.tfidf_matrix = self.vectorizer.fit_transform(corpus)
-        self.similarity_matrix = cosine_similarity(self.tfidf_matrix, self.tfidf_matrix)
-
-    def recommend_similar(self, product_id: int, limit: int = 10) -> List[ProductRecommendationItem]:
-        """
-        Gợi ý sản phẩm tương tự khi người dùng đang xem trang chi tiết một sản phẩm công nghệ.
-        """
-        if self.similarity_matrix is None or product_id not in self.product_id_to_idx:
-            return []
-
-        target_idx = self.product_id_to_idx[product_id]
-        scores = self.similarity_matrix[target_idx]
-
-        # Sắp xếp giảm dần theo điểm Cosine Similarity
-        ranked_indices = np.argsort(scores)[::-1]
-
+    def _rank(self, scores, excluded: set[int], limit: int, category=None):
+        candidates = sorted(enumerate(scores), key=lambda x: (-float(x[1]), self.products[x[0]].id))
         results = []
-        for idx in ranked_indices:
-            pid = self.idx_to_product_id[idx]
-            if pid == product_id:
+        for idx, score in candidates:
+            product = self.products[idx]
+            if product.id in excluded or score <= 0.001:
                 continue
-            sim_score = float(scores[idx])
-            if sim_score <= 0.001:
+            if category is not None and self._category(product) != category:
                 continue
-
-            percent = int(sim_score * 100)
             results.append(ProductRecommendationItem(
-                product_id=pid,
-                score=round(sim_score, 4),
-                reason=f"Độ tương đồng thông số & thương hiệu đạt {percent}% (Cosine Similarity)"
+                product_id=product.id,
+                score=round(float(score), 4),
+                reason="Phù hợp với danh mục và thông số kỹ thuật bạn quan tâm",
             ))
-
             if len(results) >= limit:
                 break
-
         return results
 
-    def recommend_for_user(self, user_id: int, interactions_df: pd.DataFrame, limit: int = 10) -> List[ProductRecommendationItem]:
-        """
-        Gợi ý cho người dùng dựa trên hồ sơ sở thích (User Profile Vector)
-        tính bằng trung bình có trọng số các sản phẩm họ đã xem/thêm giỏ/mua.
-        """
-        if self.tfidf_matrix is None or interactions_df is None or interactions_df.empty:
-            return []
+    @staticmethod
+    def _category(product: ProductFeatureItem):
+        return product.category_id if product.category_id is not None else product.category
 
-        user_actions = interactions_df[interactions_df['user_id'] == user_id]
-        if user_actions.empty:
+    def recommend_similar(self, product_id: int, limit: int = 10):
+        if self.tfidf_matrix is None or product_id not in self.product_id_to_idx:
             return []
+        idx = self.product_id_to_idx[product_id]
+        scores = cosine_similarity(self.tfidf_matrix[idx], self.tfidf_matrix)[0]
+        return self._rank(scores, {product_id}, limit, category=self._category(self.products[idx]))
 
-        # Tạo vector sở thích của User bằng trung bình có trọng số
-        user_vector = np.zeros((1, self.tfidf_matrix.shape[1]))
+    def recommend_for_user(self, interactions: list[UserInteractionItem], limit: int = 10):
+        if self.tfidf_matrix is None or not interactions:
+            return []
+        vector = np.zeros((1, self.tfidf_matrix.shape[1]))
         total_weight = 0.0
-        interacted_pids = set(user_actions['product_id'].tolist())
-
-        for _, row in user_actions.iterrows():
-            pid = int(row['product_id'])
-            if pid in self.product_id_to_idx:
-                idx = self.product_id_to_idx[pid]
-                weight = float(row['score'])
-                user_vector += self.tfidf_matrix[idx].toarray() * weight
-                total_weight += weight
-
-        if total_weight > 0:
-            user_vector /= total_weight
-
-        # Tính Cosine Similarity giữa User Profile Vector và toàn bộ sản phẩm
-        user_scores = cosine_similarity(user_vector, self.tfidf_matrix)[0]
-        ranked_indices = np.argsort(user_scores)[::-1]
-
-        results = []
-        for idx in ranked_indices:
-            pid = self.idx_to_product_id[idx]
-            if pid in interacted_pids:
-                continue
-            sim_score = float(user_scores[idx])
-            if sim_score <= 0.001:
-                continue
-
-            results.append(ProductRecommendationItem(
-                product_id=pid,
-                score=round(sim_score, 4),
-                reason=f"Phù hợp với thông số và danh mục bạn hay quan tâm ({int(sim_score * 100)}%)"
-            ))
-
-            if len(results) >= limit:
-                break
-
-        return results
+        excluded = {item.product_id for item in interactions}
+        for item in interactions:
+            idx = self.product_id_to_idx.get(item.product_id)
+            if idx is not None:
+                vector += self.tfidf_matrix[idx].toarray() * item.score
+                total_weight += item.score
+        if total_weight <= 0:
+            return []
+        vector /= total_weight
+        scores = cosine_similarity(vector, self.tfidf_matrix)[0]
+        return self._rank(scores, excluded, limit)

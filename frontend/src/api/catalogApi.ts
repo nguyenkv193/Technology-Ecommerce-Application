@@ -2,6 +2,9 @@ import { apiClient } from './client'
 import type { ApiResponse, PageResponse, Product, Category, Brand, ProductReview, ProductReviewSummary } from '@/types'
 
 export const catalogApi = {
+  getBestSellers: (limit: number = 8): Promise<ApiResponse<Product[]>> =>
+    apiClient.get('/products/best-sellers', { params: { limit } }),
+
   getCategories: (): Promise<ApiResponse<Category[]>> => 
     apiClient.get('/categories'),
     

@@ -218,32 +218,33 @@
 
     <!-- Sản phẩm Nổi Bật -->
     <RecommendationCarousel
+      v-if="loadingBestSellers || bestSellerProducts.length > 0"
       title="Sản Phẩm Bán Chạy"
-      subtitle="Các sản phẩm được quan tâm và đánh giá cao nhất"
+      subtitle="Các sản phẩm bán nhiều nhất từ đơn hàng đã giao và thanh toán"
       badge="Nổi bật"
-      :items="popularProducts"
-      :loading="loadingPopular"
+      :items="bestSellerProducts"
+      :loading="loadingBestSellers"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import RecommendationCarousel from '@/components/RecommendationCarousel.vue'
 import FeaturedCategoriesGrid from '@/components/FeaturedCategoriesGrid.vue'
-import { aiApi } from '@/api/aiApi'
+import { recommendationApi } from '@/api/recommendationApi'
 import { catalogApi } from '@/api/catalogApi'
 import { useAuthStore } from '@/stores/auth'
-import type { Product, AIRecommendationItem } from '@/types'
+import type { Product } from '@/types'
 
 const authStore = useAuthStore()
 
 type EnrichedProduct = Product & { reason?: string; aiScore?: number }
 
 const personalizedProducts = ref<EnrichedProduct[]>([])
-const popularProducts = ref<EnrichedProduct[]>([])
+const bestSellerProducts = ref<EnrichedProduct[]>([])
 const loadingPersonalized = ref<boolean>(false)
-const loadingPopular = ref<boolean>(false)
+const loadingBestSellers = ref<boolean>(false)
 
 // Flagship Showcase Slides
 interface FeaturedSlide {
@@ -379,80 +380,48 @@ const formatCurrency = (value?: number | null): string => {
 }
 
 
-const enrichRecommendations = async (recList: AIRecommendationItem[]): Promise<EnrichedProduct[]> => {
-  const enriched: EnrichedProduct[] = []
-  for (const item of recList) {
-    try {
-      const res = await catalogApi.getProductById(item.product_id)
-      if (res.success && res.data) {
-        const pData = res.data
-        const thumb = pData.thumbnailUrl || 
-          pData.images?.find((img: any) => img.isThumbnail)?.url || 
-          pData.images?.[0]?.url || 
-          ''
-        enriched.push({
-          ...pData,
-          thumbnailUrl: thumb,
-          brandName: pData.brandName || pData.brand?.name,
-          categoryName: pData.categoryName || pData.category?.name,
-          aiScore: item.score
-        })
-      }
-    } catch {
-      enriched.push({
-        id: item.product_id,
-        name: `Thiết bị công nghệ #${item.product_id}`,
-        slug: `product-${item.product_id}`,
-        description: '',
-        shortDescription: '',
-        thumbnailUrl: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500&auto=format&fit=crop&q=60',
-        active: true,
-        minPrice: 24990000,
-        brandName: 'Tech Brand',
-        categoryName: 'Sản phẩm nổi bật',
-        aiScore: item.score
-      })
-    }
-  }
-  return enriched
-}
-
-const loadPopular = async () => {
-  loadingPopular.value = true
+const loadBestSellers = async () => {
+  loadingBestSellers.value = true
   try {
-    const res = await aiApi.getPopular(4)
-    if (res.recommendations) {
-      popularProducts.value = await enrichRecommendations(res.recommendations)
-    }
-  } catch (e) {
-    console.error('Không thể tải sản phẩm thịnh hành:', e)
+    const res = await catalogApi.getBestSellers(4)
+    bestSellerProducts.value = res.data
+  } catch (error) {
+    bestSellerProducts.value = []
+    console.error('Không thể tải sản phẩm bán chạy:', error)
   } finally {
-    loadingPopular.value = false
+    loadingBestSellers.value = false
   }
 }
 
+let personalizedRequestId = 0
 const loadPersonalized = async () => {
+  const requestId = ++personalizedRequestId
   loadingPersonalized.value = true
+  personalizedProducts.value = []
   try {
-    const userId = authStore.user?.id || 1
-    const res = await aiApi.getUserRecommendations(userId, 4)
-    if (res.recommendations) {
-      personalizedProducts.value = await enrichRecommendations(res.recommendations)
-    }
-  } catch (e) {
-    console.error('Không thể tải gợi ý cá nhân hóa:', e)
+    const res = await recommendationApi.getPersonalized(4)
+    if (requestId !== personalizedRequestId) return
+    personalizedProducts.value = res.data.recommendations.map(item => ({
+      ...item.product,
+      reason: item.reason,
+      aiScore: item.score ?? undefined
+    }))
+  } catch (error) {
+    if (requestId === personalizedRequestId) console.error('Không thể tải gợi ý sản phẩm:', error)
   } finally {
-    loadingPersonalized.value = false
+    if (requestId === personalizedRequestId) loadingPersonalized.value = false
   }
 }
+
+watch(() => authStore.token, loadPersonalized, { immediate: true })
 
 onMounted(() => {
-  loadPopular()
-  loadPersonalized()
+  loadBestSellers()
   startSlideTimer()
 })
 
 onUnmounted(() => {
+  personalizedRequestId++
   stopSlideTimer()
 })
 </script>

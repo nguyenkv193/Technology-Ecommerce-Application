@@ -37,7 +37,7 @@
     <div v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
       <ProductCard 
         v-for="item in items" 
-        :key="item.id || item.product_id"
+        :key="item.id"
         :product="item"
         :reason="item.reason"
       />

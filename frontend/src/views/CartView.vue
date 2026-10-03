@@ -213,7 +213,8 @@ import { useCartStore } from '@/stores/cart'
 import { useAuthStore } from '@/stores/auth'
 import { orderApi } from '@/api/orderApi'
 import { behaviorApi } from '@/api/behaviorApi'
-import type { Order, CheckoutRequest } from '@/types'
+import type { Order } from '@/types'
+import type { CheckoutRequest } from '@/api/orderApi'
 
 const cartStore = useCartStore()
 const authStore = useAuthStore()

@@ -22,6 +22,9 @@ public class OrderItemResponse {
     @Schema(description = "ID biến thể SKU", example = "10")
     private Long variantId;
 
+    @Schema(description = "ID sản phẩm phục vụ ghi nhận lịch sử mua hàng")
+    private Long productId;
+
     @Schema(description = "Tên sản phẩm", example = "MacBook Pro M3")
     private String productName;
 
@@ -48,6 +51,8 @@ public class OrderItemResponse {
         return OrderItemResponse.builder()
                 .id(item.getId())
                 .variantId(item.getVariant() != null ? item.getVariant().getId() : null)
+                .productId(item.getVariant() != null && item.getVariant().getProduct() != null
+                        ? item.getVariant().getProduct().getId() : null)
                 .productName(item.getProductName())
                 .variantName(item.getVariantName())
                 .sku(item.getSku())

@@ -31,7 +31,7 @@ public interface UserBehaviorRepository extends JpaRepository<UserBehavior, Long
            "ELSE 1.0 END), " +
            "COUNT(b), MAX(b.createdAt) " +
            "FROM UserBehavior b " +
-           "WHERE b.user IS NOT NULL AND b.product IS NOT NULL " +
-           "GROUP BY b.user.id, b.product.id")
-    List<Object[]> aggregateUserProductInteractions();
+            "WHERE b.user.id = :userId AND b.product IS NOT NULL " +
+            "GROUP BY b.user.id, b.product.id")
+    List<Object[]> aggregateUserProductInteractions(@Param("userId") Long userId);
 }
