@@ -1,5 +1,12 @@
 # Technology-Ecommerce-Application
 
+## CI / Docker images
+
+GitHub Actions kiểm tra frontend, backend, AI và Docker images trên push/PR. Khi nhánh mặc định vượt qua toàn bộ CI, pipeline publish ba images lên GHCR với tag commit SHA và `latest`; chưa tự deploy lên server.
+
+Xem [hướng dẫn CI/CD](docs/ci-cd.md) để bật workflow, xem artifacts và cấu hình quyền GHCR.
+
+> **Đề tài Đồ án Tốt nghiệp**: Nghiên cứu và xây dựng hệ thống thương mại điện tử về sản phẩm công nghệ tích hợp AI trong phân tích hành vi người dùng và gợi ý sản phẩm.
 Ứng dụng thương mại điện tử sản phẩm công nghệ, tích hợp gợi ý bằng Content-Based Filtering.
 
 ## Cấu trúc
