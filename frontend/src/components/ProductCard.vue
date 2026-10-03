@@ -2,11 +2,25 @@
   <div class="group relative bg-white border border-zinc-200/80 hover:border-zinc-300 rounded-2xl p-4 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 flex flex-col justify-between">
     <div>
       <!-- Product Image Canvas -->
-      <div class="relative overflow-hidden rounded-xl bg-[#f6f6f8] aspect-square flex items-center justify-center mb-3.5">
+      <div
+        class="product-image-frame relative overflow-hidden rounded-xl bg-[#f6f6f8] aspect-square flex items-center justify-center mb-3.5 select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:ring-offset-2"
+        tabindex="0"
+        role="group"
+        :aria-label="`Ảnh ${product.name}. Dùng phím mũi tên để xem các góc, Escape để thu nhỏ.`"
+        @pointerenter="updateImageZoom"
+        @pointermove="updateImageZoom"
+        @pointerleave="resetImageZoom"
+        @pointercancel="resetImageZoom"
+        @focus="focusImageZoom"
+        @blur="resetImageZoom"
+        @keydown="handleImageZoomKey"
+      >
         <img 
           :src="productThumbnail" 
           :alt="product.name"
-          class="block h-full w-full object-contain group-hover:scale-105 transition-transform duration-300"
+          class="product-zoom-image block h-full w-full object-contain pointer-events-none select-none"
+          :style="imageZoomStyle"
+          :draggable="false"
           loading="lazy"
         />
 
@@ -92,6 +106,57 @@ import { ref, computed, watch } from 'vue'
 import { useWishlistStore } from '@/stores/wishlist'
 import type { Product, ProductVariant } from '@/types'
 
+const imageZoomed = ref(false)
+const imageZoomOrigin = ref({ x: 50, y: 50 })
+const imageZoomStyle = computed(() => ({
+  transform: `scale(${imageZoomed.value ? 2 : 1})`,
+  transformOrigin: `${imageZoomOrigin.value.x}% ${imageZoomOrigin.value.y}%`
+}))
+
+const clampZoomPosition = (value: number) => Math.max(0, Math.min(100, value))
+
+const resetImageZoom = () => { imageZoomed.value = false }
+
+const updateImageZoom = (event: PointerEvent) => {
+  if (event.pointerType !== 'mouse' || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return
+  // The wishlist button remains usable without moving the inspection area.
+  if ((event.target as HTMLElement).closest('button')) return
+  const frame = (event.currentTarget as HTMLElement).getBoundingClientRect()
+  if (frame.width <= 0 || frame.height <= 0) return
+  imageZoomOrigin.value = {
+    x: clampZoomPosition((event.clientX - frame.left) / frame.width * 100),
+    y: clampZoomPosition((event.clientY - frame.top) / frame.height * 100)
+  }
+  imageZoomed.value = true
+}
+
+const focusImageZoom = (event: FocusEvent) => {
+  if (!(event.currentTarget as HTMLElement).matches(':focus-visible')) return
+  imageZoomOrigin.value = { x: 50, y: 50 }
+  imageZoomed.value = true
+}
+
+const handleImageZoomKey = (event: KeyboardEvent) => {
+  // Do not intercept keyboard events from the nested wishlist button.
+  if (event.target !== event.currentTarget) return
+  if (event.key === 'Escape') {
+    event.preventDefault()
+    resetImageZoom()
+    return
+  }
+  const directions: Record<string, [number, number]> = {
+    ArrowLeft: [-10, 0], ArrowRight: [10, 0], ArrowUp: [0, -10], ArrowDown: [0, 10]
+  }
+  const direction = directions[event.key]
+  if (!direction) return
+  event.preventDefault()
+  imageZoomOrigin.value = {
+    x: clampZoomPosition(imageZoomOrigin.value.x + direction[0]),
+    y: clampZoomPosition(imageZoomOrigin.value.y + direction[1])
+  }
+  imageZoomed.value = true
+}
+
 const props = withDefaults(defineProps<{
   product: Product
   reason?: string
@@ -111,6 +176,11 @@ const productThumbnail = computed(() => {
     return thumb?.url || props.product.images[0].url
   }
   return defaultImage
+})
+
+watch(productThumbnail, () => {
+  resetImageZoom()
+  imageZoomOrigin.value = { x: 50, y: 50 }
 })
 
 const wishlistStore = useWishlistStore()
@@ -209,3 +279,21 @@ const formatPrice = (value?: number | null): string => {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value)
 }
 </script>
+
+<style scoped>
+.product-zoom-image {
+  transition: transform 180ms ease-out;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .product-image-frame {
+    cursor: zoom-in;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .product-zoom-image {
+    transition: none;
+  }
+}
+</style>
