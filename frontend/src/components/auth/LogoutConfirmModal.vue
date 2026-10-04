@@ -15,7 +15,7 @@
 
         <!-- Modal Dialog Card -->
         <div 
-          class="relative w-full max-w-[380px] my-auto bg-white rounded-3xl shadow-2xl border border-zinc-200/80 p-6 sm:p-7 text-center z-10 text-zinc-900 select-none"
+          class="modal-card relative w-full max-w-[380px] my-auto bg-white rounded-3xl shadow-2xl border border-zinc-200/80 p-6 sm:p-7 text-center z-10 text-zinc-900 select-none will-change-transform"
           @click.stop
         >
           <!-- Icon -->
@@ -109,7 +109,12 @@ watch(() => authStore.isLogoutModalOpen, (isOpen) => {
 <style scoped>
 .logout-modal-enter-active,
 .logout-modal-leave-active {
-  transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 0.22s ease;
+}
+
+.logout-modal-enter-active .modal-card,
+.logout-modal-leave-active .modal-card {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease;
 }
 
 .logout-modal-enter-from,
@@ -117,8 +122,15 @@ watch(() => authStore.isLogoutModalOpen, (isOpen) => {
   opacity: 0;
 }
 
-.logout-modal-enter-from .relative,
-.logout-modal-leave-to .relative {
-  transform: scale(0.95) translateY(8px);
+.logout-modal-enter-from .modal-card,
+.logout-modal-leave-to .modal-card {
+  opacity: 0;
+  transform: scale(0.95) translateY(12px);
+}
+
+.logout-modal-enter-to .modal-card,
+.logout-modal-leave-from .modal-card {
+  opacity: 1;
+  transform: scale(1) translateY(0);
 }
 </style>

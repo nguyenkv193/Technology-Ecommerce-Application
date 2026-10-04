@@ -15,7 +15,7 @@
 
         <!-- Modal Dialog Card -->
         <div 
-          class="relative w-full max-w-[430px] my-auto bg-white rounded-3xl shadow-2xl border border-zinc-200/80 p-6 sm:p-8 overflow-hidden z-10 text-zinc-900 select-none animate-in"
+          class="modal-card relative w-full max-w-[430px] my-auto bg-white rounded-3xl shadow-2xl border border-zinc-200/80 p-6 sm:p-8 overflow-hidden z-10 text-zinc-900 select-none will-change-transform"
           @click.stop
         >
           <!-- Close Button -->
@@ -369,10 +369,16 @@ watch(() => authStore.isAuthModalOpen, (isOpen) => {
 </script>
 
 <style scoped>
-/* Modal Fade & Scale Transition */
+/* Container & Backdrop transitions */
 .auth-modal-enter-active,
 .auth-modal-leave-active {
-  transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 0.22s ease;
+}
+
+/* Modal Card scale + fade transitions with Apple spring curve */
+.auth-modal-enter-active .modal-card,
+.auth-modal-leave-active .modal-card {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease;
 }
 
 .auth-modal-enter-from,
@@ -380,9 +386,16 @@ watch(() => authStore.isAuthModalOpen, (isOpen) => {
   opacity: 0;
 }
 
-.auth-modal-enter-from .relative,
-.auth-modal-leave-to .relative {
-  transform: scale(0.95) translateY(8px);
+.auth-modal-enter-from .modal-card,
+.auth-modal-leave-to .modal-card {
+  opacity: 0;
+  transform: scale(0.95) translateY(12px);
+}
+
+.auth-modal-enter-to .modal-card,
+.auth-modal-leave-from .modal-card {
+  opacity: 1;
+  transform: scale(1) translateY(0);
 }
 
 @keyframes shake {
