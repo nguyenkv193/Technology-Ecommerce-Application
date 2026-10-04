@@ -9,7 +9,7 @@
       >
         <!-- Backdrop Blur -->
         <div 
-          class="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity" 
+          class="fixed inset-0 bg-black/60 backdrop-blur-sm" 
           @click="handleClose"
         ></div>
 
@@ -64,7 +64,6 @@
             </button>
           </div>
 
-
           <!-- Error Alert Message -->
           <div v-if="authError" class="mb-4 p-2.5 rounded-xl bg-red-50 border border-red-200 flex items-start gap-2 text-red-600 text-xs animate-shake">
             <svg class="w-4 h-4 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -75,18 +74,24 @@
             <div class="flex-1 text-[11px] leading-snug">{{ authError }}</div>
           </div>
 
-          <!-- Login Form -->
-          <form v-if="isLogin" @submit.prevent="handleLogin" class="space-y-3">
+          <!-- Login Form with VeeValidate -->
+          <form v-if="isLogin" @submit.prevent="onLoginSubmit" class="space-y-3" novalidate>
             <div>
               <label class="block text-[11px] font-semibold text-zinc-700 mb-1">Địa chỉ Email</label>
               <input
-                v-model="loginForm.email"
+                v-model="loginEmail"
+                v-bind="loginEmailAttrs"
+                @input="clearAuthError"
                 type="email"
-                required
                 autocomplete="email"
-                class="w-full bg-zinc-50/70 hover:bg-zinc-50 focus:bg-white border border-zinc-200 focus:border-zinc-900 rounded-xl px-3.5 py-2.5 text-xs text-zinc-900 placeholder:text-zinc-400 focus:outline-none transition shadow-2xs"
+                :class="loginErrors.email ? 'border-red-400 focus:border-red-500 ring-1 ring-red-100 bg-red-50/20' : 'border-zinc-200 focus:border-zinc-900 bg-zinc-50/70 hover:bg-zinc-50 focus:bg-white'"
+                class="w-full border rounded-xl px-3.5 py-2.5 text-xs text-zinc-900 placeholder:text-zinc-400 focus:outline-none transition shadow-2xs"
                 placeholder="name@example.com"
               />
+              <p v-if="loginErrors.email" class="text-[11px] text-red-500 font-medium flex items-center gap-1 mt-1">
+                <svg class="w-3 h-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span>{{ loginErrors.email }}</span>
+              </p>
             </div>
 
             <div>
@@ -96,11 +101,13 @@
               </div>
               <div class="relative">
                 <input
-                  v-model="loginForm.password"
+                  v-model="loginPassword"
+                  v-bind="loginPasswordAttrs"
+                  @input="clearAuthError"
                   :type="showPassword ? 'text' : 'password'"
-                  required
                   autocomplete="current-password"
-                  class="w-full bg-zinc-50/70 hover:bg-zinc-50 focus:bg-white border border-zinc-200 focus:border-zinc-900 rounded-xl px-3.5 py-2.5 pr-10 text-xs text-zinc-900 placeholder:text-zinc-400 focus:outline-none transition shadow-2xs"
+                  :class="loginErrors.password ? 'border-red-400 focus:border-red-500 ring-1 ring-red-100 bg-red-50/20' : 'border-zinc-200 focus:border-zinc-900 bg-zinc-50/70 hover:bg-zinc-50 focus:bg-white'"
+                  class="w-full border rounded-xl px-3.5 py-2.5 pr-10 text-xs text-zinc-900 placeholder:text-zinc-400 focus:outline-none transition shadow-2xs"
                   placeholder="••••••••"
                 />
                 <button
@@ -118,6 +125,10 @@
                   </svg>
                 </button>
               </div>
+              <p v-if="loginErrors.password" class="text-[11px] text-red-500 font-medium flex items-center gap-1 mt-1">
+                <svg class="w-3 h-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span>{{ loginErrors.password }}</span>
+              </p>
             </div>
 
             <button
@@ -133,51 +144,71 @@
             </button>
           </form>
 
-          <!-- Register Form -->
-          <form v-else @submit.prevent="handleRegister" class="space-y-2.5">
+          <!-- Register Form with VeeValidate -->
+          <form v-else @submit.prevent="onRegisterSubmit" class="space-y-2.5" novalidate>
             <div>
               <label class="block text-[11px] font-semibold text-zinc-700 mb-1">Họ và tên</label>
               <input
-                v-model="registerForm.fullName"
+                v-model="registerFullName"
+                v-bind="registerFullNameAttrs"
+                @input="clearAuthError"
                 type="text"
-                required
-                class="w-full bg-zinc-50/70 hover:bg-zinc-50 focus:bg-white border border-zinc-200 focus:border-zinc-900 rounded-xl px-3 py-2 text-xs text-zinc-900 placeholder:text-zinc-400 focus:outline-none transition shadow-2xs"
+                :class="registerErrors.fullName ? 'border-red-400 focus:border-red-500 ring-1 ring-red-100 bg-red-50/20' : 'border-zinc-200 focus:border-zinc-900 bg-zinc-50/70 hover:bg-zinc-50 focus:bg-white'"
+                class="w-full border rounded-xl px-3 py-2 text-xs text-zinc-900 placeholder:text-zinc-400 focus:outline-none transition shadow-2xs"
                 placeholder="Nguyễn Văn A"
               />
+              <p v-if="registerErrors.fullName" class="text-[11px] text-red-500 font-medium flex items-center gap-1 mt-1">
+                <svg class="w-3 h-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span>{{ registerErrors.fullName }}</span>
+              </p>
             </div>
 
             <div>
               <label class="block text-[11px] font-semibold text-zinc-700 mb-1">Địa chỉ Email</label>
               <input
-                v-model="registerForm.email"
+                v-model="registerEmail"
+                v-bind="registerEmailAttrs"
+                @input="clearAuthError"
                 type="email"
-                required
                 autocomplete="email"
-                class="w-full bg-zinc-50/70 hover:bg-zinc-50 focus:bg-white border border-zinc-200 focus:border-zinc-900 rounded-xl px-3 py-2 text-xs text-zinc-900 placeholder:text-zinc-400 focus:outline-none transition shadow-2xs"
+                :class="registerErrors.email ? 'border-red-400 focus:border-red-500 ring-1 ring-red-100 bg-red-50/20' : 'border-zinc-200 focus:border-zinc-900 bg-zinc-50/70 hover:bg-zinc-50 focus:bg-white'"
+                class="w-full border rounded-xl px-3 py-2 text-xs text-zinc-900 placeholder:text-zinc-400 focus:outline-none transition shadow-2xs"
                 placeholder="name@example.com"
               />
+              <p v-if="registerErrors.email" class="text-[11px] text-red-500 font-medium flex items-center gap-1 mt-1">
+                <svg class="w-3 h-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span>{{ registerErrors.email }}</span>
+              </p>
             </div>
 
             <div>
-              <label class="block text-[11px] font-semibold text-zinc-700 mb-1">Số điện thoại</label>
+              <label class="block text-[11px] font-semibold text-zinc-700 mb-1">Số điện thoại (tùy chọn)</label>
               <input
-                v-model="registerForm.phoneNumber"
+                v-model="registerPhoneNumber"
+                v-bind="registerPhoneNumberAttrs"
+                @input="clearAuthError"
                 type="tel"
-                class="w-full bg-zinc-50/70 hover:bg-zinc-50 focus:bg-white border border-zinc-200 focus:border-zinc-900 rounded-xl px-3 py-2 text-xs text-zinc-900 placeholder:text-zinc-400 focus:outline-none transition shadow-2xs"
+                :class="registerErrors.phoneNumber ? 'border-red-400 focus:border-red-500 ring-1 ring-red-100 bg-red-50/20' : 'border-zinc-200 focus:border-zinc-900 bg-zinc-50/70 hover:bg-zinc-50 focus:bg-white'"
+                class="w-full border rounded-xl px-3 py-2 text-xs text-zinc-900 placeholder:text-zinc-400 focus:outline-none transition shadow-2xs"
                 placeholder="0912345678"
               />
+              <p v-if="registerErrors.phoneNumber" class="text-[11px] text-red-500 font-medium flex items-center gap-1 mt-1">
+                <svg class="w-3 h-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span>{{ registerErrors.phoneNumber }}</span>
+              </p>
             </div>
 
             <div>
               <label class="block text-[11px] font-semibold text-zinc-700 mb-1">Mật khẩu (tối thiểu 6 ký tự)</label>
               <div class="relative">
                 <input
-                  v-model="registerForm.password"
+                  v-model="registerPassword"
+                  v-bind="registerPasswordAttrs"
+                  @input="clearAuthError"
                   :type="showPassword ? 'text' : 'password'"
-                  required
-                  minlength="6"
                   autocomplete="new-password"
-                  class="w-full bg-zinc-50/70 hover:bg-zinc-50 focus:bg-white border border-zinc-200 focus:border-zinc-900 rounded-xl px-3 py-2 pr-10 text-xs text-zinc-900 placeholder:text-zinc-400 focus:outline-none transition shadow-2xs"
+                  :class="registerErrors.password ? 'border-red-400 focus:border-red-500 ring-1 ring-red-100 bg-red-50/20' : 'border-zinc-200 focus:border-zinc-900 bg-zinc-50/70 hover:bg-zinc-50 focus:bg-white'"
+                  class="w-full border rounded-xl px-3 py-2 pr-10 text-xs text-zinc-900 placeholder:text-zinc-400 focus:outline-none transition shadow-2xs"
                   placeholder="••••••••"
                 />
                 <button
@@ -195,6 +226,10 @@
                   </svg>
                 </button>
               </div>
+              <p v-if="registerErrors.password" class="text-[11px] text-red-500 font-medium flex items-center gap-1 mt-1">
+                <svg class="w-3 h-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span>{{ registerErrors.password }}</span>
+              </p>
             </div>
 
             <button
@@ -239,10 +274,12 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
+import { useForm } from 'vee-validate'
+import { toTypedSchema } from '@vee-validate/zod'
+import * as z from 'zod'
 import { useAuthStore } from '@/stores/auth'
 import { useCartStore } from '@/stores/cart'
 import { useWishlistStore } from '@/stores/wishlist'
-import type { LoginRequest, RegisterRequest } from '@/types'
 
 const authStore = useAuthStore()
 const cartStore = useCartStore()
@@ -252,13 +289,102 @@ const showPassword = ref<boolean>(false)
 const authLoading = ref<boolean>(false)
 const authError = ref<string>('')
 
-const loginForm = ref<LoginRequest>({ 
-  email: 'nguyenvana@gmail.com', 
-  password: 'Admin@123' 
-})
-const registerForm = ref<RegisterRequest>({ fullName: '', email: '', phoneNumber: '', password: '' })
-
 const isLogin = computed(() => authStore.authModalMode === 'login')
+
+// ==========================================
+// 1. LOGIN VALIDATION SCHEMA & FORM (ZOD + VEE-VALIDATE)
+// ==========================================
+const loginSchema = toTypedSchema(
+  z.object({
+    email: z
+      .string({ required_error: 'Vui lòng nhập địa chỉ email' })
+      .min(1, 'Vui lòng nhập địa chỉ email')
+      .email('Địa chỉ email không đúng định dạng (VD: ten@gmail.com)'),
+    password: z
+      .string({ required_error: 'Vui lòng nhập mật khẩu' })
+      .min(1, 'Vui lòng nhập mật khẩu')
+      .min(6, 'Mật khẩu phải chứa ít nhất 6 ký tự')
+  })
+)
+
+const {
+  defineField: defineLoginField,
+  handleSubmit: handleLoginSubmit,
+  errors: loginErrors,
+  resetForm: resetLoginForm
+} = useForm({
+  validationSchema: loginSchema,
+  initialValues: {
+    email: 'nguyenvana@gmail.com',
+    password: 'Admin@123'
+  }
+})
+
+const [loginEmail, loginEmailAttrs] = defineLoginField('email')
+const [loginPassword, loginPasswordAttrs] = defineLoginField('password')
+
+// ==========================================
+// 2. REGISTER VALIDATION SCHEMA & FORM (ZOD + VEE-VALIDATE)
+// ==========================================
+const registerSchema = toTypedSchema(
+  z.object({
+    fullName: z
+      .string({ required_error: 'Vui lòng nhập họ và tên' })
+      .min(1, 'Vui lòng nhập họ và tên')
+      .min(2, 'Họ và tên tối thiểu 2 ký tự')
+      .max(50, 'Họ và tên tối đa 50 ký tự'),
+    email: z
+      .string({ required_error: 'Vui lòng nhập địa chỉ email' })
+      .min(1, 'Vui lòng nhập địa chỉ email')
+      .email('Địa chỉ email không đúng định dạng (VD: ten@gmail.com)'),
+    phoneNumber: z
+      .string()
+      .optional()
+      .refine(
+        (val) => !val || /^(0|\+84)[3|5|7|8|9][0-9]{8}$/.test(val.replace(/\s+/g, '')),
+        'Số điện thoại không hợp lệ (gồm 10 chữ số, đầu 03, 05, 07, 08, 09)'
+      ),
+    password: z
+      .string({ required_error: 'Vui lòng nhập mật khẩu' })
+      .min(1, 'Vui lòng nhập mật khẩu')
+      .min(6, 'Mật khẩu phải chứa ít nhất 6 ký tự')
+  })
+)
+
+const {
+  defineField: defineRegisterField,
+  handleSubmit: handleRegisterSubmit,
+  errors: registerErrors,
+  resetForm: resetRegisterForm
+} = useForm({
+  validationSchema: registerSchema,
+  initialValues: {
+    fullName: '',
+    email: '',
+    phoneNumber: '',
+    password: ''
+  }
+})
+
+const [registerFullName, registerFullNameAttrs] = defineRegisterField('fullName')
+const [registerEmail, registerEmailAttrs] = defineRegisterField('email')
+const [registerPhoneNumber, registerPhoneNumberAttrs] = defineRegisterField('phoneNumber')
+const [registerPassword, registerPasswordAttrs] = defineRegisterField('password')
+
+// ==========================================
+// 3. UI HANDLERS & AUTH LIFECYCLE
+// ==========================================
+const clearAuthError = () => {
+  if (authError.value) {
+    authError.value = ''
+  }
+}
+
+// Tự động xóa thông báo lỗi khi người dùng gõ vào bất kỳ ô input nào
+watch(
+  [loginEmail, loginPassword, registerFullName, registerEmail, registerPhoneNumber, registerPassword],
+  clearAuthError
+)
 
 const switchTab = (toLogin: boolean) => {
   authStore.authModalMode = toLogin ? 'login' : 'register'
@@ -280,7 +406,6 @@ const handleAuthSuccess = async () => {
     wishlistStore.fetchWishlist()
   ])
 
-  // Execute success callback if defined
   if (authStore.onAuthSuccess) {
     const cb = authStore.onAuthSuccess
     authStore.closeAuthModal()
@@ -290,11 +415,11 @@ const handleAuthSuccess = async () => {
   }
 }
 
-const handleLogin = async () => {
+const onLoginSubmit = handleLoginSubmit(async (values) => {
   authLoading.value = true
   authError.value = ''
   try {
-    const res = await authStore.login(loginForm.value)
+    const res = await authStore.login(values)
     if (res.success) {
       await handleAuthSuccess()
     } else {
@@ -305,13 +430,18 @@ const handleLogin = async () => {
   } finally {
     authLoading.value = false
   }
-}
+})
 
-const handleRegister = async () => {
+const onRegisterSubmit = handleRegisterSubmit(async (values) => {
   authLoading.value = true
   authError.value = ''
   try {
-    const res = await authStore.register(registerForm.value)
+    const res = await authStore.register({
+      fullName: values.fullName,
+      email: values.email,
+      password: values.password,
+      phoneNumber: values.phoneNumber || undefined
+    })
     if (res.success) {
       await handleAuthSuccess()
     } else {
@@ -322,7 +452,7 @@ const handleRegister = async () => {
   } finally {
     authLoading.value = false
   }
-}
+})
 
 // Lock scroll when modal is active
 watch(() => authStore.isAuthModalOpen, (isOpen) => {

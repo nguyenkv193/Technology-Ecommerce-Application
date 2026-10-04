@@ -9,11 +9,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@vee-validate/zod": "^4.15.1",
     "axios": "^1.7.7",
     "lucide-vue-next": "^0.453.0",
     "pinia": "^2.2.4",
+    "vee-validate": "^4.15.1",
     "vue": "^3.5.12",
-    "vue-router": "^4.4.5"
+    "vue-router": "^4.4.5",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/node": "^22.20.3",
