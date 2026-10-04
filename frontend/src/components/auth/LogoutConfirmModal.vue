@@ -90,9 +90,7 @@ const confirmLogout = () => {
   wishlistStore.items = []
   authStore.closeLogoutModal()
 
-  toast.info('Đã đăng xuất', {
-    description: `Tạm biệt ${userName}, hẹn gặp lại bạn tại TechStore.`
-  })
+  toast.info('Đã đăng xuất')
 
   // If user is on a protected route like /orders, redirect to home
   if (route.path === '/orders') {

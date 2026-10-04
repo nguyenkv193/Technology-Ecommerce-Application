@@ -12,8 +12,8 @@
     <AuthModal />
     <LogoutConfirmModal />
 
-    <!-- Global Modern Toast Notifications -->
-    <Toaster position="top-right" richColors closeButton :duration="3000" />
+    <!-- Minimalist Bottom-Right Toast Notifications -->
+    <Toaster position="bottom-right" :duration="2500" :closeButton="false" :richColors="false" theme="light" />
   </div>
 </template>
 

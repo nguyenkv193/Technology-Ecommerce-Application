@@ -504,24 +504,18 @@ const alertPrivacy = () => {
 const handleLogin = async () => {
   if (!agreeTerms.value) {
     authError.value = 'Vui lòng xác nhận đồng ý với Điều khoản sử dụng dịch vụ & Chính sách quyền riêng tư để tiếp tục.'
-    toast.warning('Chưa đồng ý điều khoản', {
-      description: 'Vui lòng tích chọn đồng ý với điều khoản & chính sách để tiếp tục.'
-    })
+    toast.warning('Vui lòng đồng ý với điều khoản & chính sách')
     return
   }
   authLoading.value = true
   authError.value = ''
   try {
     await authStore.login(loginForm.value)
-    toast.success('Đăng nhập thành công!', {
-      description: `Chào mừng ${authStore.user?.fullName || 'bạn'} quay trở lại TechStore.`
-    })
+    toast.success('Đăng nhập thành công')
     redirectAfterAuth()
   } catch (err: any) {
     authError.value = err.message || 'Đăng nhập không thành công, vui lòng thử lại.'
-    toast.error('Đăng nhập thất bại', {
-      description: authError.value
-    })
+    toast.error(authError.value)
   } finally {
     authLoading.value = false
   }
@@ -530,24 +524,18 @@ const handleLogin = async () => {
 const handleRegister = async () => {
   if (!agreeTerms.value) {
     authError.value = 'Vui lòng xác nhận đồng ý với Điều khoản sử dụng dịch vụ & Chính sách quyền riêng tư để tiếp tục.'
-    toast.warning('Chưa đồng ý điều khoản', {
-      description: 'Vui lòng tích chọn đồng ý với điều khoản & chính sách để tiếp tục.'
-    })
+    toast.warning('Vui lòng đồng ý với điều khoản & chính sách')
     return
   }
   authLoading.value = true
   authError.value = ''
   try {
     await authStore.register(registerForm.value)
-    toast.success('Đăng ký tài khoản thành công!', {
-      description: 'Chào mừng bạn gia nhập cộng đồng TechStore.'
-    })
+    toast.success('Đăng ký tài khoản thành công')
     redirectAfterAuth()
   } catch (err: any) {
     authError.value = err.message || 'Đăng ký không thành công, vui lòng thử lại.'
-    toast.error('Đăng ký thất bại', {
-      description: authError.value
-    })
+    toast.error(authError.value)
   } finally {
     authLoading.value = false
   }
