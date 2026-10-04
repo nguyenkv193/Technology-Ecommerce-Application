@@ -71,6 +71,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useCartStore } from '@/stores/cart'
 import { useWishlistStore } from '@/stores/wishlist'
+import { toast } from 'vue-sonner'
 
 const router = useRouter()
 const route = useRoute()
@@ -83,10 +84,15 @@ const handleClose = () => {
 }
 
 const confirmLogout = () => {
+  const userName = authStore.user?.fullName || 'bạn'
   authStore.logout()
   cartStore.resetCart()
   wishlistStore.items = []
   authStore.closeLogoutModal()
+
+  toast.info('Đã đăng xuất', {
+    description: `Tạm biệt ${userName}, hẹn gặp lại bạn tại TechStore.`
+  })
 
   // If user is on a protected route like /orders, redirect to home
   if (route.path === '/orders') {

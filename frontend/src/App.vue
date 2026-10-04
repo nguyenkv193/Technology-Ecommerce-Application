@@ -11,11 +11,15 @@
     <!-- Global Auth & Logout Modals -->
     <AuthModal />
     <LogoutConfirmModal />
+
+    <!-- Global Modern Toast Notifications -->
+    <Toaster position="top-right" richColors closeButton :duration="3000" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { onMounted } from 'vue'
+import { Toaster } from 'vue-sonner'
 import Navbar from '@/components/Navbar.vue'
 import Footer from '@/components/Footer.vue'
 import AuthModal from '@/components/auth/AuthModal.vue'

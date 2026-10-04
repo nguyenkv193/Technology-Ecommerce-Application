@@ -366,6 +366,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useCartStore } from '@/stores/cart'
 import { useWishlistStore } from '@/stores/wishlist'
+import { toast } from 'vue-sonner'
 import type { LoginRequest, RegisterRequest } from '@/types'
 
 const router = useRouter()
@@ -503,15 +504,24 @@ const alertPrivacy = () => {
 const handleLogin = async () => {
   if (!agreeTerms.value) {
     authError.value = 'Vui lòng xác nhận đồng ý với Điều khoản sử dụng dịch vụ & Chính sách quyền riêng tư để tiếp tục.'
+    toast.warning('Chưa đồng ý điều khoản', {
+      description: 'Vui lòng tích chọn đồng ý với điều khoản & chính sách để tiếp tục.'
+    })
     return
   }
   authLoading.value = true
   authError.value = ''
   try {
     await authStore.login(loginForm.value)
+    toast.success('Đăng nhập thành công!', {
+      description: `Chào mừng ${authStore.user?.fullName || 'bạn'} quay trở lại TechStore.`
+    })
     redirectAfterAuth()
   } catch (err: any) {
     authError.value = err.message || 'Đăng nhập không thành công, vui lòng thử lại.'
+    toast.error('Đăng nhập thất bại', {
+      description: authError.value
+    })
   } finally {
     authLoading.value = false
   }
@@ -520,15 +530,24 @@ const handleLogin = async () => {
 const handleRegister = async () => {
   if (!agreeTerms.value) {
     authError.value = 'Vui lòng xác nhận đồng ý với Điều khoản sử dụng dịch vụ & Chính sách quyền riêng tư để tiếp tục.'
+    toast.warning('Chưa đồng ý điều khoản', {
+      description: 'Vui lòng tích chọn đồng ý với điều khoản & chính sách để tiếp tục.'
+    })
     return
   }
   authLoading.value = true
   authError.value = ''
   try {
     await authStore.register(registerForm.value)
+    toast.success('Đăng ký tài khoản thành công!', {
+      description: 'Chào mừng bạn gia nhập cộng đồng TechStore.'
+    })
     redirectAfterAuth()
   } catch (err: any) {
     authError.value = err.message || 'Đăng ký không thành công, vui lòng thử lại.'
+    toast.error('Đăng ký thất bại', {
+      description: authError.value
+    })
   } finally {
     authLoading.value = false
   }
