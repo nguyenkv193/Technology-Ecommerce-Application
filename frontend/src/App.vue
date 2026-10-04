@@ -8,9 +8,8 @@
 
     <Footer />
 
-    <!-- Global Auth & Logout Modals -->
+    <!-- Global Auth Modal -->
     <AuthModal />
-    <LogoutConfirmModal />
 
     <!-- Minimalist Bottom-Right Toast Notifications -->
     <Toaster position="bottom-right" :duration="2500" :closeButton="false" :richColors="false" theme="light" />
@@ -23,7 +22,6 @@ import { Toaster } from 'vue-sonner'
 import Navbar from '@/components/Navbar.vue'
 import Footer from '@/components/Footer.vue'
 import AuthModal from '@/components/auth/AuthModal.vue'
-import LogoutConfirmModal from '@/components/auth/LogoutConfirmModal.vue'
 import { useAuthStore } from '@/stores/auth'
 import { useCartStore } from '@/stores/cart'
 import { useWishlistStore } from '@/stores/wishlist'
