@@ -370,7 +370,7 @@ const loadReviews = async (productId: number) => {
 
 const handleSubmitReview = async () => {
   if (!authStore.isAuthenticated) {
-    alert('Vui lòng đăng nhập để gửi đánh giá!')
+    authStore.openLoginModal()
     return
   }
   if (!product.value) return

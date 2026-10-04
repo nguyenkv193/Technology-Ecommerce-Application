@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="h-screen w-full flex flex-col lg:flex-row bg-[#fafafc] overflow-hidden select-none">
     <!-- LEFT COLUMN: High-End Flagship Showcase Slider (58% on Desktop, hidden on mobile) -->
     <div 
@@ -215,16 +215,32 @@
             </div>
           </div>
 
+          <!-- Agreement Checkbox -->
+          <label class="flex items-start gap-2 cursor-pointer select-none text-[11px] text-zinc-500 pt-0.5">
+            <input
+              type="checkbox"
+              v-model="agreeTerms"
+              class="mt-0.5 h-3.5 w-3.5 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900 cursor-pointer accent-zinc-900 shrink-0"
+            />
+            <span class="leading-relaxed">
+              Bằng việc tiếp tục, tôi xác nhận đã đủ điều kiện và đồng ý với 
+              <a href="#" @click.prevent.stop="alertTerms" class="text-zinc-800 font-medium underline hover:text-black">Điều khoản sử dụng dịch vụ</a> 
+              cùng 
+              <a href="#" @click.prevent.stop="alertPrivacy" class="text-zinc-800 font-medium underline hover:text-black">Chính sách quyền riêng tư</a> 
+              của TechStore.
+            </span>
+          </label>
+
           <button
             type="submit"
-            :disabled="authLoading"
+            :disabled="authLoading || !agreeTerms"
             class="w-full mt-1 py-2.5 bg-zinc-900 hover:bg-black active:scale-[0.99] text-white font-medium rounded-xl text-xs shadow-xs transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
           >
             <svg v-if="authLoading" class="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            <span>{{ authLoading ? 'Đang xác thực...' : 'Đăng nhập vào hệ thống' }}</span>
+            <span>{{ authLoading ? 'Đang xác thực...' : 'Đăng nhập' }}</span>
           </button>
         </form>
 
@@ -291,16 +307,32 @@
             </div>
           </div>
 
+          <!-- Agreement Checkbox -->
+          <label class="flex items-start gap-2 cursor-pointer select-none text-[11px] text-zinc-500 pt-0.5">
+            <input
+              type="checkbox"
+              v-model="agreeTerms"
+              class="mt-0.5 h-3.5 w-3.5 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900 cursor-pointer accent-zinc-900 shrink-0"
+            />
+            <span class="leading-relaxed">
+              Bằng việc tiếp tục, tôi xác nhận đã đủ điều kiện và đồng ý với 
+              <a href="#" @click.prevent.stop="alertTerms" class="text-zinc-800 font-medium underline hover:text-black">Điều khoản sử dụng dịch vụ</a> 
+              cùng 
+              <a href="#" @click.prevent.stop="alertPrivacy" class="text-zinc-800 font-medium underline hover:text-black">Chính sách quyền riêng tư</a> 
+              của TechStore.
+            </span>
+          </label>
+
           <button
             type="submit"
-            :disabled="authLoading"
+            :disabled="authLoading || !agreeTerms"
             class="w-full mt-1 py-2.5 bg-zinc-900 hover:bg-black active:scale-[0.99] text-white font-medium rounded-xl text-xs shadow-xs transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
           >
             <svg v-if="authLoading" class="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            <span>{{ authLoading ? 'Đang tạo tài khoản...' : 'Tạo tài khoản TechStore' }}</span>
+            <span>{{ authLoading ? 'Đang đăng ký...' : 'Đăng ký' }}</span>
           </button>
         </form>
 
@@ -318,15 +350,8 @@
         </div>
       </div>
 
-      <!-- Bottom Security & Terms Footer -->
-      <div class="pt-3 border-t border-zinc-200/60 flex items-center justify-between text-[10px] text-zinc-400 shrink-0">
-        <div class="flex items-center gap-1.5">
-          <svg class="w-3 h-3 text-emerald-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-          </svg>
-          <span>SSL 256-bit Encrypted</span>
-        </div>
+      <!-- Bottom Copyright Footer -->
+      <div class="pt-3 border-t border-zinc-200/60 flex items-center justify-center text-[10px] text-zinc-400 shrink-0">
         <div>
           © 2026 TechStore Inc.
         </div>
@@ -341,6 +366,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useCartStore } from '@/stores/cart'
 import { useWishlistStore } from '@/stores/wishlist'
+import { toast } from 'vue-sonner'
 import type { LoginRequest, RegisterRequest } from '@/types'
 
 const router = useRouter()
@@ -353,6 +379,7 @@ const isLogin = ref<boolean>(true)
 const showPassword = ref<boolean>(false)
 const authLoading = ref<boolean>(false)
 const authError = ref<string>('')
+const agreeTerms = ref<boolean>(false)
 
 const loginForm = ref<LoginRequest>({ email: '', password: '' })
 const registerForm = ref<RegisterRequest>({ fullName: '', email: '', phoneNumber: '', password: '' })
@@ -466,27 +493,49 @@ const redirectAfterAuth = () => {
   }
 }
 
+const alertTerms = () => {
+  alert('Điều khoản sử dụng dịch vụ TechStore: Cam kết cung cấp sản phẩm công nghệ chính hãng, bảo hành minh bạch và bảo đảm đầy đủ quyền lợi khách hàng.')
+}
+
+const alertPrivacy = () => {
+  alert('Chính sách quyền riêng tư TechStore: Bảo mật dữ liệu cá nhân và thông tin giao dịch theo tiêu chuẩn an toàn.')
+}
+
 const handleLogin = async () => {
+  if (!agreeTerms.value) {
+    authError.value = 'Vui lòng xác nhận đồng ý với Điều khoản sử dụng dịch vụ & Chính sách quyền riêng tư để tiếp tục.'
+    toast.warning('Vui lòng đồng ý với điều khoản & chính sách')
+    return
+  }
   authLoading.value = true
   authError.value = ''
   try {
     await authStore.login(loginForm.value)
+    toast.success('Đăng nhập thành công')
     redirectAfterAuth()
   } catch (err: any) {
     authError.value = err.message || 'Đăng nhập không thành công, vui lòng thử lại.'
+    toast.error(authError.value)
   } finally {
     authLoading.value = false
   }
 }
 
 const handleRegister = async () => {
+  if (!agreeTerms.value) {
+    authError.value = 'Vui lòng xác nhận đồng ý với Điều khoản sử dụng dịch vụ & Chính sách quyền riêng tư để tiếp tục.'
+    toast.warning('Vui lòng đồng ý với điều khoản & chính sách')
+    return
+  }
   authLoading.value = true
   authError.value = ''
   try {
     await authStore.register(registerForm.value)
+    toast.success('Đăng ký tài khoản thành công')
     redirectAfterAuth()
   } catch (err: any) {
     authError.value = err.message || 'Đăng ký không thành công, vui lòng thử lại.'
+    toast.error(authError.value)
   } finally {
     authLoading.value = false
   }
