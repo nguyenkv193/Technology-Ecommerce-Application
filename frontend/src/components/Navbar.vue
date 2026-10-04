@@ -21,7 +21,7 @@
               v-model="searchKeyword"
               type="text" 
               placeholder="Nhập tên điện thoại, laptop, phụ kiện... cần tìm" 
-              class="w-full bg-zinc-100/80 hover:bg-zinc-100 border border-transparent hover:border-zinc-300/80 focus:bg-white focus:border-zinc-400 focus:ring-2 focus:ring-zinc-100 rounded-xl py-2 pl-9 pr-20 text-xs text-zinc-900 placeholder:text-zinc-400 transition outline-none"
+              class="w-full bg-zinc-50 hover:bg-white focus:bg-white border border-zinc-200 hover:border-zinc-300 focus:border-zinc-900 focus:ring-2 focus:ring-zinc-900/5 rounded-xl py-2 pl-9 pr-20 text-xs text-zinc-900 placeholder:text-zinc-400 transition-all outline-none shadow-2xs"
             />
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-zinc-400">
               <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
