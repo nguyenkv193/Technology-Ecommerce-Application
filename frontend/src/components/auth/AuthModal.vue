@@ -64,31 +64,6 @@
             </button>
           </div>
 
-          <!-- Quick 1-Click Demo Accounts (Only visible in Login tab) -->
-          <div v-if="isLogin" class="mb-4 p-2.5 rounded-2xl bg-zinc-50 border border-zinc-200/70 text-xs">
-            <div class="text-zinc-400 text-[10px] font-medium mb-1.5 flex items-center justify-between">
-              <span>Đăng nhập thử nghiệm (1-Click):</span>
-              <span class="text-emerald-600 font-semibold text-[9px] uppercase tracking-wider">Sẵn sàng</span>
-            </div>
-            <div class="flex gap-2">
-              <button 
-                type="button" 
-                @click="fillDemo('ADMIN')"
-                class="flex-1 py-1.5 px-2.5 rounded-xl bg-white hover:bg-zinc-100/80 text-zinc-800 border border-zinc-200 text-[11px] font-medium transition shadow-2xs cursor-pointer text-center flex items-center justify-center gap-1.5"
-              >
-                <span>👑</span>
-                <span class="font-semibold">Admin</span>
-              </button>
-              <button 
-                type="button" 
-                @click="fillDemo('USER')"
-                class="flex-1 py-1.5 px-2.5 rounded-xl bg-white hover:bg-zinc-100/80 text-zinc-800 border border-zinc-200 text-[11px] font-medium transition shadow-2xs cursor-pointer text-center flex items-center justify-center gap-1.5"
-              >
-                <span>👤</span>
-                <span class="font-semibold">Khách hàng</span>
-              </button>
-            </div>
-          </div>
 
           <!-- Error Alert Message -->
           <div v-if="authError" class="mb-4 p-2.5 rounded-xl bg-red-50 border border-red-200 flex items-start gap-2 text-red-600 text-xs animate-shake">
@@ -277,7 +252,10 @@ const showPassword = ref<boolean>(false)
 const authLoading = ref<boolean>(false)
 const authError = ref<string>('')
 
-const loginForm = ref<LoginRequest>({ email: '', password: '' })
+const loginForm = ref<LoginRequest>({ 
+  email: 'nguyenvana@gmail.com', 
+  password: 'Admin@123' 
+})
 const registerForm = ref<RegisterRequest>({ fullName: '', email: '', phoneNumber: '', password: '' })
 
 const isLogin = computed(() => authStore.authModalMode === 'login')
@@ -292,18 +270,8 @@ const handleClose = () => {
   authError.value = ''
 }
 
-const fillDemo = (role: 'ADMIN' | 'USER') => {
-  if (role === 'ADMIN') {
-    loginForm.value.email = 'admin@techstore.com'
-    loginForm.value.password = 'Admin@123'
-  } else {
-    loginForm.value.email = 'nguyenvana@gmail.com'
-    loginForm.value.password = 'Admin@123'
-  }
-}
-
 const alertForgotPassword = () => {
-  alert('Vui lòng liên hệ quản trị viên (admin@techstore.com) hoặc sử dụng tính năng thử nghiệm 1-click để đăng nhập.')
+  alert('Vui lòng liên hệ bộ phận hỗ trợ khách hàng (support@techstore.com) để được cấp lại mật khẩu.')
 }
 
 const handleAuthSuccess = async () => {
