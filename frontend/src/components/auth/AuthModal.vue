@@ -131,9 +131,24 @@
               </p>
             </div>
 
+            <!-- Agreement Checkbox -->
+            <label class="flex items-start gap-2 cursor-pointer select-none text-[11px] text-zinc-500 pt-0.5">
+              <input
+                type="checkbox"
+                v-model="agreeTerms"
+                class="mt-0.5 h-3.5 w-3.5 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900 cursor-pointer accent-zinc-900 shrink-0"
+              />
+              <span class="leading-tight">
+                Tôi đồng ý với 
+                <a href="#" @click.prevent.stop="alertTerms" class="text-zinc-800 font-medium underline hover:text-black">Điều khoản dịch vụ</a> 
+                và 
+                <a href="#" @click.prevent.stop="alertPrivacy" class="text-zinc-800 font-medium underline hover:text-black">Chính sách bảo mật</a>
+              </span>
+            </label>
+
             <button
               type="submit"
-              :disabled="authLoading"
+              :disabled="authLoading || !agreeTerms"
               class="w-full mt-2 py-2.5 bg-zinc-900 hover:bg-black active:scale-[0.99] text-white font-medium rounded-xl text-xs shadow-md shadow-zinc-900/10 transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
             >
               <svg v-if="authLoading" class="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24">
@@ -232,9 +247,24 @@
               </p>
             </div>
 
+            <!-- Agreement Checkbox -->
+            <label class="flex items-start gap-2 cursor-pointer select-none text-[11px] text-zinc-500 pt-0.5">
+              <input
+                type="checkbox"
+                v-model="agreeTerms"
+                class="mt-0.5 h-3.5 w-3.5 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900 cursor-pointer accent-zinc-900 shrink-0"
+              />
+              <span class="leading-tight">
+                Tôi đồng ý với 
+                <a href="#" @click.prevent.stop="alertTerms" class="text-zinc-800 font-medium underline hover:text-black">Điều khoản dịch vụ</a> 
+                và 
+                <a href="#" @click.prevent.stop="alertPrivacy" class="text-zinc-800 font-medium underline hover:text-black">Chính sách bảo mật</a>
+              </span>
+            </label>
+
             <button
               type="submit"
-              :disabled="authLoading"
+              :disabled="authLoading || !agreeTerms"
               class="w-full mt-2 py-2.5 bg-zinc-900 hover:bg-black active:scale-[0.99] text-white font-medium rounded-xl text-xs shadow-md shadow-zinc-900/10 transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
             >
               <svg v-if="authLoading" class="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24">
@@ -256,15 +286,6 @@
             >
               {{ isLogin ? 'Đăng ký ngay' : 'Đăng nhập ngay' }}
             </button>
-          </div>
-
-          <!-- Bottom Security Badge -->
-          <div class="mt-3 flex items-center justify-center gap-1.5 text-[10px] text-zinc-400">
-            <svg class="w-3 h-3 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-            </svg>
-            <span>Bảo mật chuẩn Enterprise • SSL 256-bit</span>
           </div>
         </div>
       </div>
@@ -288,6 +309,7 @@ const wishlistStore = useWishlistStore()
 const showPassword = ref<boolean>(false)
 const authLoading = ref<boolean>(false)
 const authError = ref<string>('')
+const agreeTerms = ref<boolean>(false)
 
 const isLogin = computed(() => authStore.authModalMode === 'login')
 
@@ -380,9 +402,9 @@ const clearAuthError = () => {
   }
 }
 
-// Tự động xóa thông báo lỗi khi người dùng gõ vào bất kỳ ô input nào
+// Tự động xóa thông báo lỗi khi người dùng gõ vào bất kỳ ô input nào hoặc thay đổi đồng ý điều khoản
 watch(
-  [loginEmail, loginPassword, registerFullName, registerEmail, registerPhoneNumber, registerPassword],
+  [loginEmail, loginPassword, registerFullName, registerEmail, registerPhoneNumber, registerPassword, agreeTerms],
   clearAuthError
 )
 
@@ -394,10 +416,19 @@ const switchTab = (toLogin: boolean) => {
 const handleClose = () => {
   authStore.closeAuthModal()
   authError.value = ''
+  agreeTerms.value = false
 }
 
 const alertForgotPassword = () => {
   alert('Vui lòng liên hệ bộ phận hỗ trợ khách hàng (support@techstore.com) để được cấp lại mật khẩu.')
+}
+
+const alertTerms = () => {
+  alert('Điều khoản dịch vụ TechStore: Cam kết cung cấp sản phẩm công nghệ chính hãng, bảo hành minh bạch và bảo đảm quyền lợi người tiêu dùng.')
+}
+
+const alertPrivacy = () => {
+  alert('Chính sách bảo mật TechStore: Bảo mật thông tin cá nhân và dữ liệu thanh toán của khách hàng theo tiêu chuẩn an toàn.')
 }
 
 const handleAuthSuccess = async () => {
@@ -416,6 +447,10 @@ const handleAuthSuccess = async () => {
 }
 
 const onLoginSubmit = handleLoginSubmit(async (values) => {
+  if (!agreeTerms.value) {
+    authError.value = 'Vui lòng tích chọn đồng ý với điều khoản & chính sách để tiếp tục.'
+    return
+  }
   authLoading.value = true
   authError.value = ''
   try {
@@ -433,6 +468,10 @@ const onLoginSubmit = handleLoginSubmit(async (values) => {
 })
 
 const onRegisterSubmit = handleRegisterSubmit(async (values) => {
+  if (!agreeTerms.value) {
+    authError.value = 'Vui lòng tích chọn đồng ý với điều khoản & chính sách để tiếp tục.'
+    return
+  }
   authLoading.value = true
   authError.value = ''
   try {
