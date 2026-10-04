@@ -138,11 +138,12 @@
                 v-model="agreeTerms"
                 class="mt-0.5 h-3.5 w-3.5 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900 cursor-pointer accent-zinc-900 shrink-0"
               />
-              <span class="leading-tight">
-                Tôi đồng ý với 
-                <a href="#" @click.prevent.stop="alertTerms" class="text-zinc-800 font-medium underline hover:text-black">Điều khoản dịch vụ</a> 
-                và 
-                <a href="#" @click.prevent.stop="alertPrivacy" class="text-zinc-800 font-medium underline hover:text-black">Chính sách bảo mật</a>
+              <span class="leading-relaxed">
+                Bằng việc tiếp tục, tôi xác nhận đã đủ điều kiện và đồng ý với 
+                <a href="#" @click.prevent.stop="alertTerms" class="text-zinc-800 font-medium underline hover:text-black">Điều khoản sử dụng dịch vụ</a> 
+                cùng 
+                <a href="#" @click.prevent.stop="alertPrivacy" class="text-zinc-800 font-medium underline hover:text-black">Chính sách quyền riêng tư</a> 
+                của TechStore.
               </span>
             </label>
 
@@ -254,11 +255,12 @@
                 v-model="agreeTerms"
                 class="mt-0.5 h-3.5 w-3.5 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900 cursor-pointer accent-zinc-900 shrink-0"
               />
-              <span class="leading-tight">
-                Tôi đồng ý với 
-                <a href="#" @click.prevent.stop="alertTerms" class="text-zinc-800 font-medium underline hover:text-black">Điều khoản dịch vụ</a> 
-                và 
-                <a href="#" @click.prevent.stop="alertPrivacy" class="text-zinc-800 font-medium underline hover:text-black">Chính sách bảo mật</a>
+              <span class="leading-relaxed">
+                Bằng việc tiếp tục, tôi xác nhận đã đủ điều kiện và đồng ý với 
+                <a href="#" @click.prevent.stop="alertTerms" class="text-zinc-800 font-medium underline hover:text-black">Điều khoản sử dụng dịch vụ</a> 
+                cùng 
+                <a href="#" @click.prevent.stop="alertPrivacy" class="text-zinc-800 font-medium underline hover:text-black">Chính sách quyền riêng tư</a> 
+                của TechStore.
               </span>
             </label>
 
@@ -424,11 +426,11 @@ const alertForgotPassword = () => {
 }
 
 const alertTerms = () => {
-  alert('Điều khoản dịch vụ TechStore: Cam kết cung cấp sản phẩm công nghệ chính hãng, bảo hành minh bạch và bảo đảm quyền lợi người tiêu dùng.')
+  alert('Điều khoản sử dụng dịch vụ TechStore: Cam kết cung cấp sản phẩm công nghệ chính hãng, bảo hành minh bạch và bảo đảm đầy đủ quyền lợi khách hàng.')
 }
 
 const alertPrivacy = () => {
-  alert('Chính sách bảo mật TechStore: Bảo mật thông tin cá nhân và dữ liệu thanh toán của khách hàng theo tiêu chuẩn an toàn.')
+  alert('Chính sách quyền riêng tư TechStore: Bảo mật dữ liệu cá nhân và thông tin giao dịch theo tiêu chuẩn an toàn.')
 }
 
 const handleAuthSuccess = async () => {
@@ -448,7 +450,7 @@ const handleAuthSuccess = async () => {
 
 const onLoginSubmit = handleLoginSubmit(async (values) => {
   if (!agreeTerms.value) {
-    authError.value = 'Vui lòng tích chọn đồng ý với điều khoản & chính sách để tiếp tục.'
+    authError.value = 'Vui lòng xác nhận đồng ý với Điều khoản sử dụng dịch vụ & Chính sách quyền riêng tư để tiếp tục.'
     return
   }
   authLoading.value = true
@@ -469,7 +471,7 @@ const onLoginSubmit = handleLoginSubmit(async (values) => {
 
 const onRegisterSubmit = handleRegisterSubmit(async (values) => {
   if (!agreeTerms.value) {
-    authError.value = 'Vui lòng tích chọn đồng ý với điều khoản & chính sách để tiếp tục.'
+    authError.value = 'Vui lòng xác nhận đồng ý với Điều khoản sử dụng dịch vụ & Chính sách quyền riêng tư để tiếp tục.'
     return
   }
   authLoading.value = true
