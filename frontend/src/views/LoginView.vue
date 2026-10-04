@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="h-screen w-full flex flex-col lg:flex-row bg-[#fafafc] overflow-hidden select-none">
     <!-- LEFT COLUMN: High-End Flagship Showcase Slider (58% on Desktop, hidden on mobile) -->
     <div 
@@ -224,7 +224,7 @@
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            <span>{{ authLoading ? 'Đang xác thực...' : 'Đăng nhập vào hệ thống' }}</span>
+            <span>{{ authLoading ? 'Đang xác thực...' : 'Đăng nhập' }}</span>
           </button>
         </form>
 
@@ -300,7 +300,7 @@
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            <span>{{ authLoading ? 'Đang tạo tài khoản...' : 'Tạo tài khoản TechStore' }}</span>
+            <span>{{ authLoading ? 'Đang đăng ký...' : 'Đăng ký' }}</span>
           </button>
         </form>
 
