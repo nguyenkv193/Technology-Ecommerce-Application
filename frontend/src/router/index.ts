@@ -1,10 +1,11 @@
-﻿import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
+import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import HomeView from '@/views/HomeView.vue'
 import CatalogView from '@/views/CatalogView.vue'
 import ProductDetailView from '@/views/ProductDetailView.vue'
 import CartView from '@/views/CartView.vue'
 import OrdersView from '@/views/OrdersView.vue'
 import WishlistView from '@/views/WishlistView.vue'
+import { useAuthStore } from '@/stores/auth'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -40,14 +41,12 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/login',
     name: 'login',
-    component: () => import('@/views/LoginView.vue'),
-    meta: { hideHeaderFooter: true }
+    redirect: () => '/'
   },
   {
     path: '/register',
     name: 'register',
-    component: () => import('@/views/LoginView.vue'),
-    meta: { hideHeaderFooter: true }
+    redirect: () => '/'
   }
 ]
 
@@ -57,6 +56,25 @@ const router = createRouter({
   scrollBehavior() {
     return { top: 0 }
   }
+})
+
+router.beforeEach((to, from, next) => {
+  const authStore = useAuthStore()
+  if (to.path === '/login') {
+    authStore.openLoginModal()
+    if (from.name && from.path !== '/login' && from.path !== '/register') {
+      return next(false)
+    }
+    return next('/')
+  }
+  if (to.path === '/register') {
+    authStore.openRegisterModal()
+    if (from.name && from.path !== '/login' && from.path !== '/register') {
+      return next(false)
+    }
+    return next('/')
+  }
+  next()
 })
 
 export default router

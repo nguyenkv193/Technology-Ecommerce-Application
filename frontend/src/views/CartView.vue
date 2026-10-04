@@ -208,7 +208,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, watch, onMounted } from 'vue'
 import { useCartStore } from '@/stores/cart'
 import { useAuthStore } from '@/stores/auth'
 import { orderApi } from '@/api/orderApi'
@@ -233,6 +233,13 @@ const checkoutForm = reactive<CheckoutRequest>({
   paymentMethod: 'COD'
 })
 
+watch(() => authStore.user, (u) => {
+  if (u) {
+    if (!checkoutForm.recipientName) checkoutForm.recipientName = u.fullName || ''
+    if (!checkoutForm.phoneNumber) checkoutForm.phoneNumber = u.phoneNumber || ''
+  }
+})
+
 const formatPrice = (value?: number | null): string => {
   if (!value || isNaN(value)) return '0 ₫'
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value)
@@ -240,7 +247,7 @@ const formatPrice = (value?: number | null): string => {
 
 const handleCheckout = async () => {
   if (!authStore.isAuthenticated) {
-    alert('Vui lòng đăng nhập tài khoản để thực hiện đặt hàng!')
+    authStore.openLoginModal()
     return
   }
 

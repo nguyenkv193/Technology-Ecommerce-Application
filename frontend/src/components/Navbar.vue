@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <nav class="sticky top-0 z-50 bg-white/85 backdrop-blur-md border-b border-zinc-200/80 transition-colors">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-16 gap-3 sm:gap-4">
@@ -85,20 +85,21 @@
                 <svg class="w-3.5 h-3.5 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/></svg>
                 Lịch sử đơn hàng
               </router-link>
-              <button @click="handleLogout" class="w-full text-left flex items-center gap-2 px-3 py-2 text-xs font-medium text-red-600 hover:bg-red-50 rounded-lg transition cursor-pointer">
+              <button @click="openLogoutConfirm" class="w-full text-left flex items-center gap-2 px-3 py-2 text-xs font-medium text-red-600 hover:bg-red-50 rounded-lg transition cursor-pointer">
                 <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
                 <span>Đăng xuất</span>
               </button>
             </div>
           </div>
 
-          <router-link 
+          <button 
             v-else
-            to="/login"
+            type="button"
+            @click="authStore.openLoginModal()"
             class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-zinc-900 hover:bg-zinc-800 text-white transition ml-1 cursor-pointer"
           >
             Đăng nhập
-          </router-link>
+          </button>
         </div>
       </div>
     </div>
@@ -129,11 +130,8 @@ const handleSearch = () => {
   }
 }
 
-const handleLogout = () => {
-  authStore.logout()
+const openLogoutConfirm = () => {
   userMenuOpen.value = false
-  cartStore.clearCart()
-  wishlistStore.items = []
-  router.push('/')
+  authStore.openLogoutModal()
 }
 </script>

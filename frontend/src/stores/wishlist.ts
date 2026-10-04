@@ -34,6 +34,7 @@ export const useWishlistStore = defineStore('wishlist', () => {
   const toggleWishlist = async (product: any) => {
     const authStore = useAuthStore()
     if (!authStore.isAuthenticated) {
+      authStore.openLoginModal()
       return { needLogin: true }
     }
 

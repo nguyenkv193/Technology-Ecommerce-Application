@@ -10,6 +10,37 @@ export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = computed(() => !!token.value)
   const isAdmin = computed(() => user.value?.role === 'ADMIN')
 
+  // Modal Control States
+  const isAuthModalOpen = ref<boolean>(false)
+  const authModalMode = ref<'login' | 'register'>('login')
+  const isLogoutModalOpen = ref<boolean>(false)
+  const onAuthSuccess = ref<(() => void) | null>(null)
+
+  const openLoginModal = (callback?: () => void) => {
+    authModalMode.value = 'login'
+    isAuthModalOpen.value = true
+    onAuthSuccess.value = callback || null
+  }
+
+  const openRegisterModal = (callback?: () => void) => {
+    authModalMode.value = 'register'
+    isAuthModalOpen.value = true
+    onAuthSuccess.value = callback || null
+  }
+
+  const closeAuthModal = () => {
+    isAuthModalOpen.value = false
+    onAuthSuccess.value = null
+  }
+
+  const openLogoutModal = () => {
+    isLogoutModalOpen.value = true
+  }
+
+  const closeLogoutModal = () => {
+    isLogoutModalOpen.value = false
+  }
+
   const login = async (credentials: { email: string; password: string }) => {
     const res = await authApi.login(credentials)
     if (res.success && res.data) {
@@ -57,6 +88,15 @@ export const useAuthStore = defineStore('auth', () => {
     user,
     isAuthenticated,
     isAdmin,
+    isAuthModalOpen,
+    authModalMode,
+    isLogoutModalOpen,
+    onAuthSuccess,
+    openLoginModal,
+    openRegisterModal,
+    closeAuthModal,
+    openLogoutModal,
+    closeLogoutModal,
     login,
     register,
     logout,
