@@ -86,7 +86,6 @@ describe('Navbar.vue Component Test Suite', () => {
       }
     })
 
-    const loginBtn = wrapper.find('button')
     const buttons = wrapper.findAll('button')
     const loginButton = buttons.find(b => b.text().includes('Đăng nhập'))
     expect(loginButton).toBeDefined()
@@ -124,7 +123,7 @@ describe('Navbar.vue Component Test Suite', () => {
   it('displays user profile and handles logout', async () => {
     const authStore = useAuthStore()
     authStore.token = 'user_token'
-    authStore.user = { id: 1, fullName: 'Nguyen Van B', email: 'b@techstore.vn', role: 'USER' }
+    authStore.user = { id: 1, fullName: 'Nguyen Van B', email: 'b@techstore.vn', role: 'USER', status: 'ACTIVE' }
     currentPath = '/orders'
 
     const wrapper = mount(Navbar, {
