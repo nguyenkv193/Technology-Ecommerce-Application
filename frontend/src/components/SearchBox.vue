@@ -243,6 +243,9 @@
               v-for="(product, index) in productSuggestions"
               :key="product.id"
               type="button"
+              role="option"
+              data-testid="product-suggestion-item"
+              :aria-selected="activeSuggestionIndex === index"
               @mousedown.prevent
               @click="selectProduct(product)"
               @mouseenter="activeSuggestionIndex = index"

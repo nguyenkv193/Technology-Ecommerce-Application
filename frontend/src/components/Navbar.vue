@@ -24,9 +24,10 @@
           <!-- Mobile Search Trigger -->
           <button 
             type="button"
+            data-testid="mobile-search-trigger"
             @click="mobileSearchOpen = true"
             class="p-2 text-zinc-600 hover:text-zinc-900 rounded-lg hover:bg-zinc-100 transition md:hidden cursor-pointer" 
-            title="Tìm kiếm"
+            title="Tìm kiếm trên di động"
           >
             <Search class="w-4 h-4" />
           </button>
