@@ -106,6 +106,16 @@ export interface Product {
   aiScore?: number
 }
 
+export interface ProductSuggestion {
+  id: number
+  name: string
+  slug: string
+  brandName?: string
+  categoryName?: string
+  thumbnailUrl?: string
+  minPrice?: number
+}
+
 export interface CartItem {
   id: number
   variantId: number

@@ -22,6 +22,7 @@ import com.project.techstore.product.service.ProductService;
 import com.project.techstore.common.dto.PageResponse;
 import com.project.techstore.product.dto.ProductFilterRequest;
 import com.project.techstore.product.dto.ProductResponse;
+import com.project.techstore.product.dto.ProductSuggestionResponse;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -170,6 +171,53 @@ class ProductServiceTest {
                 org.mockito.ArgumentMatchers.<Specification<Product>>any(),
                 any(Pageable.class)
         );
+    }
+
+    @Test
+    void getSearchSuggestionsUsesRelevantActiveProductResultsAndLimitsPayload() {
+        ProductResponse product = ProductResponse.builder()
+                .id(100L)
+                .name("MacBook Pro M3")
+                .slug("macbook-pro-m3")
+                .brandName("Apple")
+                .categoryName("Laptop")
+                .minPrice(new BigDecimal("39990000"))
+                .build();
+        when(productSearchService.search(any(ProductFilterRequest.class))).thenReturn(
+                PageResponse.<ProductResponse>builder()
+                        .content(List.of(product))
+                        .page(0)
+                        .size(4)
+                        .totalElements(1)
+                        .totalPages(1)
+                        .last(true)
+                        .build()
+        );
+
+        List<ProductSuggestionResponse> suggestions = productService.getSearchSuggestions("  MacBook  ", 4);
+
+        assertEquals(1, suggestions.size());
+        assertEquals("MacBook Pro M3", suggestions.get(0).getName());
+        assertEquals("Apple", suggestions.get(0).getBrandName());
+        var filterCaptor = org.mockito.ArgumentCaptor.forClass(ProductFilterRequest.class);
+        verify(productSearchService).search(filterCaptor.capture());
+        assertEquals("MacBook", filterCaptor.getValue().getKeyword());
+        assertEquals("ACTIVE", filterCaptor.getValue().getStatus());
+        assertEquals(4, filterCaptor.getValue().getSize());
+        assertEquals("relevance", filterCaptor.getValue().getSortBy());
+    }
+
+    @Test
+    void getSearchSuggestionsCapsRequestedLimit() {
+        when(productSearchService.search(any(ProductFilterRequest.class))).thenReturn(
+                PageResponse.<ProductResponse>builder().content(List.of()).build()
+        );
+
+        productService.getSearchSuggestions("phone", 100);
+
+        var filterCaptor = org.mockito.ArgumentCaptor.forClass(ProductFilterRequest.class);
+        verify(productSearchService).search(filterCaptor.capture());
+        assertEquals(10, filterCaptor.getValue().getSize());
     }
 
     @Test

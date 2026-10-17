@@ -129,6 +129,26 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
+    public List<ProductSuggestionResponse> getSearchSuggestions(String keyword, int limit) {
+        if (!StringUtils.hasText(keyword)) {
+            return List.of();
+        }
+
+        ProductFilterRequest filter = ProductFilterRequest.builder()
+                .keyword(keyword.trim())
+                .status(ProductStatus.ACTIVE.name())
+                .page(0)
+                .size(Math.min(10, Math.max(1, limit)))
+                .sortBy("relevance")
+                .sortDirection("DESC")
+                .build();
+
+        return filterProducts(filter).getContent().stream()
+                .map(ProductSuggestionResponse::from)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
     public ProductDetailResponse getById(Long id) {
         Product product = productRepository.findWithDetailsById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND, "Không tìm thấy sản phẩm với ID: " + id));
