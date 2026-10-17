@@ -15,6 +15,7 @@
           @change="fetchProducts"
           class="bg-white border border-zinc-200 text-zinc-800 text-xs rounded-xl px-3 py-1.5 focus:outline-none focus:border-zinc-800 shadow-2xs"
         >
+          <option v-if="filters.keyword.trim()" value="relevance">Phù hợp nhất</option>
           <option value="createdAt">Mới nhất</option>
           <option value="name">Tên A-Z</option>
         </select>
@@ -43,6 +44,7 @@
           <label class="block text-xs font-medium text-zinc-700 mb-1.5">Từ khóa tìm kiếm</label>
           <input 
             v-model="filters.keyword"
+            @input="handleKeywordInput"
             @keyup.enter="fetchProducts"
             type="text" 
             placeholder="Ví dụ: M3, OLED, 16GB..." 
@@ -201,7 +203,7 @@ const filters = reactive<FilterState>({
   maxPrice: null,
   page: 0,
   size: 9,
-  sortBy: 'createdAt',
+  sortBy: (route.query.keyword as string) ? 'relevance' : 'createdAt',
   sortDirection: 'DESC'
 })
 
@@ -217,6 +219,10 @@ const selectPriceRange = (min: number | null, max: number | null) => {
   filters.minPrice = min
   filters.maxPrice = max
   fetchProducts()
+}
+
+const handleKeywordInput = () => {
+  filters.sortBy = filters.keyword.trim() ? 'relevance' : 'createdAt'
 }
 
 const isPriceSelected = (min: number | null, max: number | null) => {
@@ -279,7 +285,10 @@ const fetchFilterOptions = async () => {
 }
 
 watch(() => route.query, (newQuery) => {
-  if (newQuery.keyword !== undefined) filters.keyword = newQuery.keyword as string
+  if (newQuery.keyword !== undefined) {
+    filters.keyword = newQuery.keyword as string
+    filters.sortBy = filters.keyword.trim() ? 'relevance' : 'createdAt'
+  }
   if (newQuery.categoryId !== undefined) filters.categoryId = Number(newQuery.categoryId)
   fetchProducts()
 })

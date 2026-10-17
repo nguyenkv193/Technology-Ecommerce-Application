@@ -1,5 +1,5 @@
 import { apiClient } from './client'
-import type { ApiResponse, PageResponse, Product, Category, Brand, ProductReview, ProductReviewSummary } from '@/types'
+import type { ApiResponse, PageResponse, Product, ProductSuggestion, Category, Brand, ProductReview, ProductReviewSummary } from '@/types'
 
 export const catalogApi = {
   getBestSellers: (limit: number = 8): Promise<ApiResponse<Product[]>> =>
@@ -16,6 +16,9 @@ export const catalogApi = {
   
   getProducts: (params: Record<string, any> = {}): Promise<ApiResponse<PageResponse<Product>>> => 
     apiClient.get('/products', { params }),
+
+  getSearchSuggestions: (keyword: string, limit: number = 6): Promise<ApiResponse<ProductSuggestion[]>> =>
+    apiClient.get('/products/suggestions', { params: { keyword, limit } }),
     
   getProductById: (id: number): Promise<ApiResponse<Product>> => 
     apiClient.get(`/products/${id}`),

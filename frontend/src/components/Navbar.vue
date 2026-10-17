@@ -14,29 +14,24 @@
         <!-- Category Mega Menu Dropdown -->
         <CategoryMegaMenu />
 
-        <!-- Minimal Search Bar -->
-        <div class="flex-1 max-w-lg mx-2 hidden md:block">
-          <form @submit.prevent="handleSearch" class="relative">
-            <input 
-              v-model="searchKeyword"
-              type="text" 
-              placeholder="Nhập tên điện thoại, laptop, phụ kiện... cần tìm" 
-              class="w-full bg-zinc-50 hover:bg-white focus:bg-white border border-zinc-200 hover:border-zinc-300 focus:border-zinc-900 focus:ring-2 focus:ring-zinc-900/5 rounded-xl py-2 pl-9 pr-20 text-xs text-zinc-900 placeholder:text-zinc-400 transition-all outline-none shadow-2xs"
-            />
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-zinc-400">
-              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-            </div>
-            <button 
-              type="submit"
-              class="absolute inset-y-1 right-1 px-3 bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg text-[11px] font-medium transition cursor-pointer"
-            >
-              Tìm
-            </button>
-          </form>
+        <!-- Search Bar -->
+        <div class="flex-1 max-w-xl mx-2 hidden md:block">
+          <SearchBox />
         </div>
 
         <!-- Navigation Links & Actions -->
         <div class="flex items-center gap-1.5 sm:gap-3 shrink-0">
+          <!-- Mobile Search Trigger -->
+          <button 
+            type="button"
+            data-testid="mobile-search-trigger"
+            @click="mobileSearchOpen = true"
+            class="p-2 text-zinc-600 hover:text-zinc-900 rounded-lg hover:bg-zinc-100 transition md:hidden cursor-pointer" 
+            title="Tìm kiếm trên di động"
+          >
+            <Search class="w-4 h-4" />
+          </button>
+
           <router-link to="/products" class="text-xs font-medium text-zinc-600 hover:text-zinc-900 px-3 py-2 rounded-lg hover:bg-zinc-100 transition hidden sm:inline-block">
             Sản phẩm
           </router-link>
@@ -103,17 +98,44 @@
         </div>
       </div>
     </div>
+
+    <!-- Mobile Search Modal Drawer -->
+    <Teleport to="body">
+      <Transition name="fade">
+        <div 
+          v-if="mobileSearchOpen" 
+          class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] md:hidden flex flex-col"
+        >
+          <div class="bg-white p-4 shadow-xl border-b border-zinc-200">
+            <div class="flex items-center gap-3">
+              <div class="flex-1">
+                <SearchBox />
+              </div>
+              <button 
+                type="button"
+                @click="mobileSearchOpen = false"
+                class="px-3 py-2 rounded-xl text-xs font-semibold text-zinc-600 hover:bg-zinc-100 transition cursor-pointer shrink-0"
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
+          <div class="flex-1" @click="mobileSearchOpen = false"></div>
+        </div>
+      </Transition>
+    </Teleport>
   </nav>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { Search } from 'lucide-vue-next'
 import CategoryMegaMenu from '@/components/CategoryMegaMenu.vue'
+import SearchBox from '@/components/SearchBox.vue'
 import { useAuthStore } from '@/stores/auth'
 import { useCartStore } from '@/stores/cart'
 import { useWishlistStore } from '@/stores/wishlist'
-import { behaviorApi } from '@/api/behaviorApi'
 import { toast } from 'vue-sonner'
 
 const router = useRouter()
@@ -121,15 +143,8 @@ const authStore = useAuthStore()
 const cartStore = useCartStore()
 const wishlistStore = useWishlistStore()
 
-const searchKeyword = ref<string>('')
 const userMenuOpen = ref<boolean>(false)
-
-const handleSearch = () => {
-  if (searchKeyword.value.trim()) {
-    behaviorApi.track('SEARCH', null, searchKeyword.value.trim())
-    router.push({ path: '/products', query: { keyword: searchKeyword.value.trim() } })
-  }
-}
+const mobileSearchOpen = ref<boolean>(false)
 
 const handleLogout = () => {
   userMenuOpen.value = false

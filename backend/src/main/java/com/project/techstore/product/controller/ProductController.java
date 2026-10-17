@@ -6,6 +6,7 @@ import com.project.techstore.product.dto.ProductCreateRequest;
 import com.project.techstore.product.dto.ProductDetailResponse;
 import com.project.techstore.product.dto.ProductFilterRequest;
 import com.project.techstore.product.dto.ProductResponse;
+import com.project.techstore.product.dto.ProductSuggestionResponse;
 import com.project.techstore.product.dto.ProductUpdateRequest;
 import com.project.techstore.product.dto.ProductRecommendationFeature;
 import com.project.techstore.recommendation.service.RecommendationService;
@@ -16,6 +17,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
@@ -57,6 +60,15 @@ public class ProductController {
     ) {
         PageResponse<ProductResponse> response = productService.filterProducts(filter);
         return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @GetMapping("/suggestions")
+    @Operation(summary = "Gợi ý sản phẩm khi nhập từ khóa tìm kiếm")
+    public ResponseEntity<ApiResponse<List<ProductSuggestionResponse>>> searchSuggestions(
+            @RequestParam @NotBlank @Size(max = 100) String keyword,
+            @RequestParam(defaultValue = "6") @Min(1) @Max(10) int limit
+    ) {
+        return ResponseEntity.ok(ApiResponse.success(productService.getSearchSuggestions(keyword, limit)));
     }
 
     @GetMapping("/{id}")

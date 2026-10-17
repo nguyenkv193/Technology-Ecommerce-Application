@@ -12,6 +12,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -96,7 +97,17 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * 7. Xử lý các lỗi bất ngờ chưa lường trước (UnexpectedException).
+     * 7. Xử lý lỗi ResponseStatusException (HttpStatus tùy biến từ Controller).
+     */
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ApiResponse<Void>> handleResponseStatusException(ResponseStatusException ex) {
+        log.warn("ResponseStatusException [{}]: {}", ex.getStatusCode(), ex.getReason());
+        ApiResponse<Void> response = ApiResponse.error(ex.getStatusCode().toString(), ex.getReason());
+        return new ResponseEntity<>(response, ex.getStatusCode());
+    }
+
+    /**
+     * 8. Xử lý các lỗi bất ngờ chưa lường trước (UnexpectedException).
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleGeneralException(Exception ex) {

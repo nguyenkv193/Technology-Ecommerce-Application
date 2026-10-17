@@ -113,9 +113,10 @@ public class CategoryService {
 
     public static String toSlug(String input) {
         if (!StringUtils.hasText(input)) return "";
-        String nowhitespace = Pattern.compile("[\\s]").matcher(input).replaceAll("-");
+        String text = input.trim().replace("đ", "d").replace("Đ", "d");
+        String nowhitespace = Pattern.compile("[\\s]").matcher(text).replaceAll("-");
         String normalized = Normalizer.normalize(nowhitespace, Normalizer.Form.NFD);
         String slug = Pattern.compile("[^\\w-]").matcher(normalized).replaceAll("");
-        return slug.toLowerCase(Locale.ENGLISH).replaceAll("-+", "-");
+        return slug.toLowerCase(Locale.ENGLISH).replaceAll("-+", "-").replaceAll("^-|-$", "");
     }
 }

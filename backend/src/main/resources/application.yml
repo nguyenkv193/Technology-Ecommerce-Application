@@ -8,6 +8,14 @@ spring:
     name: techstore-backend
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
+  elasticsearch:
+    uris: ${ELASTICSEARCH_URIS:http://localhost:9200}
+
+techstore:
+  search:
+    index-check-interval-ms: ${SEARCH_INDEX_CHECK_INTERVAL_MS:10000}
+    outbox:
+      poll-interval-ms: ${SEARCH_OUTBOX_POLL_INTERVAL_MS:2000}
 
 ai:
   service-url: ${AI_SERVICE_URL:http://localhost:8001/api/v1}

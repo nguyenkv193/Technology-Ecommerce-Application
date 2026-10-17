@@ -14,7 +14,16 @@ Xem [hướng dẫn CI/CD](docs/ci-cd.md) để bật workflow, xem artifacts v�
 - `backend/`: Spring Boot 3.4, Java 21, PostgreSQL, JWT.
 - `frontend/`: Vue 3, TypeScript, Vite, Pinia, Tailwind CSS.
 - `aiservice/`: FastAPI, Scikit-learn và ma trận user-item sparse; Content-Based, Item-Item Collaborative và Hybrid.
-- `docker-compose.yml`: PostgreSQL, backend, AI service và frontend.
+- `docker-compose.yml`: PostgreSQL, Elasticsearch, backend, AI service và frontend.
+
+## Tìm kiếm sản phẩm
+
+- PostgreSQL vẫn là nguồn dữ liệu chính; Elasticsearch giữ index tìm kiếm `products-v1`.
+- Keyword search tìm theo tên, mô tả, thương hiệu, danh mục, SKU và thông số; hỗ trợ lọc kết hợp theo danh mục, thương hiệu, trạng thái và khoảng giá.
+- Tìm kiếm keyword mặc định xếp theo độ liên quan; người dùng vẫn có thể chọn sắp xếp theo ngày tạo hoặc tên.
+- Tạo/sửa/xóa sản phẩm ghi sự kiện vào `product_search_outbox` trong cùng transaction với PostgreSQL. Backend xử lý và retry đồng bộ index; endpoint tìm kiếm quay về JPA/PostgreSQL khi Elasticsearch không sẵn sàng.
+- Khi index chưa tồn tại, backend tạo mapping và nạp catalog hiện có. Admin có thể dựng lại index bằng `POST /api/v1/admin/search/reindex-products`.
+- Elasticsearch trong Compose hiện được cấu hình cho local development và tắt security; không expose cấu hình này trực tiếp ra môi trường production.
 
 ## Luồng gợi ý
 
@@ -83,15 +92,16 @@ docker compose up -d --build
 - Backend Swagger: http://localhost:8080/swagger-ui/index.html
 - AI readiness: http://localhost:8001/ready
 - PostgreSQL: localhost:5433
+- Elasticsearch: http://localhost:9200
 
 AI đợi backend healthy. Frontend chỉ phụ thuộc backend nên vẫn hoạt động khi AI không khả dụng.
 
 ## Chạy development
 
-Cần Java 21, Node.js và Python. Khởi động PostgreSQL:
+Cần Java 21, Node.js và Python. Khởi động PostgreSQL và Elasticsearch:
 
 ```powershell
-docker compose up -d postgres
+docker compose up -d postgres elasticsearch
 ```
 
 Backend:
@@ -136,6 +146,9 @@ Xem `.env.example`:
 - `AI_INTERNAL_API_KEY`: khóa chia sẻ giữa backend và AI để xuất log tương tác nội bộ; để trống sẽ tắt CF.
 - `AI_MAX_TRAINING_INTERACTIONS`: giới hạn snapshot train, mặc định 200.000 cặp user-item.
 - `AI_REFRESH_SECONDS`, `AI_RETRY_SECONDS`, `AI_MAX_MODEL_AGE_SECONDS`: chu kỳ refresh, retry và giới hạn tuổi model.
+- `ELASTICSEARCH_PORT`, `ELASTICSEARCH_URIS`: cổng host và địa chỉ Elasticsearch; Compose tự dùng hostname nội bộ `elasticsearch:9200`.
+- `SEARCH_INDEX_CHECK_INTERVAL_MS`: chu kỳ kiểm tra index và nạp catalog nếu index chưa tồn tại, mặc định 10000 ms.
+- `SEARCH_OUTBOX_POLL_INTERVAL_MS`: chu kỳ xử lý sự kiện cập nhật search index, mặc định 2000 ms.
 
 ## Kiểm tra
 
