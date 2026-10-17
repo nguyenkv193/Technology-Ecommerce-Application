@@ -90,7 +90,7 @@ class BehaviorServiceTest {
         assertEquals(1, matrix.size());
         assertEquals(1L, matrix.get(0).getUserId());
         assertEquals(50L, matrix.get(0).getProductId());
-        assertEquals(8.5, matrix.get(0).getScore());
+        assertEquals(Math.log1p(8.5), matrix.get(0).getScore(), 0.001);
         assertEquals(4L, matrix.get(0).getInteractionCount());
         verify(userBehaviorRepository).aggregateUserProductInteractions(1L);
     }
