@@ -12,6 +12,7 @@ spring:
 ai:
   service-url: ${AI_SERVICE_URL:http://localhost:8001/api/v1}
   timeout-ms: ${AI_TIMEOUT_MS:1500}
+  internal-api-key: ${AI_INTERNAL_API_KEY:}
 
 # Cấu hình tài liệu Swagger OpenAPI
 springdoc:
