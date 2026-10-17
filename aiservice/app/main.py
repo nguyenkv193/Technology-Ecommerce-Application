@@ -29,7 +29,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title=settings.app_name,
     version=settings.version,
-    description="Gợi ý sản phẩm bằng Content-Based Filtering (TF-IDF & Cosine Similarity)",
+    description="Gợi ý sản phẩm TechStore bằng Content-Based, Item-Item Collaborative và Hybrid Filtering",
     lifespan=lifespan,
 )
 app.include_router(router)

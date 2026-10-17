@@ -41,13 +41,20 @@ public class AiRecommendationClient {
         if (result == null || result.recommendations() == null) {
             throw new IllegalStateException("AI returned an invalid recommendation response");
         }
-        return result.recommendations();
+        return result.recommendations().stream().map(item -> new AiItem(
+                item.productId(), item.score(), item.reason(),
+                item.source() != null ? item.source() : result.source()
+        )).toList();
     }
 
     private record Interaction(@JsonProperty("product_id") Long productId, double score) {}
     private record UserRequest(List<Interaction> interactions, int limit) {}
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public record AiItem(@JsonProperty("product_id") Long productId, Double score, String reason) {}
+    public record AiItem(@JsonProperty("product_id") Long productId, Double score, String reason, String source) {
+        public AiItem(Long productId, Double score, String reason) {
+            this(productId, score, reason, null);
+        }
+    }
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public record AiResult(List<AiItem> recommendations) {}
+    public record AiResult(String source, List<AiItem> recommendations) {}
 }

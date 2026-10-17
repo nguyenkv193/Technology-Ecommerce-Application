@@ -1,3 +1,4 @@
+from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -19,6 +20,14 @@ class UserInteractionItem(BaseModel):
     score: float = Field(gt=0)
 
 
+class TrainingInteractionItem(BaseModel):
+    model_config = ConfigDict(populate_by_name=True, allow_inf_nan=False)
+    user_id: int = Field(gt=0, alias="userId")
+    product_id: int = Field(gt=0, alias="productId")
+    score: float = Field(gt=0)
+    last_interacted_at: datetime = Field(alias="lastInteractedAt")
+
+
 class PersonalizedRequest(BaseModel):
     interactions: list[UserInteractionItem]
     limit: int = Field(default=10, ge=1, le=50)
@@ -28,6 +37,7 @@ class ProductRecommendationItem(BaseModel):
     product_id: int
     score: float
     reason: str
+    source: str = "content_based"
 
 
 class RecommendationResponse(BaseModel):

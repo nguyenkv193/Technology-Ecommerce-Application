@@ -180,7 +180,7 @@ export interface ProductReviewSummary {
 }
 
 // Recommendation data is enriched by the backend, including fallback provenance.
-export type RecommendationSource = 'content_based' | 'best_seller' | 'catalog'
+export type RecommendationSource = 'hybrid' | 'collaborative' | 'content_based' | 'best_seller' | 'catalog'
 
 export interface RecommendationItem {
   product: Product

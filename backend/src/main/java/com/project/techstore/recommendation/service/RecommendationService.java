@@ -87,7 +87,8 @@ public class RecommendationService {
             if (p == null || !available(p) || seen.contains(p.getId())
                     || (categoryId != null && !categoryId.equals(p.getCategory().getId()))) continue;
             seen.add(p.getId());
-            result.add(new Item(ProductResponse.from(p), "content_based", item.score(), item.reason()));
+            String source = isAiSource(item.source()) ? item.source() : "content_based";
+            result.add(new Item(ProductResponse.from(p), source, item.score(), item.reason()));
             if (result.size() == limit) break;
         }
         return result;
@@ -117,9 +118,15 @@ public class RecommendationService {
     }
 
     private RecommendationResponse response(List<Item> result, String fallbackReason) {
-        String source = result.stream().anyMatch(i -> "content_based".equals(i.source())) ? "content_based"
+        String source = result.stream().anyMatch(i -> "hybrid".equals(i.source())) ? "hybrid"
+                : result.stream().anyMatch(i -> "collaborative".equals(i.source())) ? "collaborative"
+                : result.stream().anyMatch(i -> "content_based".equals(i.source())) ? "content_based"
                 : result.stream().anyMatch(i -> "best_seller".equals(i.source())) ? "best_seller" : "catalog";
         return new RecommendationResponse(source, fallbackReason, List.copyOf(result));
+    }
+
+    private boolean isAiSource(String source) {
+        return "content_based".equals(source) || "collaborative".equals(source) || "hybrid".equals(source);
     }
 
     private List<Long> bestSellerIds(Set<Long> excluded, Long categoryId, int limit) {
