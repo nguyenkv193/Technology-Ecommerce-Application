@@ -14,7 +14,19 @@ import com.project.techstore.product.entity.Product;
 import com.project.techstore.product.entity.ProductStatus;
 import com.project.techstore.product.repository.ProductRepository;
 import com.project.techstore.product.repository.ProductVariantRepository;
+import com.project.techstore.product.search.ProductSearchOutboxRepository;
+import com.project.techstore.product.search.ProductSearchEventType;
+import com.project.techstore.product.search.ProductSearchService;
+import com.project.techstore.product.search.SearchUnavailableException;
 import com.project.techstore.product.service.ProductService;
+import com.project.techstore.common.dto.PageResponse;
+import com.project.techstore.product.dto.ProductFilterRequest;
+import com.project.techstore.product.dto.ProductResponse;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,6 +51,12 @@ class ProductServiceTest {
 
     @Mock
     private ProductVariantRepository productVariantRepository;
+
+    @Mock
+    private ProductSearchService productSearchService;
+
+    @Mock
+    private ProductSearchOutboxRepository searchOutboxRepository;
 
     @Mock
     private CategoryService categoryService;
@@ -97,6 +115,64 @@ class ProductServiceTest {
     }
 
     @Test
+    void testFilterProductsUsesElasticsearchForKeywordSearch() {
+        ProductFilterRequest filter = ProductFilterRequest.builder()
+                .keyword("MacBook")
+                .page(0)
+                .size(9)
+                .sortBy("relevance")
+                .build();
+        PageResponse<ProductResponse> expected = PageResponse.<ProductResponse>builder()
+                .content(List.of())
+                .page(0)
+                .size(9)
+                .totalElements(0)
+                .totalPages(0)
+                .last(true)
+                .build();
+        when(productSearchService.search(filter)).thenReturn(expected);
+
+        PageResponse<ProductResponse> actual = productService.filterProducts(filter);
+
+        assertSame(expected, actual);
+        verify(productSearchService).search(filter);
+        verify(productRepository, never()).findAll(
+                org.mockito.ArgumentMatchers.<Specification<Product>>any(),
+                any(Pageable.class)
+        );
+    }
+
+    @Test
+    void testFilterProductsFallsBackToPostgresWhenElasticsearchIsUnavailable() {
+        ProductFilterRequest filter = ProductFilterRequest.builder()
+                .keyword("MacBook")
+                .page(0)
+                .size(9)
+                .sortBy("relevance")
+                .build();
+        when(productSearchService.search(filter))
+                .thenThrow(new SearchUnavailableException("offline", new RuntimeException("offline")));
+        when(productRepository.findAll(
+                org.mockito.ArgumentMatchers.<Specification<Product>>any(),
+                any(Pageable.class)
+        )).thenReturn(new PageImpl<>(
+                List.of(sampleProduct),
+                PageRequest.of(0, 9, Sort.by(Sort.Direction.DESC, "createdAt")),
+                1
+        ));
+
+        PageResponse<ProductResponse> actual = productService.filterProducts(filter);
+
+        assertEquals(1, actual.getTotalElements());
+        assertEquals("MacBook Pro M3", actual.getContent().get(0).getName());
+        verify(productSearchService).search(filter);
+        verify(productRepository).findAll(
+                org.mockito.ArgumentMatchers.<Specification<Product>>any(),
+                any(Pageable.class)
+        );
+    }
+
+    @Test
     void testCreateProductSuccess() {
         ProductCreateRequest request = ProductCreateRequest.builder()
                 .name("MacBook Pro M3")
@@ -141,6 +217,10 @@ class ProductServiceTest {
         assertEquals(1, res.getVariants().size());
         assertEquals(2, res.getAttributes().size());
         verify(productRepository, times(1)).save(any(Product.class));
+        verify(searchOutboxRepository).save(org.mockito.ArgumentMatchers.argThat(event ->
+                event.getProductId().equals(100L)
+                        && event.getEventType() == ProductSearchEventType.UPSERT
+        ));
     }
 
     @Test
