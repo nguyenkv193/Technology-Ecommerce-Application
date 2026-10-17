@@ -14,99 +14,23 @@
         <!-- Category Mega Menu Dropdown -->
         <CategoryMegaMenu />
 
-        <!-- Minimal Search Bar -->
-        <div ref="searchContainer" class="flex-1 max-w-lg mx-2 hidden md:block relative">
-          <form @submit.prevent="handleSearch" class="relative">
-            <input 
-              v-model="searchKeyword"
-              type="text" 
-              placeholder="Nhập tên điện thoại, laptop, phụ kiện... cần tìm" 
-              role="combobox"
-              aria-autocomplete="list"
-              aria-controls="product-search-suggestions"
-              :aria-expanded="isSuggestionOpen"
-              :aria-activedescendant="activeSuggestion ? `search-suggestion-${activeSuggestion.id}` : undefined"
-              @focus="handleSearchFocus"
-              @keydown="handleSuggestionKeydown"
-              class="w-full bg-zinc-50 hover:bg-white focus:bg-white border border-zinc-200 hover:border-zinc-300 focus:border-zinc-900 focus:ring-2 focus:ring-zinc-900/5 rounded-xl py-2 pl-9 pr-20 text-xs text-zinc-900 placeholder:text-zinc-400 transition-all outline-none shadow-2xs"
-            />
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-zinc-400">
-              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-            </div>
-            <button 
-              type="submit"
-              class="absolute inset-y-1 right-1 px-3 bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg text-[11px] font-medium transition cursor-pointer"
-            >
-              Tìm
-            </button>
-
-            <div
-              v-if="isSuggestionOpen && searchKeyword.trim().length >= 2"
-              id="product-search-suggestions"
-              class="absolute left-0 right-0 top-full z-[60] mt-2 overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-xl"
-            >
-              <div v-if="isLoadingSuggestions" role="status" class="px-4 py-5 text-center text-xs text-zinc-500">
-                Đang tìm sản phẩm...
-              </div>
-
-              <div v-else-if="suggestionError" role="status" class="px-4 py-5 text-center text-xs text-zinc-500">
-                Gợi ý tạm thời không khả dụng. Nhấn Enter để tìm kiếm.
-              </div>
-
-              <div v-else-if="suggestions.length" role="listbox" class="max-h-[min(60vh,24rem)] overflow-y-auto p-1.5">
-                <button
-                  v-for="(product, index) in suggestions"
-                  :id="`search-suggestion-${product.id}`"
-                  :key="product.id"
-                  type="button"
-                  role="option"
-                  :aria-selected="activeSuggestionIndex === index"
-                  @mouseenter="activeSuggestionIndex = index"
-                  @mousedown.prevent
-                  @click="selectSuggestion(product)"
-                  class="flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left transition"
-                  :class="activeSuggestionIndex === index ? 'bg-zinc-100' : 'hover:bg-zinc-50'"
-                >
-                  <img
-                    v-if="product.thumbnailUrl"
-                    :src="product.thumbnailUrl"
-                    :alt="''"
-                    class="h-11 w-11 shrink-0 rounded-lg border border-zinc-100 bg-white object-contain p-1"
-                    loading="lazy"
-                  />
-                  <div v-else class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-zinc-100 bg-zinc-50 text-lg" aria-hidden="true">
-                    📦
-                  </div>
-                  <span class="min-w-0 flex-1">
-                    <span class="block truncate text-xs font-semibold text-zinc-900">{{ product.name }}</span>
-                    <span class="mt-1 block truncate text-[11px] text-zinc-500">
-                      {{ [product.brandName, product.categoryName].filter(Boolean).join(' · ') }}
-                    </span>
-                  </span>
-                  <span class="shrink-0 text-right text-xs font-semibold text-zinc-800">
-                    {{ formatSuggestionPrice(product.minPrice) }}
-                  </span>
-                </button>
-              </div>
-
-              <div v-else role="status" class="px-4 py-5 text-center text-xs text-zinc-500">
-                Không tìm thấy sản phẩm phù hợp.
-              </div>
-
-              <button
-                type="button"
-                @mousedown.prevent
-                @click="handleSearch"
-                class="w-full border-t border-zinc-100 px-4 py-2.5 text-left text-xs font-medium text-zinc-600 transition hover:bg-zinc-50 hover:text-zinc-900"
-              >
-                Xem tất cả kết quả cho “{{ searchKeyword.trim() }}”
-              </button>
-            </div>
-          </form>
+        <!-- Search Bar -->
+        <div class="flex-1 max-w-xl mx-2 hidden md:block">
+          <SearchBox />
         </div>
 
         <!-- Navigation Links & Actions -->
         <div class="flex items-center gap-1.5 sm:gap-3 shrink-0">
+          <!-- Mobile Search Trigger -->
+          <button 
+            type="button"
+            @click="mobileSearchOpen = true"
+            class="p-2 text-zinc-600 hover:text-zinc-900 rounded-lg hover:bg-zinc-100 transition md:hidden cursor-pointer" 
+            title="Tìm kiếm"
+          >
+            <Search class="w-4 h-4" />
+          </button>
+
           <router-link to="/products" class="text-xs font-medium text-zinc-600 hover:text-zinc-900 px-3 py-2 rounded-lg hover:bg-zinc-100 transition hidden sm:inline-block">
             Sản phẩm
           </router-link>
@@ -173,19 +97,44 @@
         </div>
       </div>
     </div>
+
+    <!-- Mobile Search Modal Drawer -->
+    <Teleport to="body">
+      <Transition name="fade">
+        <div 
+          v-if="mobileSearchOpen" 
+          class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] md:hidden flex flex-col"
+        >
+          <div class="bg-white p-4 shadow-xl border-b border-zinc-200">
+            <div class="flex items-center gap-3">
+              <div class="flex-1">
+                <SearchBox />
+              </div>
+              <button 
+                type="button"
+                @click="mobileSearchOpen = false"
+                class="px-3 py-2 rounded-xl text-xs font-semibold text-zinc-600 hover:bg-zinc-100 transition cursor-pointer shrink-0"
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
+          <div class="flex-1" @click="mobileSearchOpen = false"></div>
+        </div>
+      </Transition>
+    </Teleport>
   </nav>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { Search } from 'lucide-vue-next'
 import CategoryMegaMenu from '@/components/CategoryMegaMenu.vue'
+import SearchBox from '@/components/SearchBox.vue'
 import { useAuthStore } from '@/stores/auth'
 import { useCartStore } from '@/stores/cart'
 import { useWishlistStore } from '@/stores/wishlist'
-import { behaviorApi } from '@/api/behaviorApi'
-import { catalogApi } from '@/api/catalogApi'
-import type { ProductSuggestion } from '@/types'
 import { toast } from 'vue-sonner'
 
 const router = useRouter()
@@ -193,120 +142,8 @@ const authStore = useAuthStore()
 const cartStore = useCartStore()
 const wishlistStore = useWishlistStore()
 
-const searchKeyword = ref<string>('')
-const searchContainer = ref<HTMLElement | null>(null)
-const suggestions = ref<ProductSuggestion[]>([])
-const isSearchFocused = ref(false)
-const isSuggestionOpen = ref(false)
-const isLoadingSuggestions = ref(false)
-const suggestionError = ref(false)
-const activeSuggestionIndex = ref(-1)
-const activeSuggestion = computed(() => suggestions.value[activeSuggestionIndex.value] ?? null)
 const userMenuOpen = ref<boolean>(false)
-let suggestionTimer: ReturnType<typeof setTimeout> | undefined
-let latestSuggestionRequest = 0
-let suggestionsForQuery = ''
-
-const requestSuggestions = (query: string) => {
-  if (suggestionTimer) clearTimeout(suggestionTimer)
-
-  const requestId = ++latestSuggestionRequest
-  suggestionsForQuery = query
-  suggestions.value = []
-  activeSuggestionIndex.value = -1
-  suggestionError.value = false
-  isSuggestionOpen.value = true
-  isLoadingSuggestions.value = true
-
-  suggestionTimer = setTimeout(async () => {
-    try {
-      const response = await catalogApi.getSearchSuggestions(query)
-      if (requestId !== latestSuggestionRequest) return
-      suggestions.value = response.data ?? []
-    } catch {
-      if (requestId !== latestSuggestionRequest) return
-      suggestionError.value = true
-    } finally {
-      if (requestId === latestSuggestionRequest) isLoadingSuggestions.value = false
-    }
-  }, 250)
-}
-
-watch(searchKeyword, (value) => {
-  const query = value.trim()
-  if (query.length < 2) {
-    if (suggestionTimer) clearTimeout(suggestionTimer)
-    latestSuggestionRequest++
-    suggestionsForQuery = ''
-    suggestions.value = []
-    isLoadingSuggestions.value = false
-    suggestionError.value = false
-    isSuggestionOpen.value = false
-    activeSuggestionIndex.value = -1
-    return
-  }
-
-  if (isSearchFocused.value) requestSuggestions(query)
-})
-
-const handleSearchFocus = () => {
-  isSearchFocused.value = true
-  const query = searchKeyword.value.trim()
-  if (query.length < 2) return
-
-  isSuggestionOpen.value = true
-  if (suggestionsForQuery !== query && !isLoadingSuggestions.value) requestSuggestions(query)
-}
-
-const closeSuggestions = () => {
-  isSearchFocused.value = false
-  isSuggestionOpen.value = false
-  activeSuggestionIndex.value = -1
-}
-
-const handleDocumentPointerDown = (event: PointerEvent) => {
-  if (event.target instanceof Node && !searchContainer.value?.contains(event.target)) closeSuggestions()
-}
-
-const handleSuggestionKeydown = (event: KeyboardEvent) => {
-  if (event.key === 'ArrowDown' && suggestions.value.length > 0) {
-    event.preventDefault()
-    isSuggestionOpen.value = true
-    activeSuggestionIndex.value = (activeSuggestionIndex.value + 1) % suggestions.value.length
-  } else if (event.key === 'ArrowUp' && suggestions.value.length > 0) {
-    event.preventDefault()
-    isSuggestionOpen.value = true
-    activeSuggestionIndex.value = activeSuggestionIndex.value <= 0
-      ? suggestions.value.length - 1
-      : activeSuggestionIndex.value - 1
-  } else if (event.key === 'Enter' && isSuggestionOpen.value && activeSuggestion.value) {
-    event.preventDefault()
-    selectSuggestion(activeSuggestion.value)
-  } else if (event.key === 'Escape' && isSuggestionOpen.value) {
-    event.preventDefault()
-    closeSuggestions()
-  }
-}
-
-const selectSuggestion = (product: ProductSuggestion) => {
-  const keyword = searchKeyword.value.trim()
-  if (keyword) behaviorApi.track('SEARCH', null, keyword)
-  closeSuggestions()
-  router.push(`/products/${product.id}`)
-}
-
-const formatSuggestionPrice = (value?: number) => {
-  if (value == null) return 'Xem giá'
-  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value)
-}
-
-const handleSearch = () => {
-  if (searchKeyword.value.trim()) {
-    behaviorApi.track('SEARCH', null, searchKeyword.value.trim())
-    closeSuggestions()
-    router.push({ path: '/products', query: { keyword: searchKeyword.value.trim() } })
-  }
-}
+const mobileSearchOpen = ref<boolean>(false)
 
 const handleLogout = () => {
   userMenuOpen.value = false
@@ -319,12 +156,4 @@ const handleLogout = () => {
     router.push('/')
   }
 }
-
-onMounted(() => document.addEventListener('pointerdown', handleDocumentPointerDown))
-
-onUnmounted(() => {
-  document.removeEventListener('pointerdown', handleDocumentPointerDown)
-  if (suggestionTimer) clearTimeout(suggestionTimer)
-  latestSuggestionRequest++
-})
 </script>
