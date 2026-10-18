@@ -127,7 +127,7 @@
                       Trả góp 0%
                     </span>
                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-white/10 text-amber-300">
-                      <svg class="w-3 h-3 fill-amber-400 text-amber-400" viewBox="0 0 24 24"><path d="M12 2c-.5 3-3 4-3 7a5 5 0 0 0 10 0c0-3-2.5-4-3-7-1 2-2 3-4 0Z"/></svg>
+                      <svg class="w-3.5 h-3.5 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
                       <span>Giảm sốc</span>
                     </span>
                   </div>
@@ -470,7 +470,7 @@ const sidebarCategories = [
   {
     name: 'Apple Authorised',
     link: '/products?brandId=1',
-    iconSvg: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z"/><path d="M10 2c1 .5 2 2 2 5"/></svg>'
+    iconSvg: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.37c.61-.75 1.04-1.8 1.01-2.87-.92.04-2.02.62-2.67 1.37-.58.65-1.09 1.71-1.03 2.74 1.03.08 2.07-.5 2.69-1.24z"/></svg>'
   },
   {
     name: 'PC & Máy tính bàn',
@@ -541,7 +541,7 @@ const sidePromoBanners = [
     subtitleClass: 'text-red-600',
     ctaText: 'Săn deal ngay',
     ctaClass: 'text-red-700',
-    iconSvg: '<svg class="w-5 h-5 text-red-600 fill-red-500" viewBox="0 0 24 24"><path d="M12 2c-.5 3-3 4-3 7a5 5 0 0 0 10 0c0-3-2.5-4-3-7-1 2-2 3-4 0Z"/></svg>',
+    iconSvg: '<svg class="w-5 h-5 text-red-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>',
     bgClass: 'bg-gradient-to-br from-red-50/90 via-rose-50/60 to-white',
     image: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=500&auto=format&fit=crop&q=80',
     link: '/products?keyword=Khuyen+mai'

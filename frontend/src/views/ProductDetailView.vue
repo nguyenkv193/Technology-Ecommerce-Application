@@ -136,7 +136,7 @@
               <span>Trả góp</span>
             </span>
             <span v-if="primaryPromotion" class="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-md bg-amber-500 text-white shadow-xs">
-              <svg class="w-3 h-3 fill-current shrink-0" viewBox="0 0 24 24"><path d="M12 2c-.5 3-3 4-3 7a5 5 0 0 0 10 0c0-3-2.5-4-3-7-1 2-2 3-4 0Z"/></svg>
+              <svg class="w-3 h-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
               <span>{{ primaryPromotion.title }}</span>
             </span>
           </div>
@@ -363,7 +363,7 @@
           <div class="flex items-center justify-between pb-3 border-b border-red-100">
             <div class="flex items-center gap-2">
               <span class="flex h-6 px-2.5 rounded-lg text-white font-extrabold text-[11px] uppercase items-center gap-1 shadow-xs" :class="primaryPromotion ? 'bg-red-600 animate-pulse' : 'bg-zinc-700'">
-                <svg v-if="primaryPromotion" class="w-3.5 h-3.5 fill-current shrink-0" viewBox="0 0 24 24"><path d="M12 2c-.5 3-3 4-3 7a5 5 0 0 0 10 0c0-3-2.5-4-3-7-1 2-2 3-4 0Z"/></svg>
+                <svg v-if="primaryPromotion" class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
                 <span>{{ primaryPromotion?.title || 'Giá bán' }}</span>
               </span>
             </div>
@@ -568,7 +568,7 @@
         <div v-if="activeBundleOffers.length" class="rounded-3xl border border-zinc-200/90 bg-white p-4 sm:p-5 space-y-3 shadow-xs">
           <div class="flex items-center justify-between">
             <h4 class="text-xs font-bold text-zinc-900 flex items-center gap-1.5">
-              <svg class="w-3.5 h-3.5 text-red-600 fill-current shrink-0" viewBox="0 0 24 24"><path d="M12 2c-.5 3-3 4-3 7a5 5 0 0 0 10 0c0-3-2.5-4-3-7-1 2-2 3-4 0Z"/></svg>
+              <svg class="w-3.5 h-3.5 text-red-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
               <span>Mua kèm với giá ưu đãi</span>
             </h4>
             <span class="text-[11px] text-zinc-400">Ưu đãi đang áp dụng</span>
