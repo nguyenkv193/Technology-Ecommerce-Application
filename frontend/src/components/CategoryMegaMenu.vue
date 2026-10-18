@@ -134,7 +134,7 @@
               <div>
                 <div class="flex items-center justify-between mb-3">
                   <div class="flex items-center gap-1.5 text-xs font-bold text-zinc-900">
-                    <span class="text-amber-500">🔥</span>
+                    <svg class="w-3.5 h-3.5 text-red-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
                     <span>Gợi ý cho bạn</span>
                   </div>
                   <router-link 
@@ -180,7 +180,7 @@
                     class="flex flex-col items-center text-center p-2 rounded-xl bg-zinc-50/80 hover:bg-zinc-100/90 border border-zinc-200/60 hover:border-zinc-300 transition-all group cursor-pointer"
                   >
                     <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center mb-1.5 shadow-2xs border border-zinc-100 group-hover:scale-105 transition-transform">
-                      <span class="text-lg">{{ hl.icon }}</span>
+                      <span class="w-5 h-5 flex items-center justify-center text-zinc-700" v-html="hl.icon"></span>
                     </div>
                     <span class="text-[11px] font-semibold text-zinc-700 group-hover:text-zinc-950 leading-tight">
                       {{ hl.label }}
@@ -234,7 +234,7 @@
                   :key="sIdx"
                   class="flex items-start gap-2.5 p-2 rounded-xl hover:bg-white transition border border-transparent hover:border-zinc-200/60 shadow-2xs"
                 >
-                  <span class="text-base shrink-0">{{ service.icon }}</span>
+                  <span class="w-7 h-7 rounded-lg bg-white border border-zinc-200/80 shadow-2xs flex items-center justify-center shrink-0" v-html="service.icon"></span>
                   <div class="min-w-0">
                     <div class="text-xs font-semibold text-zinc-900 leading-snug">{{ service.title }}</div>
                     <div class="text-[10px] text-zinc-500 leading-tight mt-0.5">{{ service.desc }}</div>
@@ -340,22 +340,22 @@ const featuredBrandPortals = [
 // Dịch vụ & Tiện ích TechStore
 const services = [
   {
-    icon: '🔄',
+    icon: '<svg class="w-4 h-4 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>',
     title: 'Thu cũ đổi mới',
     desc: 'Trợ giá lên tới 3.000.000đ'
   },
   {
-    icon: '⚡',
+    icon: '<svg class="w-4 h-4 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
     title: 'Giao hỏa tốc 2H',
     desc: 'Miễn phí nội thành siêu tốc'
   },
   {
-    icon: '🛡️',
+    icon: '<svg class="w-4 h-4 text-violet-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
     title: 'Bảo hành 12 tháng',
     desc: '100% Chính hãng Apple, Samsung'
   },
   {
-    icon: '🏢',
+    icon: '<svg class="w-4 h-4 text-zinc-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></svg>',
     title: 'Khách hàng Doanh nghiệp',
     desc: 'Chiết khấu dự án & hợp đồng'
   }
@@ -377,11 +377,11 @@ const categoryData = [
       { id: 4, name: 'ASUS ROG', logoUrl: '/brands/asus.svg' }
     ],
     highlights: [
-      { label: 'Điện thoại 5G', icon: '⚡', keyword: '5G' },
-      { label: 'Galaxy / Apple AI', icon: '🤖', keyword: 'AI' },
-      { label: 'Điện thoại gập', icon: '📱', keyword: 'Fold' },
-      { label: 'Gaming Phone', icon: '🎮', keyword: 'Gaming' },
-      { label: 'Titan Tự Nhiên', icon: '💎', keyword: 'Titan' }
+      { label: 'Điện thoại 5G', icon: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m2 2 20 20"/><path d="M8.5 16.5a5 5 0 0 1 7 0"/><path d="M2 8.82a15 15 0 0 1 20 0"/><line x1="12" y1="20" x2="12" y2="20"/></svg>', keyword: '5G' },
+      { label: 'Galaxy / Apple AI', icon: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 0 1 4 4v1a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2v1a4 4 0 0 1-4 4 4 4 0 0 1-4-4v-1a2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2V6a4 4 0 0 1 4-4z"/><circle cx="9" cy="9" r="1"/><circle cx="15" cy="9" r="1"/></svg>', keyword: 'AI' },
+      { label: 'Điện thoại gập', icon: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="12" y1="2" x2="12" y2="22"/></svg>', keyword: 'Fold' },
+      { label: 'Gaming Phone', icon: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="12" x2="10" y2="12"/><line x1="8" y1="10" x2="8" y2="14"/><line x1="15" y1="13" x2="15.01" y2="13"/><line x1="18" y1="11" x2="18.01" y2="11"/><rect x="2" y="6" width="20" height="12" rx="2"/></svg>', keyword: 'Gaming' },
+      { label: 'Titan Tự Nhiên', icon: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h12l4 6-10 12L2 9z"/></svg>', keyword: 'Titan' }
     ],
     groups: [
       {
@@ -434,11 +434,11 @@ const categoryData = [
       { id: 6, name: 'NVIDIA', logoUrl: '/brands/nvidia.svg' }
     ],
     highlights: [
-      { label: 'Apple Silicon M3', icon: '🍏', keyword: 'M3' },
-      { label: 'Intel Core Ultra AI', icon: '⚡', keyword: 'Ultra' },
-      { label: 'Gaming RTX 4070', icon: '🎮', keyword: 'RTX' },
-      { label: 'OLED 240Hz', icon: '🖥️', keyword: 'OLED' },
-      { label: 'Ultrabook nhẹ', icon: '🪶', keyword: 'Ultrabook' }
+      { label: 'Apple Silicon M3', icon: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3"/></svg>', keyword: 'M3' },
+      { label: 'Intel Core Ultra AI', icon: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>', keyword: 'Ultra' },
+      { label: 'Gaming RTX 4070', icon: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="7" cy="12" r="3"/><circle cx="17" cy="12" r="3"/></svg>', keyword: 'RTX' },
+      { label: 'OLED 240Hz', icon: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="12" y1="17" x2="12" y2="21"/></svg>', keyword: 'OLED' },
+      { label: 'Ultrabook nhẹ', icon: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 18h20"/><path d="M4 14l3-8h10l3 8z"/></svg>', keyword: 'Ultrabook' }
     ],
     groups: [
       {
@@ -488,11 +488,11 @@ const categoryData = [
       { id: 2, name: 'Xiaomi Pad', logoUrl: '/brands/xiaomi.svg' }
     ],
     highlights: [
-      { label: 'Chip Apple M4', icon: '🚀', keyword: 'M4' },
-      { label: 'Tandem OLED kép', icon: '🎨', keyword: 'OLED' },
-      { label: 'Apple Pencil Pro', icon: '🖊️', keyword: 'Pencil' },
-      { label: 'Bút S-Pen kèm máy', icon: '✍️', keyword: 'SPen' },
-      { label: 'Kết nối 5G', icon: '📶', keyword: 'Cellular' }
+      { label: 'Chip Apple M4', icon: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>', keyword: 'M4' },
+      { label: 'Tandem OLED kép', icon: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="12" y1="17" x2="12" y2="21"/></svg>', keyword: 'OLED' },
+      { label: 'Apple Pencil Pro', icon: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>', keyword: 'Pencil' },
+      { label: 'Bút S-Pen kèm máy', icon: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="2" x2="22" y2="6"/><path d="m7.5 20.5 9-9L13 8l-9 9v3.5h3.5z"/></svg>', keyword: 'SPen' },
+      { label: 'Kết nối 5G', icon: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m2 2 20 20"/><path d="M8.5 16.5a5 5 0 0 1 7 0"/><path d="M2 8.82a15 15 0 0 1 20 0"/><line x1="12" y1="20" x2="12" y2="20"/></svg>', keyword: 'Cellular' }
     ],
     groups: [
       {
@@ -540,11 +540,11 @@ const categoryData = [
       { id: 2, name: 'Samsung Galaxy Buds', logoUrl: '/brands/samsung.svg' }
     ],
     highlights: [
-      { label: 'Chống ồn ANC', icon: '🎧', keyword: 'Chống ồn' },
-      { label: 'Hi-Res LDAC', icon: '🎼', keyword: 'Hi-Res' },
-      { label: 'Pin 30 giờ', icon: '🔋', keyword: 'Pin' },
-      { label: 'Đàm thoại AI', icon: '🎙️', keyword: 'Mic' },
-      { label: 'Studio Monitor', icon: '🔊', keyword: 'Studio' }
+      { label: 'Chống ồn ANC', icon: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>', keyword: 'Chống ồn' },
+      { label: 'Hi-Res LDAC', icon: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>', keyword: 'Hi-Res' },
+      { label: 'Pin 30 giờ', icon: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="16" height="10" rx="2"/><line x1="22" y1="11" x2="22" y2="13"/></svg>', keyword: 'Pin' },
+      { label: 'Đàm thoại AI', icon: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>', keyword: 'Mic' },
+      { label: 'Studio Monitor', icon: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>', keyword: 'Studio' }
     ],
     groups: [
       {
@@ -592,11 +592,11 @@ const categoryData = [
       { id: 1, name: 'Apple', logoUrl: '/brands/apple.svg' }
     ],
     highlights: [
-      { label: 'RTX 4090 OC', icon: '🎮', keyword: 'RTX 4090' },
-      { label: 'MX Master 3S', icon: '🖱️', keyword: 'MX Master' },
-      { label: 'Phím cơ Quiet', icon: '⌨️', keyword: 'Mechanical' },
-      { label: 'Apple Watch', icon: '⌚', keyword: 'Watch' },
-      { label: 'Sạc nhanh GaN', icon: '⚡', keyword: 'GaN' }
+      { label: 'RTX 4090 OC', icon: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="7" cy="12" r="3"/><circle cx="17" cy="12" r="3"/></svg>', keyword: 'RTX 4090' },
+      { label: 'MX Master 3S', icon: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="3" width="12" height="18" rx="6"/><line x1="12" y1="7" x2="12" y2="11"/></svg>', keyword: 'MX Master' },
+      { label: 'Phím cơ Quiet', icon: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="6" y1="8" x2="6" y2="8"/><line x1="10" y1="8" x2="10" y2="8"/><line x1="14" y1="8" x2="14" y2="8"/><line x1="18" y1="8" x2="18" y2="8"/></svg>', keyword: 'Mechanical' },
+      { label: 'Apple Watch', icon: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="4"/><polyline points="12 8 12 12 14 14"/><path d="M9 4V1h6v3M9 20v3h6v-3"/></svg>', keyword: 'Watch' },
+      { label: 'Sạc nhanh GaN', icon: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>', keyword: 'GaN' }
     ],
     groups: [
       {

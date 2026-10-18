@@ -147,16 +147,18 @@
             <button 
               type="button" 
               @click="fillDemo('ADMIN')"
-              class="flex-1 py-1 px-2 rounded-lg bg-white hover:bg-zinc-50 text-zinc-800 border border-zinc-200 text-[10px] font-medium transition shadow-2xs truncate cursor-pointer text-center"
+              class="flex-1 py-1 px-2 rounded-lg bg-white hover:bg-zinc-50 text-zinc-800 border border-zinc-200 text-[10px] font-medium transition shadow-2xs truncate cursor-pointer text-center flex items-center justify-center gap-1.5"
             >
-              👑 <span class="font-semibold">Admin</span>
+              <svg class="w-3.5 h-3.5 text-amber-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 6 6 1-4.5 4.5 1 6.5-5.5-3-5.5 3 1-6.5L3 9l6-1z"/></svg>
+              <span class="font-semibold">Admin</span>
             </button>
             <button 
               type="button" 
               @click="fillDemo('USER')"
-              class="flex-1 py-1 px-2 rounded-lg bg-white hover:bg-zinc-50 text-zinc-800 border border-zinc-200 text-[10px] font-medium transition shadow-2xs truncate cursor-pointer text-center"
+              class="flex-1 py-1 px-2 rounded-lg bg-white hover:bg-zinc-50 text-zinc-800 border border-zinc-200 text-[10px] font-medium transition shadow-2xs truncate cursor-pointer text-center flex items-center justify-center gap-1.5"
             >
-              👤 <span class="font-semibold">Khách</span>
+              <svg class="w-3.5 h-3.5 text-zinc-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <span class="font-semibold">Khách</span>
             </button>
           </div>
         </div>
