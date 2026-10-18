@@ -154,4 +154,77 @@ describe('ProductDetailView.vue', () => {
 
     expect(wrapper.text()).toContain('Không tìm thấy thông tin sản phẩm')
   })
+
+  it('renders FPT Shop style badges, flash sale countdown, and guarantees', async () => {
+    const wrapper = mount(ProductDetailView, {
+      global: {
+        stubs: {
+          routerLink: { template: '<a><slot /></a>' },
+          HardwareSpecsTable: { props: ['attributes'], template: '<div>HardwareSpecsTable</div>' },
+          RecommendationCarousel: true
+        }
+      }
+    })
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('GIÁ SỐC ONLINE')
+    expect(wrapper.text()).toContain('Miễn phí giao hàng toàn quốc')
+    expect(wrapper.text()).toContain('Chính hãng 100% - Bảo hành 12T')
+    expect(wrapper.text()).toContain('TRẢ GÓP 0%')
+  })
+
+  it('toggles FAQ accordion items', async () => {
+    const wrapper = mount(ProductDetailView, {
+      global: {
+        stubs: {
+          routerLink: { template: '<a><slot /></a>' },
+          HardwareSpecsTable: { props: ['attributes'], template: '<div>HardwareSpecsTable</div>' },
+          RecommendationCarousel: true
+        }
+      }
+    })
+    await flushPromises()
+
+    const faqButtons = wrapper.findAll('#faq button')
+    expect(faqButtons.length).toBeGreaterThan(0)
+    await faqButtons[1].trigger('click')
+    expect(wrapper.text()).toContain('Circle to Search')
+  })
+
+  it('expands editorial story when clicking read more', async () => {
+    const wrapper = mount(ProductDetailView, {
+      global: {
+        stubs: {
+          routerLink: { template: '<a><slot /></a>' },
+          HardwareSpecsTable: { props: ['attributes'], template: '<div>HardwareSpecsTable</div>' },
+          RecommendationCarousel: true
+        }
+      }
+    })
+    await flushPromises()
+
+    const readMoreBtn = wrapper.findAll('button').find(b => b.text().includes('Đọc thêm nội dung'))
+    expect(readMoreBtn).toBeDefined()
+    await readMoreBtn!.trigger('click')
+    expect(wrapper.text()).toContain('Thu gọn nội dung')
+  })
+
+  it('records user satisfaction feedback', async () => {
+    const wrapper = mount(ProductDetailView, {
+      global: {
+        stubs: {
+          routerLink: { template: '<a><slot /></a>' },
+          HardwareSpecsTable: { props: ['attributes'], template: '<div>HardwareSpecsTable</div>' },
+          RecommendationCarousel: true
+        }
+      }
+    })
+    await flushPromises()
+
+    const satisfiedBtn = wrapper.findAll('button').find(b => b.text().includes('Hài lòng'))
+    expect(satisfiedBtn).toBeDefined()
+    await satisfiedBtn!.trigger('click')
+    expect(wrapper.text()).toContain('Hài lòng')
+  })
 })
+

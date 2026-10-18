@@ -7,6 +7,7 @@ import com.project.techstore.product.entity.Product;
 import com.project.techstore.product.service.ProductService;
 import com.project.techstore.review.dto.CreateReviewRequest;
 import com.project.techstore.review.dto.ProductReviewSummaryResponse;
+import com.project.techstore.review.dto.RatingBreakdownItem;
 import com.project.techstore.review.dto.ReviewResponse;
 import com.project.techstore.review.entity.ProductReview;
 import com.project.techstore.review.repository.ProductReviewRepository;
@@ -23,6 +24,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Optional;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -79,11 +83,20 @@ public class ReviewService {
                 : 0.0;
 
         PageResponse<ReviewResponse> reviews = getProductReviews(productId, page, size);
+        Map<Integer, Long> countsByRating = new HashMap<>();
+        for (Object[] row : productReviewRepository.countRatingsByProductId(productId)) {
+            countsByRating.put(((Number) row[0]).intValue(), ((Number) row[1]).longValue());
+        }
+        var ratingBreakdown = new ArrayList<RatingBreakdownItem>();
+        for (int stars = 5; stars >= 1; stars--) {
+            ratingBreakdown.add(new RatingBreakdownItem(stars, countsByRating.getOrDefault(stars, 0L)));
+        }
 
         return ProductReviewSummaryResponse.builder()
                 .productId(productId)
                 .averageRating(roundedAvg)
                 .totalReviews(total)
+                .ratingBreakdown(ratingBreakdown)
                 .reviews(reviews)
                 .build();
     }

@@ -7,6 +7,9 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      spacing: {
+        '18': '4.5rem',
+      },
       colors: {
         brand: {
           50: '#eff6ff',

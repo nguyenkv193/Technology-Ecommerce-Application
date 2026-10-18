@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -22,6 +24,9 @@ public class ProductReviewSummaryResponse {
 
     @Schema(description = "Tổng số lượt đánh giá", example = "125")
     private Long totalReviews;
+
+    @Schema(description = "Số lượt đánh giá thực tế theo số sao")
+    private List<RatingBreakdownItem> ratingBreakdown;
 
     @Schema(description = "Danh sách đánh giá phân trang")
     private PageResponse<ReviewResponse> reviews;
