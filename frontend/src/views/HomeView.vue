@@ -4,8 +4,12 @@
     <section class="space-y-3.5">
       <!-- 1. Top Trending Keyword Tags Bar -->
       <div class="flex items-center gap-2 overflow-x-auto scrollbar-none py-1 px-1">
-        <span class="text-[11px] font-bold text-red-600 uppercase tracking-wider flex items-center gap-1 shrink-0">
-          <span class="animate-pulse">🔥</span> Xu hướng:
+        <span class="text-[11px] font-bold text-red-600 uppercase tracking-wider flex items-center gap-1.5 shrink-0">
+          <svg class="w-3.5 h-3.5 text-red-600 fill-red-500 animate-pulse" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.362 5.214A8.252 8.252 0 0 1 12 21 8.25 8.25 0 0 1 6.038 7.047 8.287 8.287 0 0 0 9 9.601a8.983 8.983 0 0 1 3.361-6.867 8.21 8.21 0 0 0 3 2.48Z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 18a3.75 3.75 0 0 0 .495-7.468 5.99 5.99 0 0 0-1.925 3.547 5.975 5.975 0 0 1-2.133-1.001A3.75 3.75 0 0 0 12 18Z" />
+          </svg>
+          <span>Xu hướng:</span>
         </span>
         <div class="flex items-center gap-1.5 flex-nowrap shrink-0">
           <router-link
@@ -69,7 +73,7 @@
               class="flex items-center justify-between text-xs font-bold text-red-600 hover:text-red-700 py-1.5 px-2 rounded-xl hover:bg-red-50/50 transition-colors"
             >
               <span class="flex items-center gap-1.5">
-                <span>⚡</span>
+                <svg class="w-3.5 h-3.5 text-red-600 fill-current" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
                 <span>Xem tất cả sản phẩm</span>
               </span>
               <span>→</span>
@@ -122,8 +126,9 @@
                     <span class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase bg-red-600 text-white shadow-2xs">
                       Trả góp 0%
                     </span>
-                    <span class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-white/10 text-amber-300">
-                      🔥 Giảm sốc
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-white/10 text-amber-300">
+                      <svg class="w-3 h-3 fill-amber-400 text-amber-400" viewBox="0 0 24 24"><path d="M12 2c-.5 3-3 4-3 7a5 5 0 0 0 10 0c0-3-2.5-4-3-7-1 2-2 3-4 0Z"/></svg>
+                      <span>Giảm sốc</span>
                     </span>
                   </div>
 
@@ -222,7 +227,7 @@
                 <span>{{ b.ctaText }}</span>
                 <span class="group-hover:translate-x-1 transition-transform">›</span>
               </span>
-              <span class="text-2xl drop-shadow-sm">{{ b.iconEmoji }}</span>
+              <div class="w-9 h-9 rounded-xl bg-white/90 shadow-2xs border border-zinc-200/80 flex items-center justify-center shrink-0" v-html="b.iconSvg"></div>
             </div>
           </router-link>
         </div>
@@ -257,7 +262,9 @@
       <!-- 4. Trust Badges Row (Enterprise Brand Guarantees) -->
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 rounded-2xl bg-white border border-zinc-200/80 text-xs shadow-2xs">
         <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold shrink-0">✓</div>
+          <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+          </div>
           <div>
             <div class="font-bold text-zinc-900">100% Chính hãng</div>
             <div class="text-[10px] text-zinc-500">Bảo đảm nguồn gốc</div>
@@ -265,7 +272,9 @@
         </div>
 
         <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold shrink-0">⚡</div>
+          <div class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
           <div>
             <div class="font-bold text-zinc-900">Giao hỏa tốc 2H</div>
             <div class="text-[10px] text-zinc-500">Nội thành miễn phí</div>
@@ -273,7 +282,9 @@
         </div>
 
         <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center font-bold shrink-0">🛡️</div>
+          <div class="w-8 h-8 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center shrink-0">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
           <div>
             <div class="font-bold text-zinc-900">Bảo hành 12 tháng</div>
             <div class="text-[10px] text-zinc-500">Toàn diện chính hãng</div>
@@ -281,7 +292,9 @@
         </div>
 
         <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold shrink-0">🔄</div>
+          <div class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          </div>
           <div>
             <div class="font-bold text-zinc-900">Đổi mới 30 ngày</div>
             <div class="text-[10px] text-zinc-500">Lỗi 1-đổi-1 an tâm</div>
@@ -513,7 +526,7 @@ const sidePromoBanners = [
     subtitleClass: 'text-blue-600',
     ctaText: 'Đăng ký ngay',
     ctaClass: 'text-blue-700',
-    iconEmoji: '🎓',
+    iconSvg: '<svg class="w-5 h-5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>',
     bgClass: 'bg-gradient-to-br from-blue-50/90 via-indigo-50/60 to-white',
     image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=500&auto=format&fit=crop&q=80',
     link: '/products?keyword=Hoc+sinh+sinh+vien'
@@ -528,7 +541,7 @@ const sidePromoBanners = [
     subtitleClass: 'text-red-600',
     ctaText: 'Săn deal ngay',
     ctaClass: 'text-red-700',
-    iconEmoji: '🔥',
+    iconSvg: '<svg class="w-5 h-5 text-red-600 fill-red-500" viewBox="0 0 24 24"><path d="M12 2c-.5 3-3 4-3 7a5 5 0 0 0 10 0c0-3-2.5-4-3-7-1 2-2 3-4 0Z"/></svg>',
     bgClass: 'bg-gradient-to-br from-red-50/90 via-rose-50/60 to-white',
     image: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=500&auto=format&fit=crop&q=80',
     link: '/products?keyword=Khuyen+mai'

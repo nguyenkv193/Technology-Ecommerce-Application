@@ -259,8 +259,8 @@
                 class="h-11 w-11 shrink-0 rounded-lg border border-zinc-100 bg-white object-contain p-1"
                 loading="lazy"
               />
-              <div v-else class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-zinc-100 bg-zinc-50 text-base">
-                📦
+              <div v-else class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-zinc-100 bg-zinc-50 text-zinc-400">
+                <Package class="w-5 h-5" />
               </div>
               <div class="min-w-0 flex-1">
                 <div class="truncate text-xs font-semibold text-zinc-900 group-hover:text-[#d70018]">
@@ -312,8 +312,8 @@
             <!-- Header -->
             <div class="flex items-center justify-between border-b border-zinc-100 pb-3">
               <div class="flex items-center gap-2.5">
-                <div class="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 flex items-center justify-center text-lg">
-                  🪙
+                <div class="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 flex items-center justify-center">
+                  <Coins class="w-5 h-5" />
                 </div>
                 <div>
                   <h3 class="text-sm font-bold text-zinc-900">Tích Điểm Đổi Ưu Đãi</h3>
@@ -332,7 +332,9 @@
             <!-- Perks -->
             <div class="space-y-3">
               <div class="flex items-start gap-3 p-3 rounded-xl bg-zinc-50 border border-zinc-100">
-                <span class="text-base mt-0.5">💰</span>
+                <div class="w-6 h-6 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center shrink-0 mt-0.5">
+                  <Coins class="w-3.5 h-3.5" />
+                </div>
                 <div>
                   <div class="text-xs font-bold text-zinc-900">Tích lũy 1% - 3% mỗi đơn hàng</div>
                   <div class="text-[11px] text-zinc-500 mt-0.5">Mỗi 1.000đ tích lũy = 1 điểm thưởng TechPoints dùng khi mua thiết bị tiếp theo.</div>
@@ -340,7 +342,9 @@
               </div>
 
               <div class="flex items-start gap-3 p-3 rounded-xl bg-zinc-50 border border-zinc-100">
-                <span class="text-base mt-0.5">🎁</span>
+                <div class="w-6 h-6 rounded-lg bg-red-100 text-red-700 flex items-center justify-center shrink-0 mt-0.5">
+                  <Gift class="w-3.5 h-3.5" />
+                </div>
                 <div>
                   <div class="text-xs font-bold text-zinc-900">Đổi Voucher giảm giá lên đến 500.000đ</div>
                   <div class="text-[11px] text-zinc-500 mt-0.5">Dễ dàng đổi voucher mua phụ kiện, điện thoại, laptop ngay tại trang thanh toán.</div>
@@ -348,7 +352,9 @@
               </div>
 
               <div class="flex items-start gap-3 p-3 rounded-xl bg-zinc-50 border border-zinc-100">
-                <span class="text-base mt-0.5">⭐</span>
+                <div class="w-6 h-6 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center shrink-0 mt-0.5">
+                  <Crown class="w-3.5 h-3.5" />
+                </div>
                 <div>
                   <div class="text-xs font-bold text-zinc-900">Đặc quyền Hội Viên VIP</div>
                   <div class="text-[11px] text-zinc-500 mt-0.5">Miễn phí giao hàng hỏa tốc, quà sinh nhật đặc biệt và ưu tiên bảo hành chính hãng.</div>
@@ -383,7 +389,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { Search, History, X, RotateCw } from 'lucide-vue-next'
+import { Search, History, X, RotateCw, Package, Coins, Gift, Crown } from 'lucide-vue-next'
 import { catalogApi } from '@/api/catalogApi'
 import { behaviorApi } from '@/api/behaviorApi'
 import type { ProductSuggestion } from '@/types'

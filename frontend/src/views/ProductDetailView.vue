@@ -81,7 +81,8 @@
             <span>{{ storefront.storePolicy.officialProductText }}</span>
           </div>
           <div v-if="selectedCityAvailability?.deliveryEstimate" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 text-amber-700 text-xs font-semibold border border-amber-200">
-            <span>⚡ {{ selectedCityAvailability.deliveryEstimate }}</span>
+            <svg class="w-3.5 h-3.5 text-amber-600 fill-current shrink-0" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            <span>{{ selectedCityAvailability.deliveryEstimate }}</span>
           </div>
         </div>
       </div>
@@ -103,7 +104,7 @@
                 class="px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition cursor-pointer"
                 :class="activeSection === nav.id ? 'bg-red-600 text-white font-semibold shadow-xs' : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100'"
               >
-                <span class="mr-1">{{ nav.icon }}</span>
+                <span class="mr-1.5 inline-flex items-center" v-html="nav.iconSvg"></span>
                 <span>{{ nav.label }}</span>
               </button>
             </div>
@@ -135,7 +136,8 @@
               <span>Trả góp</span>
             </span>
             <span v-if="primaryPromotion" class="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-md bg-amber-500 text-white shadow-xs">
-              🔥 {{ primaryPromotion.title }}
+              <svg class="w-3 h-3 fill-current shrink-0" viewBox="0 0 24 24"><path d="M12 2c-.5 3-3 4-3 7a5 5 0 0 0 10 0c0-3-2.5-4-3-7-1 2-2 3-4 0Z"/></svg>
+              <span>{{ primaryPromotion.title }}</span>
             </span>
           </div>
 
@@ -361,7 +363,7 @@
           <div class="flex items-center justify-between pb-3 border-b border-red-100">
             <div class="flex items-center gap-2">
               <span class="flex h-6 px-2.5 rounded-lg text-white font-extrabold text-[11px] uppercase items-center gap-1 shadow-xs" :class="primaryPromotion ? 'bg-red-600 animate-pulse' : 'bg-zinc-700'">
-                <span v-if="primaryPromotion">🔥</span>
+                <svg v-if="primaryPromotion" class="w-3.5 h-3.5 fill-current shrink-0" viewBox="0 0 24 24"><path d="M12 2c-.5 3-3 4-3 7a5 5 0 0 0 10 0c0-3-2.5-4-3-7-1 2-2 3-4 0Z"/></svg>
                 <span>{{ primaryPromotion?.title || 'Giá bán' }}</span>
               </span>
             </div>
@@ -396,7 +398,7 @@
             <!-- Loyalty F-Points Earn Badge -->
             <div v-if="loyaltyPoints != null" class="pt-1 flex items-center gap-2 text-xs">
               <div class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 text-[11px] font-semibold">
-                <span>🪙</span>
+                <svg class="w-3.5 h-3.5 text-amber-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M14.8 9A2 2 0 0 0 13 8h-2a2 2 0 0 0 0 4h2a2 2 0 0 1 0 4h-2a2 2 0 0 1-1.8-1"/><path d="M12 6v2m0 8v2"/></svg>
                 <span>Tích lũy +{{ loyaltyPoints.toLocaleString('vi-VN') }} điểm thưởng TechStore</span>
               </div>
             </div>
@@ -566,7 +568,7 @@
         <div v-if="activeBundleOffers.length" class="rounded-3xl border border-zinc-200/90 bg-white p-4 sm:p-5 space-y-3 shadow-xs">
           <div class="flex items-center justify-between">
             <h4 class="text-xs font-bold text-zinc-900 flex items-center gap-1.5">
-              <span>🔥</span>
+              <svg class="w-3.5 h-3.5 text-red-600 fill-current shrink-0" viewBox="0 0 24 24"><path d="M12 2c-.5 3-3 4-3 7a5 5 0 0 0 10 0c0-3-2.5-4-3-7-1 2-2 3-4 0Z"/></svg>
               <span>Mua kèm với giá ưu đãi</span>
             </h4>
             <span class="text-[11px] text-zinc-400">Ưu đãi đang áp dụng</span>
@@ -879,17 +881,19 @@
       <div class="flex items-center gap-2 shrink-0">
         <button 
           @click="handleFeedback(true)"
-          class="px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer"
+          class="px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5"
           :class="feedbackState === 'yes' ? 'bg-red-600 text-white' : 'bg-white border border-zinc-300 text-zinc-800 hover:bg-zinc-50'"
         >
-          👍 Hài lòng
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+          <span>Hài lòng</span>
         </button>
         <button 
           @click="handleFeedback(false)"
-          class="px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer"
+          class="px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5"
           :class="feedbackState === 'no' ? 'bg-zinc-800 text-white' : 'bg-white border border-zinc-300 text-zinc-800 hover:bg-zinc-50'"
         >
-          👎 Chưa hài lòng
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"/></svg>
+          <span>Chưa hài lòng</span>
         </button>
       </div>
     </div>
@@ -1209,12 +1213,36 @@ const startCountdown = (endsAt?: string) => {
 
 // Sub Nav Tabs
 const navTabs = [
-  { id: 'overview', label: 'Thông tin sản phẩm', icon: '⭐' },
-  { id: 'description', label: 'Mô tả chi tiết', icon: '📝' },
-  { id: 'specs', label: 'Thông số kỹ thuật', icon: '⚙️' },
-  { id: 'reviews', label: 'Đánh giá & Bình luận', icon: '💬' },
-  { id: 'similar', label: 'Có thể bạn quan tâm', icon: '❤️' },
-  { id: 'faq', label: 'Câu hỏi thường gặp', icon: '❓' }
+  { 
+    id: 'overview', 
+    label: 'Thông tin sản phẩm', 
+    iconSvg: '<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>' 
+  },
+  { 
+    id: 'description', 
+    label: 'Mô tả chi tiết', 
+    iconSvg: '<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>' 
+  },
+  { 
+    id: 'specs', 
+    label: 'Thông số kỹ thuật', 
+    iconSvg: '<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3"/></svg>' 
+  },
+  { 
+    id: 'reviews', 
+    label: 'Đánh giá & Bình luận', 
+    iconSvg: '<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>' 
+  },
+  { 
+    id: 'similar', 
+    label: 'Có thể bạn quan tâm', 
+    iconSvg: '<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>' 
+  },
+  { 
+    id: 'faq', 
+    label: 'Câu hỏi thường gặp', 
+    iconSvg: '<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>' 
+  }
 ]
 
 // Similar Products
