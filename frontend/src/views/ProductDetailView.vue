@@ -27,10 +27,10 @@
           <span>Trang chủ</span>
         </router-link>
         <span class="text-zinc-300">/</span>
-        <router-link to="/products" class="hover:text-red-600 transition">
-          {{ product.category?.name || 'Điện thoại' }}
+        <router-link v-if="product.category?.name || product.categoryName" to="/products" class="hover:text-red-600 transition">
+          {{ product.category?.name || product.categoryName }}
         </router-link>
-        <span class="text-zinc-300">/</span>
+        <span v-if="product.category?.name || product.categoryName" class="text-zinc-300">/</span>
         <span v-if="product.brand?.name" class="hover:text-red-600 cursor-pointer transition">
           {{ product.brand.name }}
         </span >
@@ -46,15 +46,15 @@
 
           <div class="flex items-center flex-wrap gap-x-4 gap-y-2 mt-2 text-xs text-zinc-500">
             <span class="font-mono text-zinc-600 font-medium bg-zinc-100 px-2 py-0.5 rounded-md border border-zinc-200">
-              Mã SP: No.00{{ product.id }}
+              Mã SP: {{ product.id }}
             </span>
 
             <a href="#reviews" class="flex items-center gap-1 hover:text-red-600 transition">
               <span class="flex text-amber-400">
-                <svg v-for="s in 5" :key="s" class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                <svg v-for="s in 5" :key="s" class="w-3.5 h-3.5 fill-current" :class="hasReviews && s <= Math.round(reviewSummary.averageRating) ? 'text-amber-400' : 'text-zinc-300'" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
               </span>
-              <span class="font-bold text-zinc-900 ml-1">{{ reviewSummary.averageRating || '4.9' }}</span>
-              <span class="text-zinc-400 underline decoration-zinc-300">({{ reviewSummary.totalReviews || 199 }} đánh giá)</span>
+              <span class="font-bold text-zinc-900 ml-1">{{ hasReviews ? reviewSummary.averageRating.toFixed(1) : 'Chưa có đánh giá' }}</span>
+              <span class="text-zinc-400 underline decoration-zinc-300">({{ reviewSummary.totalReviews }} đánh giá)</span>
             </a>
 
             <button 
@@ -66,7 +66,7 @@
             </button>
 
             <button 
-              @click="showCompareModal = true"
+              @click="openCompareModal"
               class="flex items-center gap-1 hover:text-red-600 transition cursor-pointer text-zinc-600"
             >
               <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><path d="M11 18H8a2 2 0 0 1-2-2V9"/></svg>
@@ -75,13 +75,13 @@
           </div>
         </div>
 
-        <div class="hidden md:flex items-center gap-3">
-          <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold border border-emerald-200">
+        <div v-if="storefront.storePolicy.officialProductText || selectedCityAvailability?.deliveryEstimate" class="hidden md:flex items-center gap-3">
+          <div v-if="storefront.storePolicy.officialProductText" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold border border-emerald-200">
             <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span>Chính hãng 100%</span>
+            <span>{{ storefront.storePolicy.officialProductText }}</span>
           </div>
-          <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 text-amber-700 text-xs font-semibold border border-amber-200">
-            <span>⚡ Giao siêu tốc 2H</span>
+          <div v-if="selectedCityAvailability?.deliveryEstimate" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 text-amber-700 text-xs font-semibold border border-amber-200">
+            <span>⚡ {{ selectedCityAvailability.deliveryEstimate }}</span>
           </div>
         </div>
       </div>
@@ -108,9 +108,9 @@
               </button>
             </div>
 
-            <div class="hidden lg:flex items-center gap-3 shrink-0 pl-3 border-l border-zinc-200 text-xs">
+            <div v-if="storefront.storePolicy.hotline" class="hidden lg:flex items-center gap-3 shrink-0 pl-3 border-l border-zinc-200 text-xs">
               <span class="text-zinc-400">Hotline:</span>
-              <a href="tel:18006601" class="font-bold text-red-600 hover:underline">1800 6601 (Miễn phí)</a>
+              <a :href="`tel:${storefront.storePolicy.hotline}`" class="font-bold text-red-600 hover:underline">{{ storefront.storePolicy.hotline }}</a>
             </div>
           </div>
         </div>
@@ -130,12 +130,12 @@
         >
           <!-- Top Left Tag Badges -->
           <div class="absolute top-4 left-4 z-10 flex flex-col gap-2">
-            <span class="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-lg bg-red-600 text-white shadow-xs">
+            <span v-if="activeInstallmentPlans.length" class="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-lg bg-red-600 text-white shadow-xs">
               <svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-              <span>Trả góp 0%</span>
+              <span>Trả góp</span>
             </span>
-            <span class="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-md bg-amber-500 text-white shadow-xs">
-              🔥 Giảm sốc Online
+            <span v-if="primaryPromotion" class="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-md bg-amber-500 text-white shadow-xs">
+              🔥 {{ primaryPromotion.title }}
             </span>
           </div>
 
@@ -159,11 +159,12 @@
           </div>
 
           <!-- Active Display Image -->
-          <img 
-            :src="activeImage || defaultImage" 
+          <img v-if="activeImage"
+            :src="activeImage"
             :alt="product.name"
             class="object-contain max-h-[85%] max-w-[85%] transition-transform duration-500 group-hover:scale-105 select-none"
           />
+          <div v-else class="text-xs text-zinc-400">Chưa có hình ảnh sản phẩm</div>
 
           <!-- Gallery Floating Navigation Arrows -->
           <button 
@@ -183,14 +184,14 @@
 
           <!-- Bottom Image Index Badge -->
           <div class="absolute bottom-4 right-4 px-2.5 py-1 rounded-full bg-zinc-900/70 backdrop-blur-xs text-white text-[11px] font-mono">
-            {{ activeImageIndex + 1 }} / {{ galleryImages.length }}
+            {{ galleryImages.length ? activeImageIndex + 1 : 0 }} / {{ galleryImages.length }}
           </div>
         </div>
 
         <!-- FPT Interactive Media Thumbnails & Function Tabs -->
         <div class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
           <!-- Video Review Tab -->
-          <button 
+          <button v-if="storefront.media.reviewVideoUrl"
             @click="openVideoModal"
             class="flex flex-col items-center justify-center w-16 h-16 sm:w-18 sm:h-18 rounded-2xl border bg-white text-zinc-700 hover:border-red-500 hover:text-red-600 shrink-0 transition p-2 cursor-pointer group/btn"
           >
@@ -201,7 +202,7 @@
           </button>
 
           <!-- Highlight Feature Icon Tab -->
-          <button 
+          <button v-if="storefront.storySections.length > 0 || product.description"
             @click="scrollToSection('description')"
             class="flex flex-col items-center justify-center w-16 h-16 sm:w-18 sm:h-18 rounded-2xl border bg-white text-zinc-700 hover:border-amber-500 hover:text-amber-600 shrink-0 transition p-2 cursor-pointer"
           >
@@ -212,7 +213,7 @@
           </button>
 
           <!-- Real Image Thumbnails -->
-          <button 
+          <button
             v-for="(img, idx) in galleryImages" 
             :key="idx"
             @click="selectImage(idx)"
@@ -223,7 +224,7 @@
           </button>
 
           <!-- Unbox Tab -->
-          <button 
+          <button v-if="storefront.media.unboxingDescription || storefront.media.unboxingVideoUrl"
             @click="openUnboxModal"
             class="flex flex-col items-center justify-center w-16 h-16 sm:w-18 sm:h-18 rounded-2xl border bg-white text-zinc-700 hover:border-zinc-400 shrink-0 transition p-2 cursor-pointer"
           >
@@ -234,7 +235,7 @@
           </button>
 
           <!-- 360 View Tab -->
-          <button 
+          <button v-if="storefront.media.view360Url"
             @click="open360Modal"
             class="flex flex-col items-center justify-center w-16 h-16 sm:w-18 sm:h-18 rounded-2xl border bg-white text-zinc-700 hover:border-zinc-400 shrink-0 transition p-2 cursor-pointer"
           >
@@ -247,32 +248,14 @@
 
         <!-- TechStore Policy & Gold Guarantees Bar (FPT Style) -->
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 rounded-2xl bg-zinc-50 border border-zinc-200/80 text-xs">
-          <div class="flex items-center gap-2.5">
+          <div v-for="(policy, index) in policyTexts" :key="`${index}-${policy}`" class="flex items-center gap-2.5">
             <div class="w-8 h-8 rounded-xl bg-white border border-zinc-200 flex items-center justify-center text-red-600 shrink-0 shadow-2xs">
-              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
             </div>
-            <span class="text-zinc-700 font-medium leading-tight">Miễn phí giao hàng toàn quốc (*)</span>
+            <span class="text-zinc-700 font-medium leading-tight">{{ policy }}</span>
           </div>
-
-          <div class="flex items-center gap-2.5">
-            <div class="w-8 h-8 rounded-xl bg-white border border-zinc-200 flex items-center justify-center text-red-600 shrink-0 shadow-2xs">
-              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            </div>
-            <span class="text-zinc-700 font-medium leading-tight">Chính hãng 100% - Bảo hành 12T</span>
-          </div>
-
-          <div class="flex items-center gap-2.5">
-            <div class="w-8 h-8 rounded-xl bg-white border border-zinc-200 flex items-center justify-center text-red-600 shrink-0 shadow-2xs">
-              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-            </div>
-            <span class="text-zinc-700 font-medium leading-tight">1 đổi 1 trong 30 ngày nếu lỗi</span>
-          </div>
-
-          <div class="flex items-center gap-2.5">
-            <div class="w-8 h-8 rounded-xl bg-white border border-zinc-200 flex items-center justify-center text-red-600 shrink-0 shadow-2xs">
-              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
-            </div>
-            <span class="text-zinc-700 font-medium leading-tight">Hỗ trợ kỹ thuật trực tuyến</span>
+          <div v-if="policyTexts.length === 0" class="col-span-full text-center text-zinc-400">
+            Thông tin chính sách chưa được cập nhật.
           </div>
         </div>
 
@@ -303,7 +286,7 @@
               </div>
               <div class="space-y-0.5 min-w-0">
                 <div class="text-[11px] text-zinc-400 font-medium">{{ spec.title }}</div>
-                <div class="text-xs font-bold text-zinc-900 truncate" :title="spec.value">{{ spec.value }}</div>
+              <div class="text-xs font-bold text-zinc-900 truncate" :title="spec.value || 'Chưa có dữ liệu'">{{ spec.value || 'Chưa có dữ liệu' }}</div>
               </div>
             </div>
           </div>
@@ -323,41 +306,24 @@
             class="space-y-4 text-xs sm:text-sm text-zinc-700 leading-relaxed overflow-hidden transition-all duration-300"
             :class="isExpandedStory ? 'max-h-none' : 'max-h-[320px]'"
           >
-            <p class="font-medium text-zinc-800 text-sm sm:text-base">
-              {{ product.description || 'Trải nghiệm đỉnh cao công nghệ với sự hoàn thiện vượt trội từ thiết kế kim loại cao cấp đến sức mạnh xử lý hàng đầu.' }}
+            <p v-if="product.description" class="font-medium text-zinc-800 text-sm sm:text-base">
+              {{ product.description }}
             </p>
 
-            <div class="rounded-2xl overflow-hidden border border-zinc-200 my-3">
-              <img 
-                :src="activeImage || defaultImage" 
-                class="w-full h-56 sm:h-72 object-cover" 
-                alt="Hình minh họa sản phẩm"
-              />
-              <div class="p-2.5 bg-zinc-50 text-[11px] text-zinc-500 text-center border-t border-zinc-200">
-                Ảnh thực tế và góc nhìn chi tiết sản phẩm chính hãng tại TechStore
+            <article v-for="(section, index) in storefront.storySections" :key="`${section.heading || 'story'}-${index}`" class="space-y-3">
+              <h4 v-if="section.heading" class="text-sm font-bold text-zinc-900 mt-4">{{ section.heading }}</h4>
+              <p v-if="section.body">{{ section.body }}</p>
+              <div v-if="section.imageUrl" class="rounded-2xl overflow-hidden border border-zinc-200 my-3">
+                <img :src="section.imageUrl" class="w-full h-56 sm:h-72 object-cover" :alt="section.heading || product.name" />
+                <div v-if="section.imageCaption" class="p-2.5 bg-zinc-50 text-[11px] text-zinc-500 text-center border-t border-zinc-200">
+                  {{ section.imageCaption }}
+                </div>
               </div>
+            </article>
+
+            <div v-if="!product.description && storefront.storySections.length === 0" class="text-xs text-zinc-400">
+              Nội dung giới thiệu sản phẩm chưa được cập nhật.
             </div>
-
-            <h4 class="text-sm font-bold text-zinc-900 mt-4 flex items-center gap-1.5">
-              <span class="text-red-600">●</span> Trí tuệ nhân tạo thế hệ mới & Tối ưu hóa hiệu năng
-            </h4>
-            <p>
-              Tích hợp hệ sinh thái AI thông minh toàn diện, hỗ trợ khoanh vùng tìm kiếm đa năng (Circle to Search), dịch thuật cuộc gọi trực tiếp đa ngôn ngữ theo thời gian thực và trợ lý ghi chú tóm tắt nội dung thông minh.
-            </p>
-
-            <h4 class="text-sm font-bold text-zinc-900 mt-4 flex items-center gap-1.5">
-              <span class="text-red-600">●</span> Hệ thống Camera siêu nét - Bắt trọn khoảnh khắc đêm
-            </h4>
-            <p>
-              Cảm biến máy ảnh độ phân giải cao kết hợp bộ xử lý hình ảnh ProVisual Engine mang đến khả năng khử nhiễu AI ấn tượng, zoom quang học sắc nét vượt tầm nhìn thông thường và màu sắc chân thực trong mọi điều kiện ánh sáng.
-            </p>
-
-            <h4 class="text-sm font-bold text-zinc-900 mt-4 flex items-center gap-1.5">
-              <span class="text-red-600">●</span> Thời lượng pin bền bỉ đồng hành suốt ngày dài
-            </h4>
-            <p>
-              Tối ưu hóa năng lượng thông minh từ con chip xử lý hiện đại cùng công nghệ sạc siêu nhanh, giúp thiết bị nhanh chóng sẵn sàng cho mọi hành trình sáng tạo và làm việc của bạn.
-            </p>
           </div>
 
           <!-- Bottom Fade Gradient & Read More Button -->
@@ -389,19 +355,19 @@
       <div class="lg:col-span-5 space-y-5">
         
         <!-- FPT GIÁ SỐC ONLINE / FLASH SALE BANNER -->
-        <div class="rounded-3xl border border-red-200/90 bg-gradient-to-br from-red-50/50 via-white to-red-50/30 p-5 sm:p-6 shadow-sm space-y-4">
+        <div class="rounded-3xl border p-5 sm:p-6 shadow-sm space-y-4" :class="primaryPromotion ? 'border-red-200/90 bg-gradient-to-br from-red-50/50 via-white to-red-50/30' : 'border-zinc-200/90 bg-white'">
           
           <!-- Flash Sale Header with Animated Fire & Live Countdown -->
           <div class="flex items-center justify-between pb-3 border-b border-red-100">
             <div class="flex items-center gap-2">
-              <span class="flex h-6 px-2.5 rounded-lg bg-red-600 text-white font-extrabold text-[11px] uppercase items-center gap-1 shadow-xs animate-pulse">
-                <span>🔥</span>
-                <span>GIÁ SỐC ONLINE</span>
+              <span class="flex h-6 px-2.5 rounded-lg text-white font-extrabold text-[11px] uppercase items-center gap-1 shadow-xs" :class="primaryPromotion ? 'bg-red-600 animate-pulse' : 'bg-zinc-700'">
+                <span v-if="primaryPromotion">🔥</span>
+                <span>{{ primaryPromotion?.title || 'Giá bán' }}</span>
               </span>
             </div>
 
             <!-- Countdown Timer -->
-            <div class="flex items-center gap-1 text-xs">
+            <div v-if="timer" class="flex items-center gap-1 text-xs">
               <span class="text-zinc-500 font-medium text-[11px] hidden sm:inline">Kết thúc sau:</span>
               <div class="flex items-center gap-1 font-mono font-bold text-white text-xs">
                 <span class="bg-zinc-900 px-1.5 py-0.5 rounded">{{ timer.hours }}</span>
@@ -419,44 +385,47 @@
               <span class="text-2xl sm:text-3xl lg:text-4xl font-black text-red-600 tracking-tight">
                 {{ formatPrice(currentPrice) }}
               </span>
-              <span class="text-sm sm:text-base text-zinc-400 line-through">
+              <span v-if="currentOriginalPrice != null && currentOriginalPrice > (currentPrice ?? 0)" class="text-sm sm:text-base text-zinc-400 line-through">
                 {{ formatPrice(currentOriginalPrice) }}
               </span>
-              <span class="text-xs font-bold text-red-700 bg-red-100/80 px-2 py-0.5 rounded-md border border-red-200">
+              <span v-if="discountPercent != null" class="text-xs font-bold text-red-700 bg-red-100/80 px-2 py-0.5 rounded-md border border-red-200">
                 -{{ discountPercent }}%
               </span>
             </div>
 
             <!-- Loyalty F-Points Earn Badge -->
-            <div class="pt-1 flex items-center gap-2 text-xs">
+            <div v-if="loyaltyPoints != null" class="pt-1 flex items-center gap-2 text-xs">
               <div class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 text-[11px] font-semibold">
                 <span>🪙</span>
-                <span>Tích lũy +{{ loyaltyPoints }} điểm thưởng TechStore</span>
+                <span>Tích lũy +{{ loyaltyPoints.toLocaleString('vi-VN') }} điểm thưởng TechStore</span>
               </div>
             </div>
 
             <!-- Sold quota progress bar -->
-            <div class="pt-2 space-y-1">
+            <div v-if="primaryPromotion?.quota != null && primaryPromotion.quota > 0 && primaryPromotion.claimed != null" class="pt-2 space-y-1">
               <div class="flex justify-between text-[11px] text-zinc-500 font-medium">
-                <span>Đã bán 18/50 suất</span>
-                <span class="text-red-600 font-semibold">Sắp hết hàng</span>
+                <span>Đã dùng {{ primaryPromotion.claimed }}/{{ primaryPromotion.quota }} suất</span>
+                <span class="text-red-600 font-semibold">{{ primaryPromotion.quota - primaryPromotion.claimed <= 5 ? 'Sắp hết ưu đãi' : 'Ưu đãi có giới hạn' }}</span>
               </div>
               <div class="h-2 w-full bg-zinc-200 rounded-full overflow-hidden">
-                <div class="h-full bg-gradient-to-r from-red-500 to-amber-500 rounded-full w-[36%]"></div>
+                <div class="h-full bg-gradient-to-r from-red-500 to-amber-500 rounded-full" :style="{ width: `${Math.min(100, Math.round(primaryPromotion.claimed * 100 / primaryPromotion.quota))}%` }"></div>
               </div>
             </div>
           </div>
         </div>
 
         <!-- Thu Cũ Đổi Mới Banner (Trade-In Offer) -->
-        <div class="p-3.5 rounded-2xl bg-gradient-to-r from-blue-50/80 to-indigo-50/80 border border-blue-200/80 flex items-center justify-between shadow-2xs">
+        <div v-if="activeTradeInOffers.length" class="p-3.5 rounded-2xl bg-gradient-to-r from-blue-50/80 to-indigo-50/80 border border-blue-200/80 flex items-center justify-between shadow-2xs">
           <div class="flex items-center gap-2.5">
             <div class="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0">
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
             </div>
             <div>
-              <div class="text-xs font-bold text-zinc-900">Thu cũ đổi mới - Trợ giá đến 5.000.000đ</div>
-              <div class="text-[11px] text-zinc-500">Thủ tục nhanh gọn, trợ giá trực tiếp vào hóa đơn</div>
+              <div class="text-xs font-bold text-zinc-900">Thu cũ đổi mới</div>
+              <div class="text-[11px] text-zinc-500">
+                {{ activeTradeInOffers[0].terms || activeTradeInOffers[0].condition || activeTradeInOffers[0].deviceModel }}
+                <template v-if="!activeTradeInOffers[0].terms && !activeTradeInOffers[0].condition && activeTradeInOffers[0].maximumSubsidy != null"> · Trợ giá đến {{ formatPrice(activeTradeInOffers[0].maximumSubsidy) }}</template>
+              </div>
             </div>
           </div>
           <button 
@@ -468,16 +437,16 @@
         </div>
 
         <!-- Variant Selector: Storage Options (Phiên bản cấu hình) -->
-        <div v-if="product.variants && product.variants.length > 0" class="space-y-2.5">
+        <div v-if="availableVariants.length > 0" class="space-y-2.5">
           <label class="block text-xs font-bold text-zinc-800 uppercase tracking-wider flex items-center justify-between">
             <span>Phiên bản cấu hình / Bộ nhớ:</span>
             <span class="text-zinc-400 font-normal normal-case">Chọn phiên bản phù hợp</span>
           </label>
           <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
             <button 
-              v-for="v in product.variants" 
+              v-for="v in availableVariants"
               :key="v.id"
-              @click="selectedVariant = v"
+              @click="selectVariant(v)"
               class="p-3 rounded-2xl border text-left transition relative flex flex-col justify-between cursor-pointer"
               :class="selectedVariant?.id === v.id ? 'bg-red-50/40 border-red-600 ring-1 ring-red-600 text-zinc-900 shadow-xs' : 'bg-white border-zinc-200 hover:border-zinc-300 text-zinc-700'"
             >
@@ -494,26 +463,29 @@
             </button>
           </div>
         </div>
+        <div v-else-if="product.variants?.length" class="text-xs text-zinc-500">
+          Hiện chưa có phiên bản đang kinh doanh.
+        </div>
 
         <!-- Color Selector (Màu sắc sản phẩm) -->
-        <div class="space-y-2.5">
+        <div v-if="colorOptions.length" class="space-y-2.5">
           <label class="block text-xs font-bold text-zinc-800 uppercase tracking-wider flex items-center justify-between">
             <span>Màu sắc:</span>
-            <span class="text-zinc-600 font-semibold normal-case">{{ selectedColor.name }}</span>
+            <span class="text-zinc-600 font-semibold normal-case">{{ selectedColorName || 'Chưa có thông tin màu' }}</span>
           </label>
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
             <button 
               v-for="c in colorOptions" 
               :key="c.name"
-              @click="selectedColor = c"
+              @click="selectColor(c.name)"
               class="p-2.5 rounded-2xl border transition flex items-center gap-2 cursor-pointer relative"
-              :class="selectedColor.name === c.name ? 'border-red-600 bg-red-50/30 ring-1 ring-red-600' : 'border-zinc-200 bg-white hover:border-zinc-300'"
+              :class="selectedColorName === c.name ? 'border-red-600 bg-red-50/30 ring-1 ring-red-600' : 'border-zinc-200 bg-white hover:border-zinc-300'"
             >
-              <span class="w-4 h-4 rounded-full shrink-0 border border-black/10" :style="{ backgroundColor: c.hex }"></span>
+              <span v-if="c.hex" class="w-4 h-4 rounded-full shrink-0 border border-black/10" :style="{ backgroundColor: c.hex }"></span>
               <span class="text-xs font-medium text-zinc-800 truncate">{{ c.name }}</span>
 
               <div 
-                v-if="selectedColor.name === c.name" 
+                v-if="selectedColorName === c.name"
                 class="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-red-600 text-white flex items-center justify-center text-[9px]"
               >
                 ✓
@@ -529,126 +501,106 @@
               <svg class="w-4 h-4 text-red-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
               <span>Xem siêu thị có hàng:</span>
             </div>
-            <select 
+            <select v-if="activeCityAvailability.length"
               v-model="selectedCity"
               class="bg-white border border-zinc-200 rounded-lg px-2 py-1 text-xs font-semibold text-zinc-800 focus:outline-none"
             >
-              <option value="HN">Hà Nội (28 siêu thị)</option>
-              <option value="HCM">TP. Hồ Chí Minh (45 siêu thị)</option>
-              <option value="DN">Đà Nẵng (12 siêu thị)</option>
-              <option value="CT">Cần Thơ (8 siêu thị)</option>
+              <option v-for="city in activeCityAvailability" :key="city.cityCode" :value="city.cityCode">
+                {{ city.cityName }}<template v-if="city.storeCount != null"> ({{ city.storeCount }} siêu thị)</template>
+              </option>
             </select>
+            <span v-else class="text-[11px] text-zinc-400">Chưa có dữ liệu tồn kho theo siêu thị</span>
           </div>
 
           <div class="flex items-center gap-2 pt-1">
-            <span v-if="currentStock > 0" class="inline-flex items-center gap-1.5 text-emerald-700 font-bold bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
+            <span v-if="selectedCityAvailability?.stockCount != null && selectedCityAvailability.stockCount > 0" class="inline-flex items-center gap-1.5 text-emerald-700 font-bold bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
               <span class="w-2 h-2 rounded-full bg-emerald-600 animate-ping"></span>
-              <span>Có sẵn hàng tại {{ selectedCity === 'HCM' ? '45' : '28' }} siêu thị</span>
+              <span v-if="selectedCityAvailability.storeCount != null">Có hàng tại {{ selectedCityAvailability.storeCount }} siêu thị ({{ selectedCityAvailability.stockCount }} sản phẩm)</span>
+              <span v-else>Còn {{ selectedCityAvailability.stockCount }} sản phẩm trong khu vực</span>
+            </span>
+            <span v-else-if="selectedCityAvailability" class="inline-flex items-center gap-1.5 text-zinc-500 font-medium bg-zinc-100 px-2.5 py-1 rounded-lg border border-zinc-200">
+              <span>{{ selectedCityAvailability.stockCount === 0 ? 'Tạm hết hàng tại khu vực này' : selectedCityAvailability.deliveryEstimate || 'Chưa có thông tin tồn kho khu vực' }}</span>
             </span>
             <span v-else class="inline-flex items-center gap-1.5 text-zinc-500 font-medium bg-zinc-100 px-2.5 py-1 rounded-lg border border-zinc-200">
-              <span>Tạm thời hết hàng tại khu vực này</span>
+              <span>Tồn kho phiên bản đang chọn: {{ currentStock }}</span>
             </span>
           </div>
         </div>
 
-        <!-- Khuyến mãi chính & Ưu đãi được hưởng (FPT Promo Box) -->
+        <!-- Khuyến mãi chính -->
         <div class="rounded-3xl border border-red-200 bg-white overflow-hidden shadow-xs">
           <div class="bg-gradient-to-r from-red-600 to-rose-600 px-4 py-2.5 flex items-center justify-between text-white">
             <div class="flex items-center gap-2">
               <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
               <h4 class="text-xs font-bold uppercase tracking-wider">Khuyến mãi chính</h4>
             </div>
-            <span class="text-[11px] font-semibold bg-white/20 px-2 py-0.5 rounded-full">Đặc quyền online</span>
+            <span v-if="primaryPromotion?.endsAt" class="text-[11px] font-semibold bg-white/20 px-2 py-0.5 rounded-full">Đến {{ new Date(primaryPromotion.endsAt).toLocaleDateString('vi-VN') }}</span>
           </div>
 
           <div class="p-4 sm:p-5 space-y-3">
             <ul class="space-y-2.5 text-xs text-zinc-700">
-              <li class="flex items-start gap-2">
-                <span class="w-4 h-4 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">1</span>
-                <span><strong>Giảm ngay 1.000.000đ</strong> khi thanh toán qua thẻ tín dụng ngân hàng đối tác hoặc quét mã VNPAY-QR.</span>
+              <li v-for="(offer, index) in displayedPromotions" :key="offer.id || `${offer.title}-${index}`" class="flex items-start gap-2">
+                <span class="w-4 h-4 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">{{ index + 1 }}</span>
+                <span>
+                  <strong>{{ offer.title }}</strong>
+                  <span v-if="offer.description"> — {{ offer.description }}</span>
+                  <span v-if="offer.discountAmount != null"> (giảm {{ formatPrice(offer.discountAmount) }})</span>
+                  <span v-if="offer.terms">. {{ offer.terms }}</span>
+                </span>
               </li>
-              <li class="flex items-start gap-2">
-                <span class="w-4 h-4 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">2</span>
-                <span><strong>Tặng gói bảo hành rơi vỡ màn hình 12 tháng</strong> chính hãng trị giá 2.500.000đ.</span>
-              </li>
-              <li class="flex items-start gap-2">
-                <span class="w-4 h-4 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">3</span>
-                <span><strong>Trả góp 0% lãi suất</strong> với kỳ hạn linh hoạt đến 12 tháng qua thẻ tín dụng hoặc cty tài chính.</span>
-              </li>
-
-              <template v-if="showMoreOffers">
-                <li class="flex items-start gap-2">
-                  <span class="w-4 h-4 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">4</span>
-                  <span><strong>Giảm thêm 500.000đ</strong> cho Học sinh - Sinh viên & Giáo viên khi mua qua TechStore Education.</span>
-                </li>
-                <li class="flex items-start gap-2">
-                  <span class="w-4 h-4 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">5</span>
-                  <span><strong>Giảm đến 50%</strong> khi mua kèm phụ kiện chính hãng (Củ sạc 45W, Bao da S-Pen, Dán màn hình).</span>
-                </li>
-              </template>
             </ul>
 
-            <button 
+            <div v-if="activePromotions.length === 0" class="text-xs text-zinc-400">Hiện chưa có ưu đãi nào được cập nhật cho sản phẩm này.</div>
+
+            <button v-if="activePromotions.length > 3"
               @click="showMoreOffers = !showMoreOffers"
               class="text-xs font-bold text-red-600 hover:text-red-700 flex items-center gap-1 cursor-pointer pt-1"
             >
-              <span>{{ showMoreOffers ? 'Thu gọn ưu đãi' : 'Xem thêm 2 ưu đãi đặc quyền khác' }}</span>
+              <span>{{ showMoreOffers ? 'Thu gọn ưu đãi' : `Xem thêm ${activePromotions.length - 3} ưu đãi` }}</span>
               <svg class="w-3.5 h-3.5 transition-transform" :class="{ 'rotate-180': showMoreOffers }" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
             </button>
           </div>
         </div>
 
-        <!-- Mua Kèm Với Giá Ưu Đãi (Combo Cross-sell Card) -->
-        <div class="rounded-3xl border border-zinc-200/90 bg-white p-4 sm:p-5 space-y-3 shadow-xs">
+        <!-- Mua Kèm Với Giá Ưu Đãi -->
+        <div v-if="activeBundleOffers.length" class="rounded-3xl border border-zinc-200/90 bg-white p-4 sm:p-5 space-y-3 shadow-xs">
           <div class="flex items-center justify-between">
             <h4 class="text-xs font-bold text-zinc-900 flex items-center gap-1.5">
               <span>🔥</span>
               <span>Mua kèm với giá ưu đãi</span>
             </h4>
-            <span class="text-[11px] text-zinc-400">Tiết kiệm đến 30%</span>
+            <span class="text-[11px] text-zinc-400">Ưu đãi đang áp dụng</span>
           </div>
 
           <div class="space-y-2">
-            <label 
-              v-for="combo in comboOffers" 
-              :key="combo.id"
-              class="flex items-center justify-between p-3 rounded-2xl border transition cursor-pointer"
-              :class="combo.selected ? 'bg-red-50/30 border-red-200' : 'bg-zinc-50/50 border-zinc-200/80 hover:bg-zinc-50'"
-            >
-              <div class="flex items-center gap-3">
-                <input 
-                  type="checkbox" 
-                  v-model="combo.selected"
-                  class="w-4 h-4 accent-red-600 rounded"
-                />
-                <div>
-                  <div class="text-xs font-semibold text-zinc-800">{{ combo.name }}</div>
-                  <div class="text-[11px] text-zinc-400 line-through">{{ formatPrice(combo.originalPrice) }}</div>
-                </div>
+            <div v-for="(combo, index) in activeBundleOffers" :key="combo.id || `${combo.title}-${index}`" class="flex items-center justify-between gap-3 p-3 rounded-2xl border bg-zinc-50/50 border-zinc-200/80">
+              <div>
+                <div class="text-xs font-semibold text-zinc-800">{{ combo.title }}</div>
+                <div v-if="combo.description" class="text-[11px] text-zinc-500 mt-0.5">{{ combo.description }}</div>
+                <div v-if="combo.originalPrice != null" class="text-[11px] text-zinc-400 line-through">{{ formatPrice(combo.originalPrice) }}</div>
               </div>
-              <div class="text-right">
+              <div v-if="combo.price != null" class="text-right shrink-0">
                 <div class="text-xs font-black text-red-600">{{ formatPrice(combo.price) }}</div>
-                <div class="text-[10px] text-emerald-600 font-semibold">Tiết kiệm {{ formatPrice(combo.originalPrice - combo.price) }}</div>
+                <div v-if="combo.originalPrice != null && combo.originalPrice > combo.price" class="text-[10px] text-emerald-600 font-semibold">Tiết kiệm {{ formatPrice(combo.originalPrice - combo.price) }}</div>
               </div>
-            </label>
+            </div>
           </div>
         </div>
 
         <!-- Khuyến mãi thanh toán (Payment Partner Bank Cards) -->
-        <div class="rounded-3xl border border-zinc-200/90 bg-white p-4 sm:p-5 space-y-3 shadow-xs">
+        <div v-if="activePaymentOffers.length" class="rounded-3xl border border-zinc-200/90 bg-white p-4 sm:p-5 space-y-3 shadow-xs">
           <div class="flex items-center justify-between">
-            <h4 class="text-xs font-bold text-zinc-900">Khuyến mãi thanh toán ngân hàng</h4>
-            <span class="text-[11px] text-red-600 font-semibold">Ưu đãi thẻ</span>
+            <h4 class="text-xs font-bold text-zinc-900">Ưu đãi thanh toán</h4>
+            <span class="text-[11px] text-red-600 font-semibold">Ưu đãi đối tác</span>
           </div>
 
-          <div class="grid grid-cols-4 gap-2 text-center text-[10px] font-bold">
-            <div class="p-2 rounded-xl bg-zinc-50 border border-zinc-200 text-zinc-700">TECHCOMBANK</div>
-            <div class="p-2 rounded-xl bg-zinc-50 border border-zinc-200 text-zinc-700">NAM A BANK</div>
-            <div class="p-2 rounded-xl bg-zinc-50 border border-zinc-200 text-zinc-700">VIKKI BANK</div>
-            <div class="p-2 rounded-xl bg-zinc-50 border border-zinc-200 text-zinc-700">KREDIVO</div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-[10px] font-bold">
+            <div v-for="(offer, index) in activePaymentOffers" :key="offer.id || `${offer.partnerName || offer.title}-${index}`" class="p-2 rounded-xl bg-zinc-50 border border-zinc-200 text-zinc-700">
+              {{ offer.partnerName || offer.title }}
+            </div>
           </div>
-          <p class="text-[11px] text-zinc-500 leading-normal">
-            Giảm ngay đến 800.000đ cho đơn hàng từ 20 triệu khi thanh toán 100% hoặc trả góp qua thẻ tín dụng ngân hàng liên kết.
+          <p v-for="(offer, index) in activePaymentOffers" :key="`${offer.id || offer.title}-${index}-terms`" class="text-[11px] text-zinc-500 leading-normal">
+            {{ offer.description || offer.terms || offer.title }}
           </p>
         </div>
 
@@ -660,19 +612,21 @@
             <div class="flex items-center bg-white border border-zinc-300 rounded-xl p-1 shadow-2xs">
               <button 
                 @click="quantity = Math.max(1, quantity - 1)" 
+                :disabled="quantity <= 1"
                 class="w-7 h-7 rounded-lg text-zinc-700 hover:bg-zinc-100 flex items-center justify-center font-bold text-sm cursor-pointer"
               >
                 -
               </button>
               <span class="w-10 text-center text-xs font-black text-zinc-900">{{ quantity }}</span>
               <button 
-                @click="quantity = Math.min(currentStock || 99, quantity + 1)" 
+                @click="quantity = Math.min(currentStock, quantity + 1)"
+                :disabled="currentStock <= 0 || quantity >= currentStock"
                 class="w-7 h-7 rounded-lg text-zinc-700 hover:bg-zinc-100 flex items-center justify-center font-bold text-sm cursor-pointer"
               >
                 +
               </button>
             </div>
-            <span class="text-[11px] text-zinc-400">
+              <span class="text-[11px] text-zinc-400">
               ({{ currentStock > 0 ? `Còn ${currentStock} máy` : 'Tạm hết' }})
             </span>
           </div>
@@ -686,17 +640,17 @@
               class="py-3.5 px-4 rounded-2xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-extrabold shadow-md transition-all active:scale-98 disabled:opacity-40 disabled:pointer-events-none flex flex-col items-center justify-center cursor-pointer"
             >
               <span class="text-sm uppercase tracking-wide">MUA NGAY</span>
-              <span class="text-[11px] font-normal opacity-90">Giao tận nơi hoặc nhận tại siêu thị</span>
+              <span v-if="storefront.storePolicy.shippingText" class="text-[11px] font-normal opacity-90">{{ storefront.storePolicy.shippingText }}</span>
             </button>
 
             <!-- Dark Installment CTA -->
-            <button 
+            <button v-if="activeInstallmentPlans.length"
               @click="openInstallmentModal"
               :disabled="currentStock <= 0"
               class="py-3.5 px-4 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-white font-extrabold shadow-md transition-all active:scale-98 disabled:opacity-40 disabled:pointer-events-none flex flex-col items-center justify-center cursor-pointer"
             >
-              <span class="text-sm uppercase tracking-wide">TRẢ GÓP 0%</span>
-              <span class="text-[11px] font-normal opacity-90">Duyệt nhanh qua điện thoại trong 5 phút</span>
+              <span class="text-sm uppercase tracking-wide">TRẢ GÓP</span>
+              <span class="text-[11px] font-normal opacity-90">{{ activeInstallmentPlans[0].providerName }}</span>
             </button>
           </div>
 
@@ -716,10 +670,10 @@
           </div>
 
           <!-- Hotline Consultation Assistance -->
-          <div class="text-center text-xs text-zinc-500 pt-1">
-            <span>Tư vấn mua hàng miễn phí: </span>
-            <a href="tel:18006601" class="font-bold text-red-600 hover:underline">1800 6601</a>
-            <span> (7:30 - 22:00)</span>
+          <div v-if="storefront.storePolicy.hotline" class="text-center text-xs text-zinc-500 pt-1">
+            <span>Tư vấn mua hàng: </span>
+            <a :href="`tel:${storefront.storePolicy.hotline}`" class="font-bold text-red-600 hover:underline">{{ storefront.storePolicy.hotline }}</a>
+            <span v-if="storefront.storePolicy.hotlineHours"> ({{ storefront.storePolicy.hotlineHours }})</span>
           </div>
         </div>
       </div>
@@ -738,7 +692,7 @@
             <span class="w-2.5 h-2.5 rounded-full bg-red-600"></span>
             <span>Đánh giá & Bình luận khách hàng</span>
           </h3>
-          <p class="text-xs text-zinc-500 mt-0.5">Nhận xét thực tế từ những khách hàng đã mua và trải nghiệm sản phẩm tại hệ thống</p>
+          <p class="text-xs text-zinc-500 mt-0.5">Các đánh giá đã được gửi cho sản phẩm này</p>
         </div>
 
         <button 
@@ -754,13 +708,13 @@
         <!-- Big Rating Number -->
         <div class="md:col-span-4 text-center border-b md:border-b-0 md:border-r border-zinc-200 pb-4 md:pb-0 md:pr-4">
           <div class="text-4xl sm:text-5xl font-black text-zinc-900 tracking-tight">
-            {{ reviewSummary.averageRating || '4.9' }}<span class="text-xl text-zinc-400">/5</span>
+            {{ hasReviews ? reviewSummary.averageRating.toFixed(1) : '—' }}<span class="text-xl text-zinc-400">/5</span>
           </div>
-          <div class="flex items-center justify-center text-amber-400 text-lg my-1.5">
-            <span v-for="s in 5" :key="s">★</span>
+          <div class="flex items-center justify-center text-lg my-1.5">
+            <span v-for="s in 5" :key="s" :class="hasReviews && s <= Math.round(reviewSummary.averageRating) ? 'text-amber-400' : 'text-zinc-300'">★</span>
           </div>
           <div class="text-xs text-zinc-500 font-medium">
-            Dựa trên {{ reviewSummary.totalReviews || 199 }} lượt đánh giá thực tế
+            {{ reviewSummary.totalReviews }} lượt đánh giá
           </div>
         </div>
 
@@ -816,7 +770,7 @@
             v-model="newReview.comment"
             rows="3"
             required
-            placeholder="Chia sẻ nhận xét thực tế về camera, thời lượng pin, hiệu năng, độ mượt mà của máy..."
+            placeholder="Chia sẻ trải nghiệm thực tế của bạn về sản phẩm..."
             class="w-full bg-white border border-zinc-300 rounded-2xl p-3.5 text-xs text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 transition"
           ></textarea>
         </div>
@@ -858,11 +812,8 @@
               <div>
                 <div class="flex items-center gap-2">
                   <span class="text-xs font-bold text-zinc-900">{{ rev.userFullName }}</span>
-                  <span class="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">
-                    ✓ Đã mua tại TechStore
-                  </span>
                 </div>
-                <div class="text-[11px] text-zinc-400">{{ rev.createdAt || 'Vừa xong' }}</div>
+                <div class="text-[11px] text-zinc-400">{{ formatReviewDate(rev.createdAt) }}</div>
               </div>
             </div>
 
@@ -873,16 +824,6 @@
 
           <p class="text-xs sm:text-sm text-zinc-700 leading-relaxed pl-10">{{ rev.comment }}</p>
 
-          <!-- Store Assistant Reply Thread -->
-          <div class="ml-10 p-3.5 rounded-xl bg-white border border-zinc-200/80 space-y-1 text-xs">
-            <div class="flex items-center gap-1.5 text-red-600 font-bold text-[11px]">
-              <span class="w-1.5 h-1.5 rounded-full bg-red-600"></span>
-              <span>Chăm sóc khách hàng TechStore phản hồi:</span>
-            </div>
-            <p class="text-zinc-600 text-[11px]">
-              Cảm ơn anh/chị đã tin tưởng lựa chọn sản phẩm tại TechStore. Chúc anh/chị luôn có những trải nghiệm công nghệ tuyệt vời nhất!
-            </p>
-          </div>
         </div>
       </div>
     </section>
@@ -891,7 +832,7 @@
     <div id="similar" class="pt-4 scroll-mt-24">
       <RecommendationCarousel
         title="Sản Phẩm Tương Tự & Phù Hợp"
-        subtitle="Các thiết bị có cùng phân khúc cao cấp và đặc tính kỹ thuật tương đương"
+        subtitle="Gợi ý sản phẩm từ hệ thống"
         :items="similarProducts"
         :loading="loadingSimilar"
       />
@@ -904,28 +845,29 @@
           <span class="w-2.5 h-2.5 rounded-full bg-red-600"></span>
           <span>Câu hỏi thường gặp</span>
         </h3>
-        <p class="text-xs text-zinc-500 mt-0.5">Giải đáp thắc mắc phổ biến về tính năng, chế độ bảo hành và trả góp</p>
+        <p class="text-xs text-zinc-500 mt-0.5">Thông tin giải đáp được cập nhật riêng cho sản phẩm này</p>
       </div>
 
-      <div class="space-y-2.5">
+      <div v-if="storefront.faqs.length" class="space-y-2.5">
         <div 
-          v-for="(faq, fIdx) in faqs" 
+          v-for="(faq, fIdx) in storefront.faqs"
           :key="fIdx"
           class="rounded-2xl border transition overflow-hidden"
-          :class="faq.open ? 'border-red-200 bg-red-50/20' : 'border-zinc-200/80 bg-white'"
+          :class="openFaqIndex === fIdx ? 'border-red-200 bg-red-50/20' : 'border-zinc-200/80 bg-white'"
         >
           <button 
-            @click="faq.open = !faq.open"
+            @click="openFaqIndex = openFaqIndex === fIdx ? -1 : fIdx"
             class="w-full p-4 text-left flex items-center justify-between gap-3 text-xs sm:text-sm font-bold text-zinc-800 cursor-pointer"
           >
-            <span>{{ faq.q }}</span>
-            <svg class="w-4 h-4 shrink-0 transition-transform text-zinc-400" :class="{ 'rotate-180 text-red-600': faq.open }" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+            <span>{{ faq.question }}</span>
+            <svg class="w-4 h-4 shrink-0 transition-transform text-zinc-400" :class="{ 'rotate-180 text-red-600': openFaqIndex === fIdx }" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
           </button>
-          <div v-if="faq.open" class="px-4 pb-4 text-xs text-zinc-600 leading-relaxed border-t border-zinc-100/60 pt-2.5">
-            {{ faq.a }}
+          <div v-if="openFaqIndex === fIdx" class="px-4 pb-4 text-xs text-zinc-600 leading-relaxed border-t border-zinc-100/60 pt-2.5">
+            {{ faq.answer }}
           </div>
         </div>
       </div>
+      <div v-else class="text-center py-8 text-xs text-zinc-400">Câu hỏi thường gặp chưa được cập nhật.</div>
     </section>
 
     <!-- ================= SATISFACTION FEEDBACK WIDGET ================= -->
@@ -960,28 +902,28 @@
       <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
         <!-- Left: Product Mini Info -->
         <div class="flex items-center gap-3 min-w-0">
-          <img 
-            :src="activeImage || defaultImage" 
+          <img v-if="activeImage"
+            :src="activeImage"
             :alt="product.name" 
             class="w-10 h-10 object-contain rounded-lg border border-zinc-200 bg-white p-0.5 shrink-0 hidden sm:block"
           />
           <div class="min-w-0">
             <div class="text-xs font-extrabold text-zinc-900 truncate">{{ product.name }}</div>
             <div class="text-[11px] text-zinc-500 truncate">
-              Phân loại: <strong class="text-zinc-800">{{ selectedVariant?.name || 'Mặc định' }}</strong> | {{ selectedColor.name }}
+              Phân loại: <strong class="text-zinc-800">{{ selectedVariant?.name || 'Chưa chọn phiên bản' }}</strong><span v-if="selectedColorName"> | {{ selectedColorName }}</span>
             </div>
           </div>
         </div>
 
         <!-- Middle: Price and Points -->
         <div class="hidden md:flex items-center gap-3 shrink-0">
-          <div class="flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 text-[10px] font-bold border border-amber-200">
+          <div v-if="loyaltyPoints != null" class="flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 text-[10px] font-bold border border-amber-200">
             <span>🪙</span>
-            <span>+{{ loyaltyPoints }} điểm</span>
+            <span>+{{ loyaltyPoints.toLocaleString('vi-VN') }} điểm</span>
           </div>
           <div class="text-right">
             <div class="text-base font-black text-red-600">{{ formatPrice(currentPrice) }}</div>
-            <div class="text-[10px] text-zinc-400 line-through">{{ formatPrice(currentOriginalPrice) }}</div>
+            <div v-if="currentOriginalPrice != null && currentOriginalPrice > (currentPrice ?? 0)" class="text-[10px] text-zinc-400 line-through">{{ formatPrice(currentOriginalPrice) }}</div>
           </div>
         </div>
 
@@ -1004,11 +946,11 @@
             MUA NGAY
           </button>
 
-          <button 
+          <button v-if="activeInstallmentPlans.length"
             @click="openInstallmentModal"
             class="px-4 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white font-bold text-xs uppercase tracking-wider transition active:scale-95 cursor-pointer hidden sm:block"
           >
-            TRẢ GÓP 0%
+            {{ activeInstallmentPlans[0]?.interestRatePercent === 0 ? 'TRẢ GÓP 0%' : 'TRẢ GÓP' }}
           </button>
         </div>
       </div>
@@ -1029,12 +971,37 @@
           <div class="aspect-video w-full rounded-2xl overflow-hidden bg-black flex items-center justify-center">
             <iframe 
               class="w-full h-full"
-              src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=0" 
+              :src="storefront.media.reviewVideoUrl"
               title="Product Video Review"
               frameborder="0"
               allowfullscreen
             ></iframe>
           </div>
+        </div>
+      </div>
+    </Teleport>
+
+    <Teleport to="body">
+      <div v-if="showUnboxModal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4" @click.self="showUnboxModal = false">
+        <div class="bg-white rounded-3xl max-w-2xl w-full overflow-hidden shadow-2xl space-y-3 p-4">
+          <div class="flex items-center justify-between px-2">
+            <h4 class="text-sm font-bold text-zinc-900">Nội dung mở hộp</h4>
+            <button @click="showUnboxModal = false" class="p-1 rounded-full hover:bg-zinc-100 text-zinc-500 cursor-pointer">✕</button>
+          </div>
+          <iframe v-if="storefront.media.unboxingVideoUrl" :src="storefront.media.unboxingVideoUrl" title="Video mở hộp sản phẩm" class="aspect-video w-full rounded-2xl bg-black" allowfullscreen></iframe>
+          <p v-if="storefront.media.unboxingDescription" class="px-2 text-xs text-zinc-600">{{ storefront.media.unboxingDescription }}</p>
+        </div>
+      </div>
+    </Teleport>
+
+    <Teleport to="body">
+      <div v-if="show360Modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4" @click.self="show360Modal = false">
+        <div class="bg-white rounded-3xl max-w-3xl w-full overflow-hidden shadow-2xl p-4 space-y-3">
+          <div class="flex items-center justify-between px-2">
+            <h4 class="text-sm font-bold text-zinc-900">Góc nhìn 360° sản phẩm</h4>
+            <button @click="show360Modal = false" class="p-1 rounded-full hover:bg-zinc-100 text-zinc-500 cursor-pointer">✕</button>
+          </div>
+          <iframe :src="storefront.media.view360Url" title="Góc nhìn 360 độ sản phẩm" class="aspect-video w-full rounded-2xl bg-zinc-100" allowfullscreen></iframe>
         </div>
       </div>
     </Teleport>
@@ -1047,35 +1014,33 @@
             <h4 class="text-sm font-bold text-zinc-900">Định giá thu cũ đổi mới</h4>
             <button @click="showTradeInModal = false" class="text-zinc-400 hover:text-zinc-600 cursor-pointer">✕</button>
           </div>
-          <div class="space-y-3 text-xs">
+          <div v-if="activeTradeInOffers.length" class="space-y-3 text-xs">
             <div>
               <label class="block font-semibold text-zinc-700 mb-1">Dòng máy cũ của bạn:</label>
-              <select class="w-full border border-zinc-200 rounded-xl p-2.5 bg-zinc-50 font-medium">
-                <option>Samsung Galaxy S24 Ultra (Trợ giá đến 18.500.000đ)</option>
-                <option>Samsung Galaxy S23 Ultra (Trợ giá đến 13.000.000đ)</option>
-                <option>iPhone 15 Pro Max (Trợ giá đến 21.000.000đ)</option>
-                <option>iPhone 14 Pro Max (Trợ giá đến 15.000.000đ)</option>
+              <select v-model="selectedTradeInIndex" class="w-full border border-zinc-200 rounded-xl p-2.5 bg-zinc-50 font-medium">
+                <option v-for="(offer, index) in activeTradeInOffers" :key="`${offer.deviceModel}-${index}`" :value="index">
+                  {{ offer.deviceModel }}<template v-if="offer.maximumSubsidy != null"> — trợ giá đến {{ formatPrice(offer.maximumSubsidy) }}</template>
+                </option>
               </select>
             </div>
-            <div>
-              <label class="block font-semibold text-zinc-700 mb-1">Tình trạng máy cũ:</label>
-              <select class="w-full border border-zinc-200 rounded-xl p-2.5 bg-zinc-50 font-medium">
-                <option>Loại 1: Hoạt động hoàn hảo, ngoại hình như mới 99%</option>
-                <option>Loại 2: Trầy xước nhẹ, màn hình nguyên bản</option>
-                <option>Loại 3: Cấn móp nhẹ góc cạnh</option>
-              </select>
-            </div>
+            <p v-if="selectedTradeInOffer?.condition || selectedTradeInOffer?.terms" class="text-zinc-500">
+              {{ selectedTradeInOffer?.condition || selectedTradeInOffer?.terms }}
+            </p>
             <div class="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 space-y-1">
-              <div class="text-[11px] font-semibold">Ước tính mức bù trừ khi lên đời:</div>
-              <div class="text-base font-black text-emerald-700">Chỉ từ 4.500.000đ - 7.000.000đ</div>
+              <div class="text-[11px] font-semibold">Thông tin trợ giá do cửa hàng cung cấp:</div>
+              <div v-if="selectedTradeInOffer?.minimumTopUp != null || selectedTradeInOffer?.maximumTopUp != null" class="text-base font-black text-emerald-700">
+                Bù thêm {{ selectedTradeInOffer?.minimumTopUp != null ? formatPrice(selectedTradeInOffer.minimumTopUp) : '—' }} – {{ selectedTradeInOffer?.maximumTopUp != null ? formatPrice(selectedTradeInOffer.maximumTopUp) : '—' }}
+              </div>
+              <div v-else-if="selectedTradeInOffer?.maximumSubsidy != null" class="text-base font-black text-emerald-700">Trợ giá đến {{ formatPrice(selectedTradeInOffer.maximumSubsidy) }}</div>
+              <div v-else class="text-sm text-emerald-700">Liên hệ cửa hàng để được báo giá theo tình trạng thiết bị.</div>
+              <p v-if="selectedTradeInOffer?.terms" class="text-[11px]">{{ selectedTradeInOffer.terms }}</p>
             </div>
           </div>
-          <button 
-            @click="showTradeInModal = false; toast.success('Đã lưu thông tin định giá!')"
-            class="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition cursor-pointer"
-          >
-            Đăng ký lên đời ngay
-          </button>
+          <div v-else class="text-xs text-zinc-500">Chưa có chương trình thu cũ đổi mới được cập nhật.</div>
+          <a v-if="storefront.storePolicy.hotline" :href="`tel:${storefront.storePolicy.hotline}`" class="block text-center w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition">
+            Liên hệ tư vấn
+          </a>
+          <button v-else @click="showTradeInModal = false" class="w-full py-2.5 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-700 font-bold text-xs transition">Đóng</button>
         </div>
       </div>
     </Teleport>
@@ -1087,7 +1052,7 @@
           <div class="flex items-center justify-between">
             <h4 class="text-sm font-bold text-zinc-900 flex items-center gap-2">
               <span class="w-2 h-2 rounded-full bg-red-600"></span>
-              <span>Bảng tính trả góp 0% lãi suất</span>
+              <span>Chương trình trả góp</span>
             </h4>
             <button @click="showInstallmentModal = false" class="text-zinc-400 hover:text-zinc-600 cursor-pointer">✕</button>
           </div>
@@ -1098,35 +1063,21 @@
               <span class="font-extrabold text-sm text-red-600">{{ formatPrice(currentPrice) }}</span>
             </div>
 
-            <div class="grid grid-cols-3 gap-2 text-center">
-              <div class="p-3 rounded-2xl border border-red-600 bg-red-50/40">
-                <div class="text-[11px] text-zinc-500 font-medium">Kỳ hạn 6 tháng</div>
-                <div class="text-xs font-black text-zinc-900 mt-1">{{ formatPrice(currentPrice / 6) }}/tháng</div>
-                <div class="text-[10px] text-red-600 font-bold mt-0.5">Lãi suất 0%</div>
-              </div>
-              <div class="p-3 rounded-2xl border border-zinc-200 bg-white">
-                <div class="text-[11px] text-zinc-500 font-medium">Kỳ hạn 9 tháng</div>
-                <div class="text-xs font-black text-zinc-900 mt-1">{{ formatPrice(currentPrice / 9) }}/tháng</div>
-                <div class="text-[10px] text-red-600 font-bold mt-0.5">Lãi suất 0%</div>
-              </div>
-              <div class="p-3 rounded-2xl border border-zinc-200 bg-white">
-                <div class="text-[11px] text-zinc-500 font-medium">Kỳ hạn 12 tháng</div>
-                <div class="text-xs font-black text-zinc-900 mt-1">{{ formatPrice(currentPrice / 12) }}/tháng</div>
-                <div class="text-[10px] text-red-600 font-bold mt-0.5">Lãi suất 0%</div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-center">
+              <div v-for="(plan, index) in activeInstallmentPlans" :key="`${plan.providerName}-${plan.months}-${index}`" class="p-3 rounded-2xl border border-zinc-200 bg-white">
+                <div class="text-[11px] text-zinc-500 font-medium">{{ plan.providerName }} · {{ plan.months }} tháng</div>
+                <div v-if="plan.monthlyPayment != null" class="text-xs font-black text-zinc-900 mt-1">{{ formatPrice(plan.monthlyPayment) }}/tháng</div>
+                <div v-if="plan.interestRatePercent != null" class="text-[10px] text-red-600 font-bold mt-0.5">Lãi suất {{ plan.interestRatePercent }}%</div>
+                <div v-if="plan.downPayment != null" class="text-[10px] text-zinc-500 mt-0.5">Trả trước {{ formatPrice(plan.downPayment) }}</div>
+                <div v-if="plan.terms" class="text-[10px] text-zinc-500 mt-1">{{ plan.terms }}</div>
               </div>
             </div>
 
-            <div class="text-[11px] text-zinc-500 leading-normal">
-              Hỗ trợ qua các đối tác tài chính SF+, Home Credit hoặc thẻ tín dụng hơn 25 ngân hàng đối tác. Hồ sơ chỉ cần CCCD gắn chip, duyệt nhanh 5 phút.
-            </div>
+            <div v-if="activeInstallmentPlans.length === 0" class="text-[11px] text-zinc-500 leading-normal">Chưa có phương án trả góp được cập nhật.</div>
           </div>
 
-          <button 
-            @click="showInstallmentModal = false; handleBuyNow()"
-            class="w-full py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white font-bold text-xs transition cursor-pointer"
-          >
-            Lên hồ sơ trả góp ngay
-          </button>
+          <a v-if="storefront.storePolicy.hotline" :href="`tel:${storefront.storePolicy.hotline}`" class="block text-center w-full py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white font-bold text-xs transition">Liên hệ tư vấn</a>
+          <button v-else @click="showInstallmentModal = false" class="w-full py-2.5 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-700 font-bold text-xs transition">Đóng</button>
         </div>
       </div>
     </Teleport>
@@ -1136,33 +1087,30 @@
       <div v-if="showCompareModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl max-w-2xl w-full p-6 space-y-4 shadow-2xl max-h-[85vh] overflow-y-auto">
           <div class="flex items-center justify-between pb-2 border-b border-zinc-100">
-            <h4 class="text-sm font-bold text-zinc-900">So sánh thiết bị cùng phân khúc</h4>
+            <h4 class="text-sm font-bold text-zinc-900">So sánh sản phẩm</h4>
             <button @click="showCompareModal = false" class="text-zinc-400 hover:text-zinc-600 cursor-pointer">✕</button>
           </div>
 
-          <div class="grid grid-cols-2 gap-4 text-xs">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
             <div class="p-4 rounded-2xl bg-red-50/30 border border-red-200 space-y-2 text-center">
-              <img :src="activeImage || defaultImage" class="w-20 h-20 object-contain mx-auto" />
+              <img v-if="activeImage" :src="activeImage" class="w-20 h-20 object-contain mx-auto" :alt="product.name" />
               <div class="font-bold text-zinc-900">{{ product.name }}</div>
               <div class="font-black text-red-600">{{ formatPrice(currentPrice) }}</div>
               <div class="text-[11px] text-zinc-600 pt-2 border-t border-red-100 space-y-1 text-left">
-                <div>• Chip: Snapdragon 8 Gen 3 for Galaxy</div>
-                <div>• Màn hình: Dynamic AMOLED 2X 120Hz</div>
-                <div>• Camera: 200MP OIS Zoom 100x</div>
-                <div>• Pin: 5000 mAh Sạc nhanh 45W</div>
+                <div v-for="attribute in (product.attributes || []).slice(0, 4)" :key="attribute.id || attribute.name">• {{ attribute.name }}: {{ attribute.value }}</div>
               </div>
             </div>
 
-            <div class="p-4 rounded-2xl bg-zinc-50 border border-zinc-200 space-y-2 text-center">
-              <img src="https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=300" class="w-20 h-20 object-contain mx-auto" />
-              <div class="font-bold text-zinc-900">iPhone 16 Pro Max 256GB</div>
-              <div class="font-black text-zinc-900">34.990.000₫</div>
+            <div v-if="comparisonProduct" class="p-4 rounded-2xl bg-zinc-50 border border-zinc-200 space-y-2 text-center">
+              <img v-if="comparisonProduct.thumbnailUrl || comparisonProduct.images?.[0]?.url" :src="comparisonProduct.thumbnailUrl || comparisonProduct.images?.[0]?.url" class="w-20 h-20 object-contain mx-auto" :alt="comparisonProduct.name" />
+              <div class="font-bold text-zinc-900">{{ comparisonProduct.name }}</div>
+              <div class="font-black text-zinc-900">{{ formatPrice(comparisonProduct.minPrice) }}</div>
               <div class="text-[11px] text-zinc-600 pt-2 border-t border-zinc-200 space-y-1 text-left">
-                <div>• Chip: Apple A18 Pro 3nm</div>
-                <div>• Màn hình: Super Retina XDR 120Hz</div>
-                <div>• Camera: 48MP Fusion 5x Tele</div>
-                <div>• Pin: 4685 mAh Sạc MagSafe 25W</div>
+                <div v-for="attribute in (comparisonProduct.attributes || []).slice(0, 4)" :key="attribute.id || attribute.name">• {{ attribute.name }}: {{ attribute.value }}</div>
               </div>
+            </div>
+            <div v-else class="p-4 rounded-2xl bg-zinc-50 border border-zinc-200 text-center text-xs text-zinc-500">
+              {{ loadingComparison ? 'Đang tải sản phẩm so sánh...' : 'Chưa có sản phẩm so sánh được cấu hình.' }}
             </div>
           </div>
         </div>
@@ -1183,7 +1131,7 @@ import { behaviorApi } from '@/api/behaviorApi'
 import { useCartStore } from '@/stores/cart'
 import { useWishlistStore } from '@/stores/wishlist'
 import { useAuthStore } from '@/stores/auth'
-import type { Product, ProductVariant, ProductReview, ProductReviewSummary } from '@/types'
+import type { Product, ProductVariant, ProductReview, ProductReviewSummary, ProductStorefrontContent } from '@/types'
 
 const route = useRoute()
 const router = useRouter()
@@ -1195,6 +1143,7 @@ type EnrichedProduct = Product & { reason?: string; aiScore?: number }
 
 // Core State
 const product = ref<Product | null>(null)
+const storefront = ref<ProductStorefrontContent>(emptyStorefrontContent())
 const selectedVariant = ref<ProductVariant | null>(null)
 const activeImage = ref<string>('')
 const activeImageIndex = ref<number>(0)
@@ -1210,48 +1159,51 @@ const showMoreOffers = ref<boolean>(false)
 const showReviewForm = ref<boolean>(false)
 const showStickySubNav = ref<boolean>(false)
 const showStickyBottomBar = ref<boolean>(false)
-const selectedCity = ref<string>('HN')
+const selectedCity = ref<string>('')
 const feedbackState = ref<'yes' | 'no' | null>(null)
 
 // Dialog Modals
 const showVideoModal = ref<boolean>(false)
+const showUnboxModal = ref<boolean>(false)
+const show360Modal = ref<boolean>(false)
 const showTradeInModal = ref<boolean>(false)
 const showInstallmentModal = ref<boolean>(false)
 const showCompareModal = ref<boolean>(false)
+const comparisonProduct = ref<Product | null>(null)
+const loadingComparison = ref<boolean>(false)
+const selectedTradeInIndex = ref<number>(0)
 
-// Colors
-const colorOptions = [
-  { name: 'Xanh dương', hex: '#60a5fa' },
-  { name: 'Titan Đen', hex: '#18181b' },
-  { name: 'Titan Bạc', hex: '#e4e4e7' },
-  { name: 'Titan Xám', hex: '#71717a' }
-]
-const selectedColor = ref(colorOptions[1])
-
-// Cross-sell Combos
-const comboOffers = ref([
-  { id: 1, name: 'Combo Củ sạc siêu nhanh 45W + Cáp sạc C to C', originalPrice: 690000, price: 490000, selected: false },
-  { id: 2, name: 'Bao da Smart View bảo vệ chống sốc chính hãng', originalPrice: 1190000, price: 890000, selected: false }
-])
-
-// Real-time Countdown Timer (ticking every second)
-const timer = ref({ hours: '14', minutes: '37', seconds: '23' })
+// Countdown is driven by the active promotion end time returned by the backend.
+const currentTime = ref(Date.now())
+const timer = ref<{ hours: string; minutes: string; seconds: string } | null>(null)
 let timerInterval: any = null
+let timeRefreshInterval: any = null
 
-const startCountdown = () => {
-  let totalSeconds = 14 * 3600 + 37 * 60 + 23
-  timerInterval = setInterval(() => {
-    if (totalSeconds > 0) {
-      totalSeconds--
-      const h = Math.floor(totalSeconds / 3600)
-      const m = Math.floor((totalSeconds % 3600) / 60)
-      const s = totalSeconds % 60
-      timer.value = {
-        hours: String(h).padStart(2, '0'),
-        minutes: String(m).padStart(2, '0'),
-        seconds: String(s).padStart(2, '0')
-      }
+const startCountdown = (endsAt?: string) => {
+  if (timerInterval) clearInterval(timerInterval)
+  timer.value = null
+  if (!endsAt) return
+
+  const updateTimer = () => {
+    currentTime.value = Date.now()
+    const totalSeconds = Math.max(0, Math.floor((new Date(endsAt).getTime() - currentTime.value) / 1000))
+    const h = Math.floor(totalSeconds / 3600)
+    const m = Math.floor((totalSeconds % 3600) / 60)
+    const s = totalSeconds % 60
+    timer.value = {
+      hours: String(h).padStart(2, '0'),
+      minutes: String(m).padStart(2, '0'),
+      seconds: String(s).padStart(2, '0')
     }
+    if (totalSeconds === 0 && timerInterval) {
+      clearInterval(timerInterval)
+      timerInterval = null
+    }
+  }
+
+  updateTimer()
+  timerInterval = setInterval(() => {
+    updateTimer()
   }, 1000)
 }
 
@@ -1272,180 +1224,173 @@ const loadingSimilar = ref<boolean>(false)
 // Reviews
 const reviews = ref<ProductReview[]>([])
 const reviewSummary = ref<ProductReviewSummary>({
-  productId: 0, averageRating: 4.9, totalReviews: 199,
+  productId: 0, averageRating: 0, totalReviews: 0, ratingBreakdown: [],
   reviews: { content: [], page: 0, size: 10, totalElements: 0, totalPages: 0, last: true }
 })
 const newReview = ref<{ rating: number; comment: string }>({ rating: 5, comment: '' })
 const submittingReview = ref<boolean>(false)
-
-// FAQs
-const faqs = ref([
-  {
-    q: 'Samsung Galaxy S25 Ultra có khả năng kháng nước và bụi như thế nào?',
-    a: 'Thiết bị đạt chuẩn kháng nước và bụi IP68 theo tiêu chuẩn quốc tế, cho phép ngâm dưới nước ngọt ở độ sâu tối đa 1.5 mét trong vòng 30 phút.',
-    open: true
-  },
-  {
-    q: 'Những tính năng Galaxy AI nào nổi bật nhất trên thiết bị?',
-    a: 'Bao gồm Circle to Search (khoanh tròn để tìm kiếm), Dịch trực tiếp cuộc gọi hai chiều (Live Translate), Trợ lý Note tự động tóm tắt văn bản và Chỉnh sửa ảnh chuyên nghiệp bằng AI tạo sinh.',
-    open: false
-  },
-  {
-    q: 'Camera 200MP chụp đêm và quay phim có thực sự ấn tượng không?',
-    a: 'Cảm biến 200MP kết hợp công nghệ Nightography và bộ xử lý ProVisual Engine giúp hình ảnh sắc nét vượt trội, độ sáng cao và giảm nhiễu hạt tối đa trong môi trường thiếu sáng.',
-    open: false
-  },
-  {
-    q: 'Thời lượng pin và công nghệ sạc của máy hoạt động ra sao?',
-    a: 'Dung lượng pin 5.000 mAh cùng tiến trình chip xử lý tiết kiệm điện năng cho phép xem video liên tục lên đến 30 giờ, kết hợp sạc siêu nhanh 45W nạp 65% pin trong khoảng 30 phút.',
-    open: false
-  },
-  {
-    q: 'Thủ tục mua trả góp 0% tại TechStore cần những giấy tờ gì?',
-    a: 'Bạn chỉ cần CCCD gắn chip từ 18 tuổi trở lên. Quá trình xét duyệt hồ sơ online hoàn toàn tự động chỉ trong vòng 5 phút mà không cần thế chấp hay chứng minh thu nhập.',
-    open: false
-  }
-])
-
-const defaultImage = 'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=800&auto=format&fit=crop&q=80'
+const openFaqIndex = ref<number>(0)
 
 // Computed Properties
 const isFav = computed(() => product.value ? wishlistStore.isWishlisted(product.value.id) : false)
-const currentStock = computed(() => selectedVariant.value?.stock ?? 15)
+const currentStock = computed(() => selectedVariant.value?.stock ?? 0)
 
-const currentPrice = computed(() => {
-  return selectedVariant.value?.price || product.value?.minPrice || 23990000
-})
+const currentPrice = computed(() => selectedVariant.value?.price ?? null)
 
 const currentOriginalPrice = computed(() => {
-  if (selectedVariant.value?.originalPrice) return selectedVariant.value.originalPrice
-  return Math.round(currentPrice.value * 1.28 / 10000) * 10000
+  return selectedVariant.value?.originalPrice ?? null
 })
 
 const discountPercent = computed(() => {
-  if (!currentOriginalPrice.value || currentOriginalPrice.value <= currentPrice.value) return 20
-  return Math.round(((currentOriginalPrice.value - currentPrice.value) / currentOriginalPrice.value) * 100)
+  const price = currentPrice.value
+  const originalPrice = currentOriginalPrice.value
+  if (price == null || originalPrice == null || originalPrice <= price) return null
+  return Math.round(((originalPrice - price) / originalPrice) * 100)
 })
 
-const loyaltyPoints = computed(() => {
-  return Math.round(currentPrice.value / 4000).toLocaleString('vi-VN')
+const loyaltyPoints = computed(() => selectedVariant.value?.rewardPoints ?? null)
+const availableVariants = computed(() => (product.value?.variants || []).filter(variant => variant.status?.toUpperCase() === 'ACTIVE'))
+
+const colorOptions = computed(() => {
+  const colors = new Map<string, { name: string; hex?: string }>()
+  for (const variant of availableVariants.value) {
+    const name = variant.colorName?.trim()
+    if (name && !colors.has(name)) colors.set(name, { name, hex: variant.colorHex })
+  }
+  return [...colors.values()]
 })
+
+const selectedColorName = computed(() => selectedVariant.value?.colorName || '')
+const activePromotions = computed(() => storefront.value.promotions.filter(isOfferActive))
+const primaryPromotion = computed(() => activePromotions.value[0] || null)
+const activePaymentOffers = computed(() => storefront.value.paymentOffers.filter(isOfferActive))
+const activeBundleOffers = computed(() => storefront.value.bundleOffers.filter(offer => isDatedOfferActive(offer.startsAt, offer.endsAt)))
+const activeInstallmentPlans = computed(() => storefront.value.installmentPlans.filter(plan => isDatedOfferActive(plan.startsAt, plan.endsAt)))
+const activeTradeInOffers = computed(() => storefront.value.tradeInOffers.filter(offer => isDatedOfferActive(offer.startsAt, offer.endsAt)))
+const activeCityAvailability = computed(() => storefront.value.cityAvailability)
+const selectedCityAvailability = computed(() => activeCityAvailability.value.find(city => city.cityCode === selectedCity.value) || null)
+const hasReviews = computed(() => reviewSummary.value.totalReviews > 0)
+const selectedTradeInOffer = computed(() => activeTradeInOffers.value[selectedTradeInIndex.value] || activeTradeInOffers.value[0] || null)
+const displayedPromotions = computed(() => showMoreOffers.value ? activePromotions.value : activePromotions.value.slice(0, 3))
+const policyTexts = computed(() => [
+  storefront.value.storePolicy.officialProductText,
+  storefront.value.storePolicy.warrantyText,
+  storefront.value.storePolicy.exchangeText,
+  storefront.value.storePolicy.shippingText
+].filter((value): value is string => Boolean(value?.trim())))
 
 const galleryImages = computed(() => {
-  if (product.value?.images && product.value.images.length > 0) {
-    return product.value.images.map(img => img.url)
-  }
-  return [
-    activeImage.value || defaultImage,
-    'https://images.unsplash.com/photo-1580910051074-3eb694886505?w=800&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=800&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=800&auto=format&fit=crop&q=80'
-  ]
+  const images = [...(product.value?.images || [])]
+    .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+    .map(image => image.url)
+  const thumbnail = product.value?.thumbnailUrl
+  if (thumbnail && !images.includes(thumbnail)) images.unshift(thumbnail)
+  return images
 })
 
-// Highlight key specs extracted from attributes
 const highlightSpecs = computed(() => {
   const attrs = product.value?.attributes || []
-  const findVal = (query: string) => attrs.find(a => a.name.toLowerCase().includes(query))?.value
+  const findVal = (...queries: string[]) => attrs.find(a => queries.some(query => a.name.toLowerCase().includes(query)))?.value || ''
 
   return [
     {
       title: 'Kích thước màn hình',
-      value: findVal('màn hình') || '6.8 inch Dynamic AMOLED 2X 120Hz',
+      value: findVal('màn hình'),
       iconSvg: '<rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/>'
     },
     {
       title: 'Hệ thống Camera',
-      value: findVal('camera') || '200.0 MP + 50.0 MP + 12.0 MP',
+      value: findVal('camera'),
       iconSvg: '<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>'
     },
     {
       title: 'Vi xử lý & RAM',
-      value: (findVal('cpu') || 'Snapdragon 8 Gen 3') + ' | ' + (findVal('ram') || '12GB'),
+      value: [findVal('cpu', 'chip', 'vi xử lý'), findVal('ram')].filter(Boolean).join(' | '),
       iconSvg: '<rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3"/>'
     },
     {
       title: 'Pin & Công nghệ sạc',
-      value: findVal('pin') || '5000 mAh, Sạc siêu nhanh 45W',
+      value: findVal('pin', 'sạc'),
       iconSvg: '<rect x="2" y="7" width="16" height="10" rx="2"/><line x1="22" y1="11" x2="22" y2="13"/>'
     }
   ]
 })
 
-// Star Breakdown
 const starBreakdown = computed(() => {
-  const total = reviewSummary.value.totalReviews || 199
-  const count5 = Math.round(total * 0.94)
-  const count4 = Math.round(total * 0.04)
-  const count3 = Math.round(total * 0.015)
-  const count2 = 1
-  const count1 = 0
-  return [
-    { stars: 5, count: count5, percent: 94 },
-    { stars: 4, count: count4, percent: 4 },
-    { stars: 3, count: count3, percent: 2 },
-    { stars: 2, count: count2, percent: 0 },
-    { stars: 1, count: count1, percent: 0 }
-  ]
+  const counts = new Map((reviewSummary.value.ratingBreakdown || []).map(item => [item.stars, item.count]))
+  const total = reviewSummary.value.totalReviews
+  return [5, 4, 3, 2, 1].map(stars => {
+    const count = counts.get(stars) || 0
+    return { stars, count, percent: total > 0 ? Math.round(count * 100 / total) : 0 }
+  })
 })
 
-// Display Reviews with fallback mock reviews if database review list is empty
-const displayReviews = computed(() => {
-  if (reviews.value && reviews.value.length > 0) {
-    return reviews.value
+const displayReviews = computed(() => reviews.value)
+
+const isDatedOfferActive = (startsAt?: string, endsAt?: string) => {
+  const now = currentTime.value
+  return (!startsAt || new Date(startsAt).getTime() <= now) && (!endsAt || new Date(endsAt).getTime() > now)
+}
+
+const isOfferActive = (offer: { startsAt?: string; endsAt?: string }) => isDatedOfferActive(offer.startsAt, offer.endsAt)
+
+watch(primaryPromotion, promotion => startCountdown(promotion?.endsAt))
+
+function emptyStorefrontContent(): ProductStorefrontContent {
+  return {
+    storySections: [],
+    media: {},
+    promotions: [],
+    paymentOffers: [],
+    bundleOffers: [],
+    faqs: [],
+    cityAvailability: [],
+    installmentPlans: [],
+    tradeInOffers: [],
+    storePolicy: {},
+    comparisonProductIds: []
   }
-  return [
-    {
-      id: 901,
-      userId: 1,
-      userFullName: 'Lê Văn Đạt',
-      productId: product.value?.id || 1,
-      rating: 5,
-      comment: 'Máy cầm rất chắc tay, khung titan nhẹ hơn hẳn đời trước. Màn hình phẳng dán cường lực rất dễ, độ sáng ngoài trời tuyệt vời!',
-      createdAt: 'Hôm qua'
-    },
-    {
-      id: 902,
-      userId: 2,
-      userFullName: 'Cao Thị Mỹ Duyên',
-      productId: product.value?.id || 1,
-      rating: 5,
-      comment: 'Camera zoom 5x chụp sân khấu concert siêu nét. Tính năng khoanh tròn tìm kiếm bằng Galaxy AI nhanh tiện không tưởng.',
-      createdAt: '3 ngày trước'
-    },
-    {
-      id: 903,
-      userId: 3,
-      userFullName: 'Hoàng Minh Tuấn',
-      productId: product.value?.id || 1,
-      rating: 5,
-      comment: 'Giao hàng chỉ mất 1 tiếng từ siêu thị gần nhà, nhân viên hỗ trợ dán màn hình và chuyển dữ liệu từ máy cũ rất nhiệt tình.',
-      createdAt: '5 ngày trước'
-    }
-  ]
-})
+}
 
 const formatPrice = (value?: number | null): string => {
-  if (!value || isNaN(value)) return 'Liên hệ'
+  if (value == null || isNaN(value)) return 'Liên hệ'
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value)
+}
+
+const formatReviewDate = (value: string) => {
+  const date = new Date(value)
+  return Number.isNaN(date.getTime()) ? 'Không rõ ngày' : new Intl.DateTimeFormat('vi-VN', { dateStyle: 'medium' }).format(date)
 }
 
 // Methods & Actions
 const selectImage = (idx: number) => {
+  if (!galleryImages.value[idx]) return
   activeImageIndex.value = idx
   activeImage.value = galleryImages.value[idx]
 }
 
 const prevImage = () => {
   const len = galleryImages.value.length
+  if (len < 2) return
   activeImageIndex.value = (activeImageIndex.value - 1 + len) % len
   activeImage.value = galleryImages.value[activeImageIndex.value]
 }
 
 const nextImage = () => {
   const len = galleryImages.value.length
+  if (len < 2) return
   activeImageIndex.value = (activeImageIndex.value + 1) % len
   activeImage.value = galleryImages.value[activeImageIndex.value]
+}
+
+const selectVariant = (variant: ProductVariant) => {
+  selectedVariant.value = variant
+  quantity.value = Math.min(quantity.value, Math.max(variant.stock, 1))
+}
+
+const selectColor = (colorName: string) => {
+  const matchingVariant = availableVariants.value.find(variant => variant.colorName === colorName)
+  if (matchingVariant) selectVariant(matchingVariant)
 }
 
 let touchStartX = 0
@@ -1505,24 +1450,33 @@ const handleToggleWishlist = async () => {
 
 const handleAddToCart = async () => {
   if (!product.value) return
-  const variantId = selectedVariant.value?.id || (product.value.variants?.[0]?.id ?? 201)
+  const variantId = selectedVariant.value?.id
+  if (!variantId) {
+    toast.error('Sản phẩm chưa có phiên bản để thêm vào giỏ hàng')
+    return false
+  }
+  if (currentStock.value <= 0) {
+    toast.error('Phiên bản đang chọn hiện đã hết hàng')
+    return false
+  }
   addingToCart.value = true
   try {
     await cartStore.addToCart(variantId, quantity.value, product.value.id)
     toastMessage.value = `Đã thêm ${quantity.value} sản phẩm vào giỏ hàng thành công!`
     toast.success(`Đã thêm ${quantity.value} sản phẩm vào giỏ hàng!`)
     setTimeout(() => { toastMessage.value = '' }, 3000)
+    return true
   } catch (err: any) {
     toastMessage.value = err.message
     toast.error(err.message || 'Không thể thêm sản phẩm')
+    return false
   } finally {
     addingToCart.value = false
   }
 }
 
 const handleBuyNow = async () => {
-  await handleAddToCart()
-  router.push('/cart')
+  if (await handleAddToCart()) router.push('/cart')
 }
 
 const openVideoModal = () => {
@@ -1530,11 +1484,29 @@ const openVideoModal = () => {
 }
 
 const openUnboxModal = () => {
-  toast.info('Đang mở bộ sưu tập phụ kiện trong hộp: Cáp sạc C-to-C, Que chọc sim, Sách HDSD')
+  showUnboxModal.value = true
 }
 
 const open360Modal = () => {
-  toast.info('Chế độ xoay 360° thực tế ảo đang sẵn sàng')
+  show360Modal.value = true
+}
+
+const openCompareModal = async () => {
+  showCompareModal.value = true
+  comparisonProduct.value = null
+  const comparisonProductId = storefront.value.comparisonProductIds.find(id => id !== product.value?.id)
+    ?? similarProducts.value.find(item => item.id !== product.value?.id)?.id
+  if (!comparisonProductId) return
+
+  loadingComparison.value = true
+  try {
+    const response = await catalogApi.getProductById(comparisonProductId)
+    if (response.success && response.data) comparisonProduct.value = response.data
+  } catch (error) {
+    console.error('Không thể tải sản phẩm so sánh:', error)
+  } finally {
+    loadingComparison.value = false
+  }
 }
 
 const openInstallmentModal = () => {
@@ -1570,28 +1542,61 @@ const handleScroll = () => {
   }
 }
 
+let productRequestId = 0
 const loadProductData = async (id: number | string) => {
+  const requestId = ++productRequestId
+  const productId = Number(id)
+  currentTime.value = Date.now()
   loading.value = true
+  product.value = null
+  storefront.value = emptyStorefrontContent()
+  selectedVariant.value = null
+  activeImage.value = ''
+  activeImageIndex.value = 0
+  selectedCity.value = ''
+  reviewSummary.value = {
+    productId, averageRating: 0, totalReviews: 0, ratingBreakdown: [],
+    reviews: { content: [], page: 0, size: 10, totalElements: 0, totalPages: 0, last: true }
+  }
+  reviews.value = []
+  comparisonProduct.value = null
+  selectedTradeInIndex.value = 0
+  showMoreOffers.value = false
+  startCountdown()
+
   try {
-    const res = await catalogApi.getProductById(Number(id))
+    const res = await catalogApi.getProductById(productId)
+    if (requestId !== productRequestId) return
     if (res.success && res.data) {
       product.value = res.data
-      if (product.value.variants && product.value.variants.length > 0) {
-        selectedVariant.value = product.value.variants[0]
-      }
-      if (product.value.images && product.value.images.length > 0) {
-        activeImage.value = product.value.images[0].url
-        activeImageIndex.value = 0
-      }
+      selectedVariant.value = availableVariants.value[0] || null
+      quantity.value = 1
+      activeImage.value = galleryImages.value[0] || ''
 
       behaviorApi.track('VIEW', product.value.id)
-      loadSimilarProducts(product.value.id)
-      loadReviews(product.value.id)
+      await Promise.all([
+        loadStorefrontContent(product.value.id, requestId),
+        loadSimilarProducts(product.value.id),
+        loadReviews(product.value.id, requestId)
+      ])
     }
   } catch (err) {
-    console.error('Không thể tải chi tiết sản phẩm:', err)
+    if (requestId === productRequestId) console.error('Không thể tải chi tiết sản phẩm:', err)
   } finally {
-    loading.value = false
+    if (requestId === productRequestId) loading.value = false
+  }
+}
+
+const loadStorefrontContent = async (productId: number, requestId: number) => {
+  try {
+    const response = await catalogApi.getProductStorefront(productId)
+    if (requestId !== productRequestId || product.value?.id !== productId) return
+    if (response.success && response.data) {
+      storefront.value = { ...emptyStorefrontContent(), ...response.data }
+      if (activeCityAvailability.value.length) selectedCity.value = activeCityAvailability.value[0].cityCode
+    }
+  } catch (error) {
+    if (requestId === productRequestId) console.error('Không thể tải nội dung trang sản phẩm:', error)
   }
 }
 
@@ -1613,19 +1618,21 @@ const loadSimilarProducts = async (productId: number) => {
   }
 }
 
-const loadReviews = async (productId: number) => {
+const loadReviews = async (productId: number, requestId: number = productRequestId) => {
   try {
     const res = await catalogApi.getReviewSummary(productId)
+    if (requestId !== productRequestId || product.value?.id !== productId) return
     if (res.success && res.data) {
       reviewSummary.value = {
         ...res.data,
-        averageRating: res.data.averageRating || 4.9,
-        totalReviews: res.data.totalReviews || 199
+        averageRating: res.data.averageRating ?? 0,
+        totalReviews: res.data.totalReviews ?? 0,
+        ratingBreakdown: res.data.ratingBreakdown || []
       }
       reviews.value = res.data.reviews?.content || []
     }
   } catch (err) {
-    console.error('Lỗi tải đánh giá:', err)
+    if (requestId === productRequestId) console.error('Lỗi tải đánh giá:', err)
   }
 }
 
@@ -1660,8 +1667,8 @@ watch(() => route.params.id, (newId) => {
 })
 
 onMounted(() => {
-  startCountdown()
   window.addEventListener('scroll', handleScroll, { passive: true })
+  timeRefreshInterval = setInterval(() => { currentTime.value = Date.now() }, 30000)
   if (route.params.id) {
     loadProductData(route.params.id as string)
   }
@@ -1669,6 +1676,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   if (timerInterval) clearInterval(timerInterval)
+  if (timeRefreshInterval) clearInterval(timeRefreshInterval)
   window.removeEventListener('scroll', handleScroll)
 })
 </script>

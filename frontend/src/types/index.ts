@@ -71,8 +71,102 @@ export interface ProductVariant {
   name: string
   price: number
   originalPrice?: number
+  colorName?: string
+  colorHex?: string
+  rewardPoints?: number
   stock: number
   status: string
+}
+
+export interface ProductStorySection {
+  heading?: string
+  body?: string
+  imageUrl?: string
+  imageCaption?: string
+}
+
+export interface ProductOffer {
+  id?: string
+  title: string
+  description?: string
+  partnerName?: string
+  terms?: string
+  startsAt?: string
+  endsAt?: string
+  quota?: number
+  claimed?: number
+  discountAmount?: number
+}
+
+export interface ProductBundleOffer {
+  id?: string
+  title: string
+  description?: string
+  originalPrice?: number
+  price?: number
+  startsAt?: string
+  endsAt?: string
+}
+
+export interface ProductFaq {
+  question: string
+  answer: string
+}
+
+export interface ProductCityAvailability {
+  cityCode: string
+  cityName: string
+  storeCount?: number
+  stockCount?: number
+  deliveryEstimate?: string
+}
+
+export interface ProductInstallmentPlan {
+  providerName: string
+  months: number
+  interestRatePercent?: number
+  monthlyPayment?: number
+  downPayment?: number
+  terms?: string
+  startsAt?: string
+  endsAt?: string
+}
+
+export interface ProductTradeInOffer {
+  deviceModel: string
+  maximumSubsidy?: number
+  minimumTopUp?: number
+  maximumTopUp?: number
+  condition?: string
+  terms?: string
+  startsAt?: string
+  endsAt?: string
+}
+
+export interface ProductStorefrontContent {
+  storySections: ProductStorySection[]
+  media: {
+    reviewVideoUrl?: string
+    unboxingVideoUrl?: string
+    unboxingDescription?: string
+    view360Url?: string
+  }
+  promotions: ProductOffer[]
+  paymentOffers: ProductOffer[]
+  bundleOffers: ProductBundleOffer[]
+  faqs: ProductFaq[]
+  cityAvailability: ProductCityAvailability[]
+  installmentPlans: ProductInstallmentPlan[]
+  tradeInOffers: ProductTradeInOffer[]
+  storePolicy: {
+    officialProductText?: string
+    warrantyText?: string
+    exchangeText?: string
+    shippingText?: string
+    hotline?: string
+    hotlineHours?: string
+  }
+  comparisonProductIds: number[]
 }
 
 export interface ProductImage {
@@ -186,6 +280,7 @@ export interface ProductReviewSummary {
   productId: number
   averageRating: number
   totalReviews: number
+  ratingBreakdown?: Array<{ stars: number; count: number }>
   reviews: PageResponse<ProductReview>
 }
 

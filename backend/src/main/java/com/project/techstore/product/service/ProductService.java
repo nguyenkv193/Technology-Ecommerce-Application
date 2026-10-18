@@ -203,6 +203,9 @@ public class ProductService {
                     .name(vDto.getName().trim())
                     .price(vDto.getPrice())
                     .originalPrice(vDto.getOriginalPrice())
+                    .colorName(StringUtils.hasText(vDto.getColorName()) ? vDto.getColorName().trim() : null)
+                    .colorHex(StringUtils.hasText(vDto.getColorHex()) ? vDto.getColorHex().trim() : null)
+                    .rewardPoints(vDto.getRewardPoints())
                     .stock(vDto.getStock() != null ? vDto.getStock() : 0)
                     .status(StringUtils.hasText(vDto.getStatus()) ? vDto.getStatus() : "ACTIVE")
                     .build();
@@ -300,6 +303,9 @@ public class ProductService {
                     .name(vDto.getName().trim())
                     .price(vDto.getPrice())
                     .originalPrice(vDto.getOriginalPrice())
+                    .colorName(StringUtils.hasText(vDto.getColorName()) ? vDto.getColorName().trim() : null)
+                    .colorHex(StringUtils.hasText(vDto.getColorHex()) ? vDto.getColorHex().trim() : null)
+                    .rewardPoints(vDto.getRewardPoints())
                     .stock(vDto.getStock() != null ? vDto.getStock() : 0)
                     .status(StringUtils.hasText(vDto.getStatus()) ? vDto.getStatus() : "ACTIVE")
                     .build());

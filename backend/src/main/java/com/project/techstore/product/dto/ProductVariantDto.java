@@ -6,6 +6,7 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -37,6 +38,17 @@ public class ProductVariantDto {
     @Schema(description = "Giá niêm yết ban đầu (nếu có giảm giá)", example = "36990000")
     private BigDecimal originalPrice;
 
+    @Schema(description = "Tên màu do cửa hàng xác nhận", example = "Titan Tự Nhiên")
+    private String colorName;
+
+    @Pattern(regexp = "^#[0-9A-Fa-f]{6}$", message = "Mã màu phải theo định dạng #RRGGBB")
+    @Schema(description = "Mã màu hiển thị tùy chọn", example = "#8c8c8c")
+    private String colorHex;
+
+    @Min(value = 0, message = "Điểm thưởng không được âm")
+    @Schema(description = "Điểm thưởng do hệ thống loyalty cung cấp")
+    private Long rewardPoints;
+
     @NotNull(message = "Số lượng tồn kho không được để trống")
     @Min(value = 0, message = "Số lượng tồn kho không được âm")
     @Schema(description = "Số lượng trong kho", example = "50")
@@ -54,6 +66,9 @@ public class ProductVariantDto {
                 .name(variant.getName())
                 .price(variant.getPrice())
                 .originalPrice(variant.getOriginalPrice())
+                .colorName(variant.getColorName())
+                .colorHex(variant.getColorHex())
+                .rewardPoints(variant.getRewardPoints())
                 .stock(variant.getStock())
                 .status(variant.getStatus())
                 .build();

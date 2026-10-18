@@ -34,6 +34,15 @@ public class ProductVariant extends BaseEntity {
     @Column(name = "original_price", precision = 15, scale = 2)
     private BigDecimal originalPrice;
 
+    @Column(name = "color_name", length = 100)
+    private String colorName;
+
+    @Column(name = "color_hex", length = 7)
+    private String colorHex;
+
+    @Column(name = "reward_points")
+    private Long rewardPoints;
+
     @Column(name = "stock", nullable = false)
     @Builder.Default
     private Integer stock = 0;
