@@ -306,7 +306,7 @@
         </div>
 
         <!-- Section: Mô tả - Thông tin hay (Rich Product Story) -->
-        <div id="description" class="bg-white rounded-3xl border border-zinc-200/80 p-6 sm:p-8 space-y-5 shadow-xs relative">
+        <div id="description" class="bg-white rounded-3xl border border-zinc-200/80 p-6 sm:p-8 space-y-5 shadow-xs relative scroll-mt-24">
           <div class="flex items-center justify-between pb-3 border-b border-zinc-100">
             <h2 class="text-lg font-bold text-zinc-900 flex items-center gap-2">
               <span class="w-2.5 h-2.5 rounded-full bg-red-600"></span>
@@ -726,16 +726,6 @@
       <HardwareSpecsTable :attributes="product.attributes" />
     </div>
 
-    <!-- ================= SIMILAR PRODUCTS SECTION ================= -->
-    <div id="similar" class="pt-4 scroll-mt-24">
-      <RecommendationCarousel
-        title="Sản Phẩm Tương Tự & Phù Hợp"
-        subtitle="Các thiết bị có cùng phân khúc cao cấp và đặc tính kỹ thuật tương đương"
-        :items="similarProducts"
-        :loading="loadingSimilar"
-      />
-    </div>
-
     <!-- ================= CUSTOMER REVIEWS & FEEDBACK SECTION ================= -->
     <section id="reviews" class="bg-white border border-zinc-200/80 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xs scroll-mt-24">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-zinc-100 gap-4">
@@ -892,6 +882,16 @@
         </div>
       </div>
     </section>
+
+    <!-- ================= SIMILAR PRODUCTS SECTION ================= -->
+    <div id="similar" class="pt-4 scroll-mt-24">
+      <RecommendationCarousel
+        title="Sản Phẩm Tương Tự & Phù Hợp"
+        subtitle="Các thiết bị có cùng phân khúc cao cấp và đặc tính kỹ thuật tương đương"
+        :items="similarProducts"
+        :loading="loadingSimilar"
+      />
+    </div>
 
     <!-- ================= FREQUENTLY ASKED QUESTIONS (FAQ) ================= -->
     <section id="faq" class="bg-white border border-zinc-200/80 rounded-3xl p-6 sm:p-8 space-y-4 shadow-xs scroll-mt-24">
@@ -1523,6 +1523,12 @@ const handleScroll = () => {
   const scrollPos = window.scrollY || document.documentElement.scrollTop
   showStickySubNav.value = scrollPos > 350
   showStickyBottomBar.value = scrollPos > 550
+
+  const isBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 50
+  if (isBottom) {
+    activeSection.value = 'faq'
+    return
+  }
 
   const sections = ['faq', 'similar', 'reviews', 'specs', 'description', 'overview']
   for (const s of sections) {
