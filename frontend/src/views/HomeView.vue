@@ -1,58 +1,81 @@
 <template>
   <div class="space-y-12 sm:space-y-16">
-    <!-- Hero Banner (Enterprise Minimalist Style với Flagship Showcase Slide) -->
-    <section class="relative isolate overflow-hidden rounded-3xl border border-zinc-200/80 p-8 sm:p-10 lg:p-14 shadow-xs min-h-[520px] flex items-center">
-      <!-- Dynamic Product Background with Frosted Glass Blur Overlay -->
+    <!-- Hero Banner (Flagship Cyber-Glass Stage Showcase) -->
+    <section 
+      class="relative isolate overflow-hidden rounded-3xl border border-zinc-800/90 bg-[#07090e] p-6 sm:p-10 lg:p-12 shadow-2xl min-h-[560px] flex flex-col justify-between"
+      @mouseenter="stopSlideTimer"
+      @mouseleave="startSlideTimer"
+    >
+      <!-- Dynamic Ambient Aura Mesh & Grid Overlay -->
       <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none rounded-3xl">
-        <Transition name="hero-bg-crossfade">
-          <img 
-            :key="currentSlide.id"
-            :src="currentSlide.image" 
-            :alt="currentSlide.title"
-            class="absolute inset-0 w-full h-full object-cover object-center filter blur-[8px] scale-110"
-          />
-        </Transition>
+        <!-- Tech Subtle Grid Pattern -->
+        <div class="absolute inset-0 bg-[radial-gradient(#ffffff0d_1px,transparent_1px)] [background-size:24px_24px] opacity-40"></div>
 
-        <!-- Frosted Glass Protective Layer ("Hiệu ứng phủ mờ") -->
-        <div class="absolute inset-0 bg-white/40 backdrop-blur-sm"></div>
-        <div class="absolute inset-0 bg-gradient-to-r from-white/80 via-white/50 to-transparent"></div>
+        <!-- Dynamic Ambient Aura Glow in top right / center -->
+        <div 
+          class="absolute -top-24 right-0 lg:right-12 w-[420px] sm:w-[560px] h-[420px] sm:h-[560px] rounded-full blur-[110px] opacity-40 transition-all duration-1000 pointer-events-none"
+          :class="currentSlide.themeGlow"
+        ></div>
+
+        <!-- Secondary subtle ambient glow in bottom left -->
+        <div class="absolute -bottom-24 -left-24 w-80 h-80 rounded-full bg-blue-600/10 blur-[100px] pointer-events-none"></div>
+
+        <!-- Soft Vignette & Border Light -->
+        <div class="absolute inset-0 bg-gradient-to-t from-[#07090e] via-transparent to-transparent opacity-60"></div>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center relative z-10 w-full">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center relative z-10 w-full flex-1">
         <!-- Left: Dynamic Copy & Actions (7 cols) -->
         <div class="lg:col-span-7 space-y-6">
           <Transition name="hero-text-fade" mode="out-in">
-            <div :key="currentSlide.id" class="space-y-6">
-              <!-- Kicker Pill Badge -->
-              <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/90 backdrop-blur-md border border-zinc-200/80 text-zinc-800 text-xs font-semibold shadow-2xs">
-                <span class="w-1.5 h-1.5 rounded-full bg-zinc-900 animate-pulse"></span>
+            <div :key="currentSlide.id" class="space-y-5">
+              <!-- Kicker Pill Badge with Pulsing LED Dot -->
+              <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 backdrop-blur-md border border-white/10 text-white text-xs font-semibold shadow-inner">
+                <span class="w-2 h-2 rounded-full animate-ping" :class="currentSlide.accentDot"></span>
                 <span>{{ currentSlide.kicker }}</span>
               </div>
 
-              <!-- Main Dynamic H1 -->
-              <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-zinc-950 tracking-tight leading-[1.15]">
-                {{ currentSlide.headingLine1 }} <br/>
-                <span class="text-zinc-500">{{ currentSlide.headingLine2 }}</span>
+              <!-- Main Dynamic H1 with Metallic Gradient Text -->
+              <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-[1.12]">
+                <span>{{ currentSlide.headingLine1 }}</span> <br/>
+                <span class="bg-clip-text text-transparent bg-gradient-to-r from-zinc-100 via-zinc-300 to-zinc-500 font-extrabold">
+                  {{ currentSlide.headingLine2 }}
+                </span>
               </h1>
 
               <!-- Dynamic Description -->
-              <p class="text-zinc-600 text-sm sm:text-base leading-relaxed max-w-xl">
+              <p class="text-zinc-300 text-xs sm:text-sm lg:text-base leading-relaxed max-w-xl font-normal">
                 {{ currentSlide.description }}
               </p>
 
+              <!-- Deal Highlight Pill & Price -->
+              <div class="flex items-center flex-wrap gap-3 pt-1">
+                <div class="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                  {{ formatCurrency(currentSlide.price) }}
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="px-2.5 py-1 rounded-lg text-[11px] font-bold uppercase tracking-wider bg-red-600/90 text-white shadow-xs">
+                    Trả góp 0%
+                  </span>
+                  <span class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-white/10 border border-white/10 text-amber-300">
+                    🔥 Giảm sốc online
+                  </span>
+                </div>
+              </div>
+
               <!-- Dynamic Action Buttons -->
-              <div class="flex flex-wrap gap-3 pt-1">
+              <div class="flex flex-wrap items-center gap-3 pt-2">
                 <router-link 
                   :to="currentSlide.link"
-                  class="px-5 py-2.5 rounded-xl font-medium text-xs sm:text-sm bg-zinc-900 hover:bg-black text-white shadow-xs transition-all active:scale-95 flex items-center gap-2"
+                  class="px-6 py-3 rounded-2xl font-bold text-xs sm:text-sm bg-white hover:bg-zinc-100 text-zinc-950 shadow-lg hover:shadow-white/20 transition-all active:scale-95 flex items-center gap-2 cursor-pointer group/btn"
                 >
                   <span>{{ currentSlide.primaryCtaText }}</span>
-                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  <svg class="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 </router-link>
 
                 <router-link 
                   :to="currentSlide.secondaryCtaLink"
-                  class="px-5 py-2.5 rounded-xl font-medium text-xs sm:text-sm bg-white/90 hover:bg-white text-zinc-800 border border-zinc-200/80 shadow-2xs transition flex items-center gap-2"
+                  class="px-5 py-3 rounded-2xl font-semibold text-xs sm:text-sm bg-white/5 hover:bg-white/10 text-zinc-200 border border-white/15 backdrop-blur-md transition-all active:scale-95 flex items-center gap-2 cursor-pointer"
                 >
                   <span>{{ currentSlide.secondaryCtaText }}</span>
                 </router-link>
@@ -60,145 +83,129 @@
             </div>
           </Transition>
 
-          <!-- Redesigned Trust Badges (Modern Luxury Pill Badges) -->
-          <div class="pt-5 border-t border-zinc-200/70 flex flex-wrap items-center gap-2.5 sm:gap-3">
+          <!-- Modern Glassmorphism Trust Badges -->
+          <div class="pt-5 border-t border-white/10 flex flex-wrap items-center gap-2.5 sm:gap-3">
             <!-- 100% Chính Hãng -->
-            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/90 backdrop-blur-md border border-zinc-200/80 shadow-2xs hover:border-emerald-300 hover:shadow-xs transition-all duration-200 group/b">
-              <div class="w-5 h-5 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 group-hover/b:scale-110 transition-transform">
-                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-              </div>
-              <span class="text-xs font-semibold text-zinc-800">100% Chính hãng</span>
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-zinc-300 text-xs font-medium hover:bg-white/10 hover:border-emerald-500/40 transition-all duration-200">
+              <span class="text-emerald-400">✓</span>
+              <span>100% Chính hãng</span>
             </div>
 
             <!-- Giao hỏa tốc 2H -->
-            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/90 backdrop-blur-md border border-zinc-200/80 shadow-2xs hover:border-blue-300 hover:shadow-xs transition-all duration-200 group/b">
-              <div class="w-5 h-5 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 group-hover/b:scale-110 transition-transform">
-                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-              </div>
-              <span class="text-xs font-semibold text-zinc-800">Giao hỏa tốc 2H</span>
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-zinc-300 text-xs font-medium hover:bg-white/10 hover:border-blue-500/40 transition-all duration-200">
+              <span class="text-blue-400">⚡</span>
+              <span>Giao hỏa tốc 2H</span>
             </div>
 
             <!-- Bảo hành 12 tháng -->
-            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/90 backdrop-blur-md border border-zinc-200/80 shadow-2xs hover:border-violet-300 hover:shadow-xs transition-all duration-200 group/b">
-              <div class="w-5 h-5 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center shrink-0 group-hover/b:scale-110 transition-transform">
-                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-              </div>
-              <span class="text-xs font-semibold text-zinc-800">Bảo hành 12 tháng</span>
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-zinc-300 text-xs font-medium hover:bg-white/10 hover:border-violet-500/40 transition-all duration-200">
+              <span class="text-violet-400">🛡️</span>
+              <span>Bảo hành 12 tháng</span>
             </div>
 
             <!-- Đổi trả 1-đổi-1 30 ngày -->
-            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/90 backdrop-blur-md border border-zinc-200/80 shadow-2xs hover:border-amber-300 hover:shadow-xs transition-all duration-200 group/b">
-              <div class="w-5 h-5 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 group-hover/b:scale-110 transition-transform">
-                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"/><path d="M4 6v12c0 1.1.9 2 2 2h14v-4"/><circle cx="18" cy="12" r="1"/></svg>
-              </div>
-              <span class="text-xs font-semibold text-zinc-800">Đổi mới 30 ngày</span>
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-zinc-300 text-xs font-medium hover:bg-white/10 hover:border-amber-500/40 transition-all duration-200">
+              <span class="text-amber-400">🔄</span>
+              <span>Đổi mới 30 ngày</span>
             </div>
           </div>
         </div>
 
-        <!-- Right: Interactive Flagship Showcase (5 cols) -->
-        <div 
-          class="lg:col-span-5 relative flex flex-col items-center justify-center pt-2 lg:pt-0"
-          @mouseenter="stopSlideTimer"
-          @mouseleave="startSlideTimer"
-        >
-          <!-- Soft Ambient Glow -->
-          <div class="absolute -top-6 -right-6 w-64 h-64 rounded-full bg-gradient-to-br from-zinc-200 to-zinc-100/20 blur-3xl pointer-events-none -z-0"></div>
+        <!-- Right: Flagship Floating Stage & Floating HUD Spec Cards (5 cols) -->
+        <div class="lg:col-span-5 relative flex items-center justify-center min-h-[340px] sm:min-h-[400px]">
+          <!-- Floating Pedestal Light Glow underneath product -->
+          <div class="absolute bottom-6 w-60 sm:w-80 h-10 rounded-[100%] bg-white/10 blur-xl pointer-events-none"></div>
 
-          <!-- Showcase Card with Fade-Slide Transition -->
-          <div class="relative z-10 w-full max-w-sm">
-            <Transition name="fade-slide" mode="out-in">
-              <div 
-                :key="currentSlide.id"
-                class="rounded-2xl bg-white/95 backdrop-blur-md border border-zinc-200/80 p-5 shadow-lg hover:shadow-xl transition-all duration-300 flex flex-col justify-between"
-              >
-                <!-- Top Header on Card -->
-                <div class="flex items-center justify-between gap-2 mb-3">
-                  <span class="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-md bg-zinc-100 text-zinc-700 border border-zinc-200/80">
-                    {{ currentSlide.tag }}
-                  </span>
-                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-zinc-900 text-white shadow-2xs">
-                    ★ {{ currentSlide.badge }}
-                  </span>
-                </div>
-
-                <!-- Product Showcase Image Canvas -->
-                <router-link 
-                  :to="currentSlide.link"
-                  class="relative aspect-[4/3] rounded-xl bg-[#f6f6f8] flex items-center justify-center p-4 overflow-hidden group cursor-pointer"
-                >
-                  <img 
-                    :src="currentSlide.image" 
-                    :alt="currentSlide.title"
-                    class="object-contain max-h-full max-w-full group-hover:scale-105 transition-transform duration-500 drop-shadow-sm"
-                  />
-                </router-link>
-
-                <!-- Spec Chips -->
-                <div class="flex flex-wrap gap-1.5 mt-3 mb-2">
-                  <span 
-                    v-for="(spec, sIdx) in currentSlide.specs" 
-                    :key="sIdx"
-                    class="text-[10px] text-zinc-600 bg-zinc-100/90 px-2 py-0.5 rounded-md font-medium border border-zinc-200/60"
-                  >
-                    {{ spec }}
-                  </span>
-                </div>
-
-                <!-- Product Info & Direct CTA -->
-                <div class="mt-2 pt-3 border-t border-zinc-100 flex items-center justify-between gap-3">
-                  <div class="min-w-0">
-                    <h3 class="font-bold text-zinc-900 text-sm truncate">
-                      {{ currentSlide.title }}
-                    </h3>
-                    <div class="text-xs font-bold text-zinc-900 mt-0.5">
-                      {{ formatCurrency(currentSlide.price) }}
-                    </div>
-                  </div>
-
-                  <router-link 
-                    :to="currentSlide.link"
-                    class="shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-medium bg-zinc-900 hover:bg-black text-white transition-all active:scale-95 flex items-center gap-1 shadow-2xs"
-                  >
-                    <span>Xem ngay</span>
-                    <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                  </router-link>
-                </div>
+          <!-- Product Floating Image (Free-standing, borderless & majestic) -->
+          <router-link 
+            :to="currentSlide.link"
+            class="relative z-10 block group cursor-pointer"
+          >
+            <Transition name="hero-product-zoom" mode="out-in">
+              <div :key="currentSlide.id" class="relative flex items-center justify-center p-2">
+                <img 
+                  :src="currentSlide.image" 
+                  :alt="currentSlide.title"
+                  class="w-72 sm:w-88 lg:w-96 max-h-[320px] sm:max-h-[380px] object-contain drop-shadow-[0_20px_45px_rgba(0,0,0,0.85)] group-hover:scale-105 transition-transform duration-500 select-none animate-float-slow"
+                />
               </div>
             </Transition>
+          </router-link>
 
-            <!-- Slide Navigation Controls -->
-            <div class="flex items-center justify-between mt-3 px-1">
-              <!-- Dots -->
-              <div class="flex items-center gap-1.5">
-                <button 
-                  v-for="(_, idx) in featuredSlides" 
-                  :key="idx"
-                  @click="goToSlide(idx)"
-                  class="h-1.5 rounded-full transition-all duration-300"
-                  :class="currentSlideIndex === idx ? 'w-6 bg-zinc-900' : 'w-2 bg-zinc-300 hover:bg-zinc-400'"
-                  :title="`Slide ${idx + 1}`"
-                ></button>
-              </div>
-
-              <!-- Previous / Next Arrows -->
-              <div class="flex items-center gap-1">
-                <button 
-                  @click="prevSlide"
-                  class="p-1 rounded-lg bg-white/80 hover:bg-white border border-zinc-200 text-zinc-600 hover:text-zinc-900 transition shadow-2xs"
-                  title="Trước"
-                >
-                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>
-                </button>
-                <button 
-                  @click="nextSlide"
-                  class="p-1 rounded-lg bg-white/80 hover:bg-white border border-zinc-200 text-zinc-600 hover:text-zinc-900 transition shadow-2xs"
-                  title="Tiếp theo"
-                >
-                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 18l6-6-6-6"/></svg>
-                </button>
-              </div>
+          <!-- Floating Spec HUD 1 (Top Left) -->
+          <div 
+            v-if="currentSlide.hudSpecs?.[0]"
+            class="absolute top-2 left-0 sm:-left-3 z-20 px-3.5 py-2 rounded-2xl bg-zinc-900/85 backdrop-blur-md border border-white/15 shadow-xl flex items-center gap-3 transition-all duration-500 animate-hover-gentle pointer-events-none select-none"
+          >
+            <div class="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center text-white shrink-0">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3"/></svg>
             </div>
+            <div>
+              <div class="text-[10px] text-zinc-400 font-medium">{{ currentSlide.hudSpecs[0].label }}</div>
+              <div class="text-xs font-bold text-white">{{ currentSlide.hudSpecs[0].value }}</div>
+            </div>
+          </div>
+
+          <!-- Floating Spec HUD 2 (Bottom Right) -->
+          <div 
+            v-if="currentSlide.hudSpecs?.[1]"
+            class="absolute bottom-6 right-0 sm:-right-3 z-20 px-3.5 py-2 rounded-2xl bg-zinc-900/85 backdrop-blur-md border border-white/15 shadow-xl flex items-center gap-3 transition-all duration-500 animate-hover-gentle-delay pointer-events-none select-none"
+          >
+            <div class="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center text-white shrink-0">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div>
+              <div class="text-[10px] text-zinc-400 font-medium">{{ currentSlide.hudSpecs[1].label }}</div>
+              <div class="text-xs font-bold text-white">{{ currentSlide.hudSpecs[1].value }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Controls: Interactive Product Tabs with Progress Timer & Arrows -->
+      <div class="relative z-20 pt-6 mt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <!-- Tab Switcher with Progress Indicator -->
+        <div class="flex items-center gap-2 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0 scrollbar-none">
+          <button 
+            v-for="(slide, idx) in featuredSlides" 
+            :key="slide.id"
+            @click="goToSlide(idx)"
+            class="relative px-3.5 py-2 rounded-xl text-xs font-semibold transition-all shrink-0 cursor-pointer overflow-hidden group"
+            :class="currentSlideIndex === idx 
+              ? 'text-white bg-white/15 border border-white/25 shadow-sm' 
+              : 'text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent'"
+          >
+            <span>{{ slide.shortName || slide.title }}</span>
+
+            <!-- Animated Progress Bar on Active Tab -->
+            <div 
+              v-if="currentSlideIndex === idx"
+              class="absolute bottom-0 left-0 h-[2px] bg-white rounded-full transition-all duration-100 ease-linear"
+              :style="{ width: `${slideProgress}%` }"
+            ></div>
+          </button>
+        </div>
+
+        <!-- Arrows & Slide Counter -->
+        <div class="flex items-center gap-3 shrink-0 self-end sm:self-auto">
+          <span class="text-xs font-mono font-medium text-zinc-400">
+            0{{ currentSlideIndex + 1 }} / 0{{ featuredSlides.length }}
+          </span>
+          <div class="flex items-center gap-1.5">
+            <button 
+              @click="prevSlide"
+              class="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-white flex items-center justify-center transition active:scale-95 cursor-pointer"
+              title="Slide trước"
+            >
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+            <button 
+              @click="nextSlide"
+              class="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-white flex items-center justify-center transition active:scale-95 cursor-pointer"
+              title="Slide tiếp theo"
+            >
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 18l6-6-6-6"/></svg>
+            </button>
           </div>
         </div>
       </div>
@@ -349,11 +356,18 @@ const retryCatalogShelf = (shelf: CatalogShelf) => {
 }
 
 // Flagship Showcase Slides
+interface HudSpec {
+  label: string
+  value: string
+  icon: string
+}
+
 interface FeaturedSlide {
   id: number
   tag: string
   badge: string
   title: string
+  shortName: string
   specs: string[]
   price: number
   image: string
@@ -366,6 +380,9 @@ interface FeaturedSlide {
   primaryCtaText: string
   secondaryCtaText: string
   secondaryCtaLink: string
+  themeGlow: string
+  accentDot: string
+  hudSpecs: HudSpec[]
 }
 
 const featuredSlides = ref<FeaturedSlide[]>([
@@ -374,6 +391,7 @@ const featuredSlides = ref<FeaturedSlide[]>([
     tag: 'Apple Silicon M3',
     badge: 'Flagship Laptop',
     title: 'MacBook Pro 14 M3 Pro',
+    shortName: 'MacBook Pro M3',
     specs: ['Apple M3 Pro 11-Core', '18GB Unified RAM', 'Liquid Retina XDR', 'Pin 18h'],
     price: 49990000,
     image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800&auto=format&fit=crop&q=80',
@@ -385,13 +403,20 @@ const featuredSlides = ref<FeaturedSlide[]>([
     description: 'Trang bị vi xử lý Apple M3 Pro thế hệ mới với 18GB RAM Unified, màn hình Liquid Retina XDR 120Hz rực rỡ và thời lượng pin 18 giờ liên tục, đáp ứng hoàn hảo mọi tác vụ đồ họa và lập trình chuyên sâu.',
     primaryCtaText: 'Khám phá MacBook Pro',
     secondaryCtaText: 'Xem tất cả Laptop',
-    secondaryCtaLink: '/products?categoryId=1'
+    secondaryCtaLink: '/products?categoryId=1',
+    themeGlow: 'bg-gradient-to-br from-violet-600/35 via-indigo-600/20 to-transparent',
+    accentDot: 'bg-violet-400',
+    hudSpecs: [
+      { label: 'Chipset Siêu Mạnh', value: 'Apple M3 Pro 11-Core', icon: 'cpu' },
+      { label: 'Màn hình Chuẩn Studio', value: 'Liquid Retina XDR 120Hz', icon: 'display' }
+    ]
   },
   {
     id: 1,
     tag: 'Titanium Design',
     badge: 'Smartphone Đỉnh Cao',
     title: 'iPhone 16 Pro Max 256GB',
+    shortName: 'iPhone 16 Pro',
     specs: ['Apple A18 Pro 3nm', 'Camera 48MP Zoom 5x', '6.9" 120Hz ProMotion', 'Titan Tự Nhiên'],
     price: 34990000,
     image: 'https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=800&auto=format&fit=crop&q=80',
@@ -403,13 +428,20 @@ const featuredSlides = ref<FeaturedSlide[]>([
     description: 'Tuyệt tác Flagship hàng đầu với chip vi xử lý Apple A18 Pro 3nm, cụm camera 48MP Fusion zoom quang học 5x sắc nét và màn hình viền siêu mỏng cùng khung titan chuẩn hàng không vũ trụ.',
     primaryCtaText: 'Khám phá iPhone 16 Pro',
     secondaryCtaText: 'Xem Flagship Phone',
-    secondaryCtaLink: '/products?categoryId=2'
+    secondaryCtaLink: '/products?categoryId=2',
+    themeGlow: 'bg-gradient-to-br from-amber-500/30 via-orange-600/20 to-transparent',
+    accentDot: 'bg-amber-400',
+    hudSpecs: [
+      { label: 'Vi xử lý Tối Tân', value: 'Apple A18 Pro 3nm', icon: 'cpu' },
+      { label: 'Ống kính Đỉnh Cao', value: '48MP Fusion 5x Tele', icon: 'camera' }
+    ]
   },
   {
     id: 5,
     tag: 'AI Workstation & Gaming',
     badge: 'Siêu Cấu Hình',
     title: 'ASUS ROG Zephyrus G16 OLED',
+    shortName: 'ROG Zephyrus G16',
     specs: ['Core Ultra 9 185H', 'RTX 4070 8GB', 'Nebula OLED 240Hz', '32GB LPDDR5X'],
     price: 64990000,
     image: 'https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=800&auto=format&fit=crop&q=80',
@@ -421,13 +453,20 @@ const featuredSlides = ref<FeaturedSlide[]>([
     description: 'Định nghĩa lại laptop gaming siêu mỏng nhẹ với vi xử lý Intel Core Ultra 9 tích hợp AI NPU, card đồ họa NVIDIA GeForce RTX 4070 và màn hình ROG Nebula OLED 240Hz siêu mượt mà.',
     primaryCtaText: 'Khám phá ROG Zephyrus',
     secondaryCtaText: 'Xem Máy trạm Gaming',
-    secondaryCtaLink: '/products?categoryId=1'
+    secondaryCtaLink: '/products?categoryId=1',
+    themeGlow: 'bg-gradient-to-br from-red-600/35 via-rose-600/20 to-transparent',
+    accentDot: 'bg-red-400',
+    hudSpecs: [
+      { label: 'Card Đồ Họa', value: 'GeForce RTX 4070 8GB', icon: 'gpu' },
+      { label: 'Màn hình Gaming', value: 'ROG Nebula OLED 240Hz', icon: 'display' }
+    ]
   },
   {
     id: 7,
     tag: 'Chống Ồn Huyền Thoại',
     badge: 'Hi-Res Audio',
     title: 'Sony WH-1000XM5 Wireless',
+    shortName: 'Sony WH-1000XM5',
     specs: ['Bộ xử lý kép V1 + QN1', 'Âm thanh LDAC Hi-Res', 'Pin 30 giờ', 'Màng loa sợi carbon'],
     price: 7990000,
     image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&auto=format&fit=crop&q=80',
@@ -439,12 +478,21 @@ const featuredSlides = ref<FeaturedSlide[]>([
     description: 'Đắm chìm vào thế giới âm thanh chân thực đỉnh cao với vi xử lý kép V1 và QN1, màng loa sợi carbon 30mm siêu nhẹ hỗ trợ giải mã LDAC và thời lượng pin vượt bậc lên đến 30 giờ.',
     primaryCtaText: 'Trải nghiệm Sony XM5',
     secondaryCtaText: 'Xem Thiết bị Âm thanh',
-    secondaryCtaLink: '/products?categoryId=4'
+    secondaryCtaLink: '/products?categoryId=4',
+    themeGlow: 'bg-gradient-to-br from-cyan-500/35 via-blue-600/20 to-transparent',
+    accentDot: 'bg-cyan-400',
+    hudSpecs: [
+      { label: 'Chipset Chống Ồn', value: 'Kép V1 + HD QN1', icon: 'audio' },
+      { label: 'Thời Lượng Pin', value: '30h Nghe Nhạc Liên Tục', icon: 'battery' }
+    ]
   }
 ])
 
 const currentSlideIndex = ref<number>(0)
-let slideTimer: number | null = null
+const slideProgress = ref<number>(0)
+let slideTimer: any = null
+const SLIDE_DURATION = 5000 // 5 seconds per slide
+const TICK_INTERVAL = 50
 
 const currentSlide = computed(() => {
   return featuredSlides.value[currentSlideIndex.value] || featuredSlides.value[0]
@@ -452,21 +500,28 @@ const currentSlide = computed(() => {
 
 const nextSlide = () => {
   currentSlideIndex.value = (currentSlideIndex.value + 1) % featuredSlides.value.length
+  slideProgress.value = 0
 }
 
 const prevSlide = () => {
   currentSlideIndex.value = (currentSlideIndex.value - 1 + featuredSlides.value.length) % featuredSlides.value.length
+  slideProgress.value = 0
 }
 
 const goToSlide = (idx: number) => {
   currentSlideIndex.value = idx
+  slideProgress.value = 0
 }
 
 const startSlideTimer = () => {
   stopSlideTimer()
-  slideTimer = window.setInterval(() => {
-    nextSlide()
-  }, 4500)
+  slideTimer = setInterval(() => {
+    slideProgress.value += (TICK_INTERVAL / SLIDE_DURATION) * 100
+    if (slideProgress.value >= 100) {
+      slideProgress.value = 0
+      nextSlide()
+    }
+  }, TICK_INTERVAL)
 }
 
 const stopSlideTimer = () => {
@@ -579,5 +634,52 @@ onUnmounted(() => {
 .hero-text-fade-leave-to {
   opacity: 0;
   transform: translateY(-8px);
+}
+
+/* Floating Animations for Product & Spec HUDs */
+@keyframes float-slow {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(0.5deg);
+  }
+}
+
+.animate-float-slow {
+  animation: float-slow 4.5s ease-in-out infinite;
+}
+
+@keyframes hover-gentle {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.animate-hover-gentle {
+  animation: hover-gentle 3.5s ease-in-out infinite;
+}
+
+.animate-hover-gentle-delay {
+  animation: hover-gentle 4s ease-in-out infinite 1.8s;
+}
+
+/* Hero Product Zoom Transition */
+.hero-product-zoom-enter-active,
+.hero-product-zoom-leave-active {
+  transition: opacity 0.4s ease, transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hero-product-zoom-enter-from {
+  opacity: 0;
+  transform: scale(0.93) translateY(12px);
+}
+
+.hero-product-zoom-leave-to {
+  opacity: 0;
+  transform: scale(0.96) translateY(-12px);
 }
 </style>
