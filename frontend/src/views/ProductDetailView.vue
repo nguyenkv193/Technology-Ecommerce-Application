@@ -87,28 +87,35 @@
       </div>
     </div>
 
-    <!-- Sticky Sub-Nav Anchor Bar -->
-    <div 
-      class="sticky top-16 z-30 bg-white/95 backdrop-blur-md border border-zinc-200/90 rounded-2xl shadow-xs py-2 px-3 sm:px-4 flex items-center justify-between overflow-x-auto scrollbar-none transition-all"
-    >
-      <div class="flex items-center gap-1 sm:gap-2">
-        <button 
-          v-for="nav in navTabs" 
-          :key="nav.id"
-          @click="scrollToSection(nav.id)"
-          class="px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition cursor-pointer"
-          :class="activeSection === nav.id ? 'bg-red-600 text-white font-semibold shadow-xs' : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100'"
+    <!-- Sticky Sub-Nav Anchor Bar (Chỉ hiển thị khi cuộn trang) -->
+    <Teleport to="body">
+      <Transition name="fade-slide">
+        <div 
+          v-if="showStickySubNav"
+          class="fixed top-16 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-b border-zinc-200/90 shadow-sm py-2 px-4 transition-all"
         >
-          <span class="mr-1">{{ nav.icon }}</span>
-          <span>{{ nav.label }}</span>
-        </button>
-      </div>
+          <div class="max-w-7xl mx-auto flex items-center justify-between overflow-x-auto scrollbar-none px-2 sm:px-4">
+            <div class="flex items-center gap-1 sm:gap-2">
+              <button 
+                v-for="nav in navTabs" 
+                :key="nav.id"
+                @click="scrollToSection(nav.id)"
+                class="px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition cursor-pointer"
+                :class="activeSection === nav.id ? 'bg-red-600 text-white font-semibold shadow-xs' : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100'"
+              >
+                <span class="mr-1">{{ nav.icon }}</span>
+                <span>{{ nav.label }}</span>
+              </button>
+            </div>
 
-      <div class="hidden lg:flex items-center gap-3 shrink-0 pl-3 border-l border-zinc-200 text-xs">
-        <span class="text-zinc-400">Hotline:</span>
-        <a href="tel:18006601" class="font-bold text-red-600 hover:underline">1800 6601 (Miễn phí)</a>
-      </div>
-    </div>
+            <div class="hidden lg:flex items-center gap-3 shrink-0 pl-3 border-l border-zinc-200 text-xs">
+              <span class="text-zinc-400">Hotline:</span>
+              <a href="tel:18006601" class="font-bold text-red-600 hover:underline">1800 6601 (Miễn phí)</a>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
 
     <!-- Main Detail Section (Left: Gallery & Details, Right: Buy Box & Offers) -->
     <div id="overview" class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
@@ -1197,6 +1204,7 @@ const activeSection = ref<string>('overview')
 const isExpandedStory = ref<boolean>(false)
 const showMoreOffers = ref<boolean>(false)
 const showReviewForm = ref<boolean>(false)
+const showStickySubNav = ref<boolean>(false)
 const showStickyBottomBar = ref<boolean>(false)
 const selectedCity = ref<string>('HN')
 const feedbackState = ref<'yes' | 'no' | null>(null)
@@ -1513,7 +1521,20 @@ const handleFeedback = (isPositive: boolean) => {
 
 const handleScroll = () => {
   const scrollPos = window.scrollY || document.documentElement.scrollTop
-  showStickyBottomBar.value = scrollPos > 450
+  showStickySubNav.value = scrollPos > 350
+  showStickyBottomBar.value = scrollPos > 550
+
+  const sections = ['faq', 'similar', 'reviews', 'specs', 'description', 'overview']
+  for (const s of sections) {
+    const el = document.getElementById(s)
+    if (el) {
+      const top = el.getBoundingClientRect().top
+      if (top <= 160) {
+        activeSection.value = s
+        break
+      }
+    }
+  }
 }
 
 const loadProductData = async (id: number | string) => {
@@ -1636,6 +1657,17 @@ onBeforeUnmount(() => {
 
 .animate-slide-up {
   animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fade-slide-enter-from,
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-8px);
 }
 
 .scrollbar-none::-webkit-scrollbar {
