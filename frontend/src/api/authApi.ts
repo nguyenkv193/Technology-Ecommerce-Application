@@ -18,6 +18,9 @@ export const authApi = {
     
   refreshToken: (token: string): Promise<ApiResponse<LoginResponseData>> => 
     apiClient.post('/auth/refresh', { refreshToken: token }),
+
+  exchangeOAuthCode: (code: string): Promise<ApiResponse<LoginResponseData>> =>
+    apiClient.post('/auth/oauth2/exchange', { code }),
     
   getProfile: (): Promise<ApiResponse<User>> => 
     apiClient.get('/auth/me'),

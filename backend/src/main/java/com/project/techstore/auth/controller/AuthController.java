@@ -2,8 +2,10 @@ package com.project.techstore.auth.controller;
 
 import com.project.techstore.auth.dto.AuthResponse;
 import com.project.techstore.auth.dto.LoginRequest;
+import com.project.techstore.auth.dto.OAuth2CodeRequest;
 import com.project.techstore.auth.dto.RefreshTokenRequest;
 import com.project.techstore.auth.dto.RegisterRequest;
+import com.project.techstore.auth.oauth2.OAuthLoginCodeService;
 import com.project.techstore.auth.service.AuthService;
 import com.project.techstore.common.response.ApiResponse;
 import com.project.techstore.user.dto.UserResponse;
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final OAuthLoginCodeService oauthLoginCodeService;
 
     @PostMapping("/register")
     @Operation(summary = "1. Đăng ký tài khoản mới", description = "Tạo tài khoản mới với vai trò USER, mật khẩu được mã hóa an toàn bằng BCrypt")
@@ -47,9 +50,22 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success("Làm mới Token thành công", response));
     }
 
+    @PostMapping("/oauth2/exchange")
+    @Operation(
+            summary = "4. Đổi OAuth code lấy JWT",
+            description = "Đổi mã OAuth dùng một lần sau callback Google để lấy cặp JWT của hệ thống"
+    )
+    public ResponseEntity<ApiResponse<AuthResponse>> exchangeOAuthCode(
+            @Valid @RequestBody OAuth2CodeRequest request
+    ) {
+        Long userId = oauthLoginCodeService.consume(request.getCode());
+        AuthResponse response = authService.issueTokensForUser(userId);
+        return ResponseEntity.ok(ApiResponse.success("Đăng nhập OAuth thành công", response));
+    }
+
     @GetMapping("/me")
     @SecurityRequirement(name = "BearerAuth")
-    @Operation(summary = "4. Lấy thông tin tài khoản đang đăng nhập", description = "Yêu cầu gắn Bearer JWT Token ở Header")
+    @Operation(summary = "5. Lấy thông tin tài khoản đang đăng nhập", description = "Yêu cầu gắn Bearer JWT Token ở Header")
     public ResponseEntity<ApiResponse<UserResponse>> getCurrentUser(@AuthenticationPrincipal User currentUser) {
         return ResponseEntity.ok(ApiResponse.success(authService.getCurrentUser(currentUser)));
     }

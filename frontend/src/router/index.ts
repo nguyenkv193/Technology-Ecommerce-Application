@@ -5,6 +5,7 @@ import ProductDetailView from '@/views/ProductDetailView.vue'
 import CartView from '@/views/CartView.vue'
 import OrdersView from '@/views/OrdersView.vue'
 import WishlistView from '@/views/WishlistView.vue'
+import OAuthCallbackView from '@/views/OAuthCallbackView.vue'
 import { useAuthStore } from '@/stores/auth'
 
 const routes: Array<RouteRecordRaw> = [
@@ -37,6 +38,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/wishlist',
     name: 'wishlist',
     component: WishlistView
+  },
+  {
+    path: '/oauth2/callback',
+    name: 'oauth2-callback',
+    component: OAuthCallbackView
   },
   {
     path: '/login',

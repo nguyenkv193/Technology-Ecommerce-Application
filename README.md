@@ -150,6 +150,32 @@ Xem `.env.example`:
 - `SEARCH_INDEX_CHECK_INTERVAL_MS`: chu kỳ kiểm tra index và nạp catalog nếu index chưa tồn tại, mặc định 10000 ms.
 - `SEARCH_OUTBOX_POLL_INTERVAL_MS`: chu kỳ xử lý sự kiện cập nhật search index, mặc định 2000 ms.
 
+### Đăng nhập Google OAuth2 (tùy chọn)
+
+Backend hỗ trợ Google OIDC và vẫn phát hành JWT của TechStore sau khi callback thành công.
+Để bật tính năng, tạo OAuth Client trên Google Cloud Console rồi thêm các biến sau vào `.env`:
+
+```env
+OAUTH2_GOOGLE_ENABLED=true
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+OAUTH2_GOOGLE_REDIRECT_URI=http://localhost:8080/login/oauth2/code/google
+OAUTH2_FRONTEND_SUCCESS_URL=http://localhost:5173/oauth2/callback
+```
+
+Thêm `http://localhost:8080/login/oauth2/code/google` vào Authorized redirect URIs
+của Google OAuth Client. Khi chạy Docker Compose, dùng callback
+`http://localhost:3000/login/oauth2/code/google` và frontend callback
+`http://localhost:3000/oauth2/callback`.
+
+Khi chạy frontend bằng Vite, đặt `VITE_GOOGLE_OAUTH_ENABLED=true` trong
+`frontend/.env`. Khi chạy Docker Compose, đặt biến này trong `.env` ở thư mục gốc
+để truyền vào frontend image lúc build.
+
+Luồng callback dùng one-time code có thời hạn hai phút, sau đó frontend đổi code lấy
+JWT qua `POST /api/v1/auth/oauth2/exchange`. Code hiện được lưu trong memory của backend;
+môi trường nhiều instance nên thay bằng Redis hoặc storage dùng chung.
+
 ## Kiểm tra
 
 ```powershell

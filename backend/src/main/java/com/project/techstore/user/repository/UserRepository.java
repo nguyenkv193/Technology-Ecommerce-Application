@@ -1,6 +1,7 @@
 package com.project.techstore.user.repository;
 
 import com.project.techstore.user.entity.User;
+import com.project.techstore.user.entity.AuthProvider;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -12,4 +13,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
 
     boolean existsByEmail(String email);
+
+    Optional<User> findByAuthProviderAndProviderSubject(AuthProvider authProvider, String providerSubject);
 }

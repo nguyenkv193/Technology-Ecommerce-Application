@@ -8,6 +8,7 @@ import com.project.techstore.auth.security.JwtService;
 import com.project.techstore.common.exception.AppException;
 import com.project.techstore.common.exception.ErrorCode;
 import com.project.techstore.user.dto.UserResponse;
+import com.project.techstore.user.entity.AuthProvider;
 import com.project.techstore.user.entity.Role;
 import com.project.techstore.user.entity.User;
 import com.project.techstore.user.entity.UserStatus;
@@ -17,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 @Slf4j
 @Service
@@ -47,16 +49,7 @@ public class AuthService {
         User savedUser = userRepository.save(user);
         log.info("Đăng ký thành công tài khoản mới: {}", email);
 
-        String accessToken = jwtService.generateAccessToken(savedUser);
-        String refreshToken = jwtService.generateRefreshToken(savedUser);
-
-        return AuthResponse.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .tokenType("Bearer")
-                .expiresIn(jwtService.getAccessTokenExpiration())
-                .user(UserResponse.from(savedUser))
-                .build();
+        return createAuthResponse(savedUser);
     }
 
     @Transactional(readOnly = true)
@@ -66,7 +59,7 @@ public class AuthService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(ErrorCode.INVALID_CREDENTIALS, "Email hoặc mật khẩu không chính xác"));
 
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+        if (user.getPassword() == null || !passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new AppException(ErrorCode.INVALID_CREDENTIALS, "Email hoặc mật khẩu không chính xác");
         }
 
@@ -76,16 +69,75 @@ public class AuthService {
 
         log.info("Người dùng đăng nhập thành công: {}", email);
 
-        String accessToken = jwtService.generateAccessToken(user);
-        String refreshToken = jwtService.generateRefreshToken(user);
+        return createAuthResponse(user);
+    }
 
-        return AuthResponse.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .tokenType("Bearer")
-                .expiresIn(jwtService.getAccessTokenExpiration())
-                .user(UserResponse.from(user))
+    @Transactional
+    public User loginWithOAuth2(
+            String registrationId,
+            String providerSubject,
+            String email,
+            String fullName,
+            boolean emailVerified
+    ) {
+        if (!StringUtils.hasText(providerSubject) || !StringUtils.hasText(email)) {
+            throw new AppException(
+                    ErrorCode.INVALID_REQUEST,
+                    "OAuth provider không trả về đủ thông tin tài khoản"
+            );
+        }
+
+        if (!emailVerified) {
+            throw new AppException(
+                    ErrorCode.ACCESS_DENIED,
+                    "Email OAuth chưa được xác thực"
+            );
+        }
+
+        final AuthProvider provider;
+        try {
+            provider = AuthProvider.fromRegistrationId(registrationId);
+        } catch (IllegalArgumentException ex) {
+            throw new AppException(ErrorCode.INVALID_REQUEST, ex.getMessage());
+        }
+
+        User linkedUser = userRepository
+                .findByAuthProviderAndProviderSubject(provider, providerSubject)
+                .orElse(null);
+
+        if (linkedUser != null) {
+            ensureUserCanLogin(linkedUser);
+            return linkedUser;
+        }
+
+        if (userRepository.findByEmail(email.trim().toLowerCase()).isPresent()) {
+            throw new AppException(
+                    ErrorCode.EMAIL_ALREADY_EXISTS,
+                    "Email này đã tồn tại. Vui lòng đăng nhập tài khoản hiện tại rồi liên kết Google."
+            );
+        }
+
+        String normalizedEmail = email.trim().toLowerCase();
+        int emailSeparator = normalizedEmail.indexOf('@');
+        String normalizedFullName = StringUtils.hasText(fullName)
+                ? fullName.trim()
+                : emailSeparator > 0
+                    ? normalizedEmail.substring(0, emailSeparator)
+                    : normalizedEmail;
+
+        User user = User.builder()
+                .email(normalizedEmail)
+                .password(null)
+                .fullName(normalizedFullName)
+                .role(Role.USER)
+                .status(UserStatus.ACTIVE)
+                .authProvider(provider)
+                .providerSubject(providerSubject)
                 .build();
+
+        User savedUser = userRepository.save(user);
+        log.info("Tạo tài khoản OAuth thành công: provider={}, email={}", provider, normalizedEmail);
+        return savedUser;
     }
 
     @Transactional(readOnly = true)
@@ -107,18 +159,8 @@ public class AuthService {
             }
 
             // Sinh cặp Token mới (Refresh Token Rotation)
-            String newAccessToken = jwtService.generateAccessToken(user);
-            String newRefreshToken = jwtService.generateRefreshToken(user);
-
             log.info("Làm mới Token thành công cho người dùng: {}", email);
-
-            return AuthResponse.builder()
-                    .accessToken(newAccessToken)
-                    .refreshToken(newRefreshToken)
-                    .tokenType("Bearer")
-                    .expiresIn(jwtService.getAccessTokenExpiration())
-                    .user(UserResponse.from(user))
-                    .build();
+            return createAuthResponse(user);
 
         } catch (Exception e) {
             log.warn("Lỗi khi xử lý làm mới Refresh Token: {}", e.getMessage());
@@ -129,5 +171,33 @@ public class AuthService {
     @Transactional(readOnly = true)
     public UserResponse getCurrentUser(User currentUser) {
         return UserResponse.from(currentUser);
+    }
+
+    @Transactional(readOnly = true)
+    public AuthResponse issueTokensForUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND, "Không tìm thấy người dùng"));
+
+        ensureUserCanLogin(user);
+        return createAuthResponse(user);
+    }
+
+    private void ensureUserCanLogin(User user) {
+        if (user.getStatus() == UserStatus.BLOCKED) {
+            throw new AppException(
+                    ErrorCode.ACCESS_DENIED,
+                    "Tài khoản của bạn đã bị khóa, vui lòng liên hệ quản trị viên"
+            );
+        }
+    }
+
+    private AuthResponse createAuthResponse(User user) {
+        return AuthResponse.builder()
+                .accessToken(jwtService.generateAccessToken(user))
+                .refreshToken(jwtService.generateRefreshToken(user))
+                .tokenType("Bearer")
+                .expiresIn(jwtService.getAccessTokenExpiration())
+                .user(UserResponse.from(user))
+                .build();
     }
 }
