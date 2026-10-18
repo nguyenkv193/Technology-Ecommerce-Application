@@ -123,7 +123,11 @@
       <!-- ================= LEFT COLUMN (MEDIA & STORY) ================= -->
       <div class="lg:col-span-7 space-y-6">
         <!-- Main Media Gallery Box -->
-        <div class="bg-white border border-zinc-200/90 rounded-3xl p-6 sm:p-8 aspect-4/3 sm:aspect-square flex items-center justify-center relative overflow-hidden shadow-xs group">
+        <div 
+          @touchstart="handleTouchStart"
+          @touchend="handleTouchEnd"
+          class="bg-white border border-zinc-200/90 rounded-3xl p-6 sm:p-8 aspect-[4/3] sm:aspect-square flex items-center justify-center relative overflow-hidden shadow-xs group select-none"
+        >
           <!-- Top Left Tag Badges -->
           <div class="absolute top-4 left-4 z-10 flex flex-col gap-2">
             <span class="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-lg bg-red-600 text-white shadow-xs">
@@ -165,14 +169,14 @@
           <button 
             v-if="galleryImages.length > 1"
             @click="prevImage"
-            class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 border border-zinc-200 text-zinc-700 hover:bg-white hover:text-red-600 shadow-md flex items-center justify-center transition opacity-0 group-hover:opacity-100 cursor-pointer"
+            class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 border border-zinc-200 text-zinc-700 hover:bg-white hover:text-red-600 shadow-md flex items-center justify-center transition opacity-80 sm:opacity-0 sm:group-hover:opacity-100 cursor-pointer z-10"
           >
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
           </button>
           <button 
             v-if="galleryImages.length > 1"
             @click="nextImage"
-            class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 border border-zinc-200 text-zinc-700 hover:bg-white hover:text-red-600 shadow-md flex items-center justify-center transition opacity-0 group-hover:opacity-100 cursor-pointer"
+            class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 border border-zinc-200 text-zinc-700 hover:bg-white hover:text-red-600 shadow-md flex items-center justify-center transition opacity-80 sm:opacity-0 sm:group-hover:opacity-100 cursor-pointer z-10"
           >
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
           </button>
@@ -188,7 +192,7 @@
           <!-- Video Review Tab -->
           <button 
             @click="openVideoModal"
-            class="flex flex-col items-center justify-center w-18 h-18 rounded-2xl border bg-white text-zinc-700 hover:border-red-500 hover:text-red-600 shrink-0 transition p-2 cursor-pointer group/btn"
+            class="flex flex-col items-center justify-center w-16 h-16 sm:w-18 sm:h-18 rounded-2xl border bg-white text-zinc-700 hover:border-red-500 hover:text-red-600 shrink-0 transition p-2 cursor-pointer group/btn"
           >
             <div class="w-6 h-6 rounded-full bg-red-100 text-red-600 group-hover/btn:bg-red-600 group-hover/btn:text-white flex items-center justify-center transition">
               <svg class="w-3.5 h-3.5 ml-0.5 fill-current" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
@@ -199,7 +203,7 @@
           <!-- Highlight Feature Icon Tab -->
           <button 
             @click="scrollToSection('description')"
-            class="flex flex-col items-center justify-center w-18 h-18 rounded-2xl border bg-white text-zinc-700 hover:border-amber-500 hover:text-amber-600 shrink-0 transition p-2 cursor-pointer"
+            class="flex flex-col items-center justify-center w-16 h-16 sm:w-18 sm:h-18 rounded-2xl border bg-white text-zinc-700 hover:border-amber-500 hover:text-amber-600 shrink-0 transition p-2 cursor-pointer"
           >
             <div class="w-6 h-6 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center">
               <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
@@ -212,16 +216,16 @@
             v-for="(img, idx) in galleryImages" 
             :key="idx"
             @click="selectImage(idx)"
-            class="w-18 h-18 rounded-2xl bg-white border p-1.5 shrink-0 transition relative cursor-pointer"
-            :class="activeImage === img ? 'border-red-600 ring-2 ring-red-600/30' : 'border-zinc-200 hover:border-zinc-300'"
+            class="w-16 h-16 sm:w-18 sm:h-18 rounded-2xl bg-white border p-1.5 shrink-0 transition relative cursor-pointer overflow-hidden flex items-center justify-center"
+            :class="activeImageIndex === idx ? 'border-red-600 ring-2 ring-red-600/30' : 'border-zinc-200 hover:border-zinc-300'"
           >
-            <img :src="img" class="object-contain w-full h-full" :alt="`Góc ảnh ${idx + 1}`" />
+            <img :src="img" class="object-contain w-full h-full pointer-events-none select-none" :alt="`Góc ảnh ${idx + 1}`" />
           </button>
 
           <!-- Unbox Tab -->
           <button 
             @click="openUnboxModal"
-            class="flex flex-col items-center justify-center w-18 h-18 rounded-2xl border bg-white text-zinc-700 hover:border-zinc-400 shrink-0 transition p-2 cursor-pointer"
+            class="flex flex-col items-center justify-center w-16 h-16 sm:w-18 sm:h-18 rounded-2xl border bg-white text-zinc-700 hover:border-zinc-400 shrink-0 transition p-2 cursor-pointer"
           >
             <div class="w-6 h-6 rounded-full bg-zinc-100 text-zinc-600 flex items-center justify-center">
               <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
@@ -232,7 +236,7 @@
           <!-- 360 View Tab -->
           <button 
             @click="open360Modal"
-            class="flex flex-col items-center justify-center w-18 h-18 rounded-2xl border bg-white text-zinc-700 hover:border-zinc-400 shrink-0 transition p-2 cursor-pointer"
+            class="flex flex-col items-center justify-center w-16 h-16 sm:w-18 sm:h-18 rounded-2xl border bg-white text-zinc-700 hover:border-zinc-400 shrink-0 transition p-2 cursor-pointer"
           >
             <div class="w-6 h-6 rounded-full bg-zinc-100 text-zinc-600 flex items-center justify-center">
               <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
@@ -1442,6 +1446,29 @@ const nextImage = () => {
   const len = galleryImages.value.length
   activeImageIndex.value = (activeImageIndex.value + 1) % len
   activeImage.value = galleryImages.value[activeImageIndex.value]
+}
+
+let touchStartX = 0
+let touchEndX = 0
+
+const handleTouchStart = (e: TouchEvent) => {
+  if (e.changedTouches && e.changedTouches[0]) {
+    touchStartX = e.changedTouches[0].clientX
+  }
+}
+
+const handleTouchEnd = (e: TouchEvent) => {
+  if (e.changedTouches && e.changedTouches[0]) {
+    touchEndX = e.changedTouches[0].clientX
+    const diff = touchStartX - touchEndX
+    if (Math.abs(diff) > 40) {
+      if (diff > 0) {
+        nextImage()
+      } else {
+        prevImage()
+      }
+    }
+  }
 }
 
 const scrollToSection = (sectionId: string) => {
