@@ -46,5 +46,5 @@ oauth2:
     enabled: ${OAUTH2_GOOGLE_ENABLED:false}
     client-id: ${GOOGLE_CLIENT_ID:}
     client-secret: ${GOOGLE_CLIENT_SECRET:}
-    redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+    redirect-uri: ${OAUTH2_GOOGLE_REDIRECT_URI:http://localhost:8080/login/oauth2/code/google}
     frontend-success-url: ${OAUTH2_FRONTEND_SUCCESS_URL:http://localhost:5173/oauth2/callback}
