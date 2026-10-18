@@ -64,6 +64,24 @@
             </button>
           </div>
 
+          <!-- Google OAuth Login -->
+          <div v-if="isLogin && googleOAuthEnabled" class="mb-4">
+            <button
+              type="button"
+              :disabled="authLoading"
+              @click="startGoogleLogin"
+              class="w-full flex items-center justify-center gap-2.5 rounded-xl border border-zinc-200 bg-white py-2.5 text-xs font-semibold text-zinc-700 shadow-sm transition hover:border-zinc-400 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <span class="text-base font-bold leading-none text-[#4285F4]">G</span>
+              <span>Tiếp tục với Google</span>
+            </button>
+            <div class="mt-3 flex items-center gap-3 text-[10px] text-zinc-400">
+              <span class="h-px flex-1 bg-zinc-200"></span>
+              <span>hoặc tiếp tục bằng email</span>
+              <span class="h-px flex-1 bg-zinc-200"></span>
+            </div>
+          </div>
+
           <!-- Error Alert Message -->
           <div v-if="authError" class="mb-4 p-2.5 rounded-xl bg-red-50 border border-red-200 flex items-start gap-2 text-red-600 text-xs animate-shake">
             <svg class="w-4 h-4 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -313,6 +331,7 @@ const showPassword = ref<boolean>(false)
 const authLoading = ref<boolean>(false)
 const authError = ref<string>('')
 const agreeTerms = ref<boolean>(false)
+const googleOAuthEnabled = import.meta.env.VITE_GOOGLE_OAUTH_ENABLED === 'true'
 
 const isLogin = computed(() => authStore.authModalMode === 'login')
 
@@ -432,6 +451,16 @@ const alertTerms = () => {
 
 const alertPrivacy = () => {
   alert('Chính sách quyền riêng tư TechStore: Bảo mật dữ liệu cá nhân và thông tin giao dịch theo tiêu chuẩn an toàn.')
+}
+
+const startGoogleLogin = () => {
+  if (!agreeTerms.value) {
+    authError.value = 'Vui lòng xác nhận đồng ý với Điều khoản sử dụng dịch vụ & Chính sách quyền riêng tư để tiếp tục.'
+    toast.warning('Vui lòng đồng ý với điều khoản & chính sách')
+    return
+  }
+
+  window.location.assign(window.location.origin + '/oauth2/authorization/google')
 }
 
 const handleAuthSuccess = async () => {

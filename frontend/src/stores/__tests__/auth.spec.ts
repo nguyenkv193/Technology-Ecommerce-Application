@@ -7,6 +7,7 @@ vi.mock('@/api/authApi', () => ({
   authApi: {
     login: vi.fn(),
     register: vi.fn(),
+    exchangeOAuthCode: vi.fn(),
     getProfile: vi.fn()
   }
 }))
@@ -105,6 +106,29 @@ describe('useAuthStore', () => {
     expect(res.success).toBe(true)
     expect(store.token).toBe('reg_token')
     expect(store.user).toEqual(mockUser)
+  })
+
+  it('handles OAuth code exchange and stores token/user', async () => {
+    const mockUser = { id: 3, email: 'oauth@techstore.vn', fullName: 'OAuth User', role: 'USER' }
+    vi.mocked(authApi.exchangeOAuthCode).mockResolvedValueOnce({
+      success: true,
+      message: 'OAuth login success',
+      data: {
+        accessToken: 'oauth_access',
+        refreshToken: 'oauth_refresh',
+        tokenType: 'Bearer',
+        expiresIn: 3600,
+        user: mockUser
+      }
+    })
+
+    const store = useAuthStore()
+    const res = await store.exchangeOAuthCode('oauth_code_123')
+
+    expect(res.success).toBe(true)
+    expect(store.token).toBe('oauth_access')
+    expect(store.user).toEqual(mockUser)
+    expect(localStorage.getItem('techstore_refresh_token')).toBe('oauth_refresh')
   })
 
   it('handles logout by clearing state and localStorage', () => {

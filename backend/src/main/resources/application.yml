@@ -1,5 +1,6 @@
 server:
   port: ${SERVER_PORT:8080}
+  forward-headers-strategy: framework
   servlet:
     context-path: /
 
@@ -37,3 +38,13 @@ jwt:
   secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
   access-token-expiration: ${JWT_ACCESS_TOKEN_EXPIRATION:1800000}      # 30 phút (ms)
   refresh-token-expiration: ${JWT_REFRESH_TOKEN_EXPIRATION:2592000000} # 30 ngày (ms)
+
+# Cấu hình Google OAuth2/OIDC. Bật bằng OAUTH2_GOOGLE_ENABLED=true
+# sau khi tạo OAuth Client trong Google Cloud Console.
+oauth2:
+  google:
+    enabled: ${OAUTH2_GOOGLE_ENABLED:false}
+    client-id: ${GOOGLE_CLIENT_ID:}
+    client-secret: ${GOOGLE_CLIENT_SECRET:}
+    redirect-uri: ${OAUTH2_GOOGLE_REDIRECT_URI:http://localhost:8080/login/oauth2/code/google}
+    frontend-success-url: ${OAUTH2_FRONTEND_SUCCESS_URL:http://localhost:5173/oauth2/callback}

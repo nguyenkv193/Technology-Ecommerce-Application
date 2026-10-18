@@ -68,7 +68,7 @@ describe('Frontend API Modules', () => {
   })
 
   describe('authApi', () => {
-    it('calls login, register, refreshToken, and getProfile', async () => {
+    it('calls login, register, refreshToken, exchangeOAuthCode, and getProfile', async () => {
       vi.mocked(apiClient.post).mockResolvedValueOnce({ success: true, data: {} })
       await authApi.login({ email: 'test@techstore.vn', password: '123' })
       expect(apiClient.post).toHaveBeenCalledWith('/auth/login', { email: 'test@techstore.vn', password: '123' })
@@ -78,6 +78,9 @@ describe('Frontend API Modules', () => {
 
       await authApi.refreshToken('tok_123')
       expect(apiClient.post).toHaveBeenCalledWith('/auth/refresh', { refreshToken: 'tok_123' })
+
+      await authApi.exchangeOAuthCode('oauth_code_123')
+      expect(apiClient.post).toHaveBeenCalledWith('/auth/oauth2/exchange', { code: 'oauth_code_123' })
 
       vi.mocked(apiClient.get).mockResolvedValueOnce({ success: true, data: {} })
       await authApi.getProfile()

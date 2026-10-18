@@ -8,6 +8,7 @@ import com.project.techstore.auth.service.AuthService;
 import com.project.techstore.common.exception.AppException;
 import com.project.techstore.common.exception.ErrorCode;
 import com.project.techstore.user.entity.Role;
+import com.project.techstore.user.entity.AuthProvider;
 import com.project.techstore.user.entity.User;
 import com.project.techstore.user.entity.UserStatus;
 import com.project.techstore.user.repository.UserRepository;
@@ -126,5 +127,48 @@ class AuthServiceTest {
 
         AppException ex = assertThrows(AppException.class, () -> authService.login(request));
         assertEquals(ErrorCode.INVALID_CREDENTIALS, ex.getErrorCode());
+    }
+
+    @Test
+    void testOAuthLoginCreatesNewUser() {
+        when(userRepository.findByAuthProviderAndProviderSubject(AuthProvider.GOOGLE, "google-sub-123"))
+                .thenReturn(Optional.empty());
+        when(userRepository.findByEmail("oauth@example.com")).thenReturn(Optional.empty());
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
+            User user = invocation.getArgument(0);
+            user.setId(1002L);
+            return user;
+        });
+
+        User result = authService.loginWithOAuth2(
+                "google",
+                "google-sub-123",
+                "OAuth@Example.com",
+                "OAuth User",
+                true
+        );
+
+        assertEquals(1002L, result.getId());
+        assertEquals("oauth@example.com", result.getEmail());
+        assertEquals(AuthProvider.GOOGLE, result.getAuthProvider());
+        assertEquals("google-sub-123", result.getProviderSubject());
+        assertNull(result.getPassword());
+    }
+
+    @Test
+    void testOAuthLoginRejectsUnverifiedEmail() {
+        AppException ex = assertThrows(
+                AppException.class,
+                () -> authService.loginWithOAuth2(
+                        "google",
+                        "google-sub-123",
+                        "oauth@example.com",
+                        "OAuth User",
+                        false
+                )
+        );
+
+        assertEquals(ErrorCode.ACCESS_DENIED, ex.getErrorCode());
+        verify(userRepository, never()).save(any(User.class));
     }
 }

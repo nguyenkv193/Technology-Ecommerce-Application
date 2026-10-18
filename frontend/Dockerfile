@@ -8,6 +8,9 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+ARG VITE_GOOGLE_OAUTH_ENABLED=false
+ENV VITE_GOOGLE_OAUTH_ENABLED=$VITE_GOOGLE_OAUTH_ENABLED
+
 COPY package*.json ./
 RUN npm ci --no-audit --no-fund
 

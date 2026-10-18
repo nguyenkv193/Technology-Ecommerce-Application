@@ -44,7 +44,8 @@ public class UserService {
     public void changePassword(Long userId, ChangePasswordRequest request) {
         User user = getUserEntity(userId);
 
-        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+        if (user.getPassword() == null
+                || !passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
             throw new AppException(ErrorCode.INVALID_CREDENTIALS, "Mật khẩu hiện tại không chính xác");
         }
 

@@ -4,9 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.techstore.auth.controller.AuthController;
 import com.project.techstore.auth.dto.AuthResponse;
 import com.project.techstore.auth.dto.LoginRequest;
+import com.project.techstore.auth.dto.OAuth2CodeRequest;
 import com.project.techstore.auth.dto.RefreshTokenRequest;
 import com.project.techstore.auth.dto.RegisterRequest;
 import com.project.techstore.auth.security.JwtAuthenticationFilter;
+import com.project.techstore.auth.oauth2.OAuthLoginCodeService;
 import com.project.techstore.auth.service.AuthService;
 import com.project.techstore.user.dto.UserResponse;
 import com.project.techstore.user.entity.Role;
@@ -38,6 +40,9 @@ class AuthControllerTest {
 
     @MockBean
     private AuthService authService;
+
+    @MockBean
+    private OAuthLoginCodeService oauthLoginCodeService;
 
     @MockBean
     private JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -112,6 +117,29 @@ class AuthControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.accessToken").value("new_access_token"));
+    }
+
+    @Test
+    void testExchangeOAuthCode() throws Exception {
+        OAuth2CodeRequest request = OAuth2CodeRequest.builder()
+                .code("oauth_code_123")
+                .build();
+
+        AuthResponse response = AuthResponse.builder()
+                .accessToken("oauth_access_token")
+                .refreshToken("oauth_refresh_token")
+                .tokenType("Bearer")
+                .build();
+
+        when(oauthLoginCodeService.consume("oauth_code_123")).thenReturn(1L);
+        when(authService.issueTokensForUser(1L)).thenReturn(response);
+
+        mockMvc.perform(post("/api/v1/auth/oauth2/exchange")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.accessToken").value("oauth_access_token"));
     }
 
     @Test
