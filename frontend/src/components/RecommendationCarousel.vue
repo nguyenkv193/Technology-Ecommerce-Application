@@ -22,14 +22,14 @@
 
     <!-- Skeleton Loading -->
     <div v-if="loading" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-      <div v-for="i in 4" :key="i" class="bg-white border border-zinc-200/80 rounded-2xl p-4 animate-pulse space-y-3">
-        <div class="bg-zinc-100 rounded-xl aspect-square"></div>
+      <div v-for="i in 4" :key="i" class="bg-white border border-zinc-200/80 rounded-xl p-4 animate-pulse space-y-3">
+        <div class="bg-zinc-100 rounded-lg aspect-square"></div>
         <div class="h-3.5 bg-zinc-100 rounded w-3/4"></div>
         <div class="h-3 bg-zinc-100 rounded w-1/2"></div>
       </div>
     </div>
 
-    <div v-else-if="errorMessage" role="alert" class="p-6 sm:p-8 bg-white rounded-2xl border border-zinc-200/80 text-center space-y-3">
+    <div v-else-if="errorMessage" role="alert" class="p-6 sm:p-8 bg-white rounded-xl border border-zinc-200/80 text-center space-y-3">
       <p class="text-sm text-zinc-600">{{ errorMessage }}</p>
       <button type="button" @click="$emit('retry')" class="px-4 py-2 rounded-lg border border-zinc-300 text-xs font-semibold text-zinc-800 hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:ring-offset-2">
         Thử lại
@@ -37,7 +37,7 @@
     </div>
 
     <!-- Empty State -->
-    <div v-else-if="!items || items.length === 0" class="p-8 text-center bg-white rounded-2xl border border-zinc-200/80 text-zinc-400 text-xs">
+    <div v-else-if="!items || items.length === 0" class="p-8 text-center bg-white rounded-xl border border-zinc-200/80 text-zinc-400 text-xs">
       {{ emptyMessage }}
     </div>
 
@@ -82,7 +82,7 @@ withDefaults(defineProps<{
 
 <style scoped>
 .collection-header {
-  @apply relative mb-6 flex flex-col justify-between gap-5 rounded-2xl border border-zinc-200/80 bg-white p-5 sm:flex-row sm:items-center sm:gap-8 sm:p-7;
+  @apply relative mb-6 flex flex-col justify-between gap-5 rounded-xl border border-zinc-200/80 bg-white p-5 sm:flex-row sm:items-center sm:gap-8 sm:p-7;
 }
 
 .collection-header::before {

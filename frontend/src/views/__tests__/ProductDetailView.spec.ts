@@ -19,6 +19,7 @@ vi.mock('vue-router', () => ({
 vi.mock('@/api/catalogApi', () => ({
   catalogApi: {
     getProductById: vi.fn(),
+    getProductStorefront: vi.fn(),
     getReviews: vi.fn(),
     getReviewSummary: vi.fn(),
     submitReview: vi.fn()
@@ -58,7 +59,46 @@ describe('ProductDetailView.vue', () => {
         sku: 'MBP14-M3-18GB',
         name: '18GB / 512GB SSD Space Black',
         price: 39990000,
-        stock: 5
+        stock: 5,
+        status: 'ACTIVE'
+      }
+    ]
+  }
+
+  const mockStorefront = {
+    storySections: [],
+    media: {},
+    promotions: [
+      {
+        id: 1,
+        title: 'GIÁ SỐC ONLINE',
+        description: 'Ưu đãi có hạn'
+      }
+    ],
+    paymentOffers: [],
+    bundleOffers: [],
+    installmentPlans: [
+      {
+        id: 1,
+        providerName: 'TRẢ GÓP 0%'
+      }
+    ],
+    tradeInOffers: [],
+    cityAvailability: [],
+    storePolicy: {
+      officialProductText: 'Chính hãng 100% - Bảo hành 12T',
+      shippingText: 'Miễn phí giao hàng toàn quốc'
+    },
+    faqs: [
+      {
+        id: 1,
+        question: 'Sản phẩm có chính hãng không?',
+        answer: 'Cam kết 100% chính hãng.'
+      },
+      {
+        id: 2,
+        question: 'Tính năng AI có gì nổi bật?',
+        answer: 'Hỗ trợ tính năng Circle to Search thông minh.'
       }
     ]
   }
@@ -89,6 +129,12 @@ describe('ProductDetailView.vue', () => {
       success: true,
       message: 'OK',
       data: { productId: 1, averageRating: 4.8, totalReviews: 5, reviews: { content: [] } } as any
+    })
+
+    vi.mocked(catalogApi.getProductStorefront).mockResolvedValue({
+      success: true,
+      message: 'OK',
+      data: mockStorefront as any
     })
   })
 

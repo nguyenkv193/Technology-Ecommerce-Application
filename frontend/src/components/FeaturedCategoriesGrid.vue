@@ -1,5 +1,5 @@
 <template>
-  <section class="bg-white rounded-2xl sm:rounded-3xl border border-zinc-200/80 p-5 sm:p-7 shadow-xs">
+  <section class="bg-white rounded-xl border border-zinc-200/80 p-5 sm:p-7 shadow-xs">
     <!-- Header -->
     <div class="flex items-center justify-between mb-5 sm:mb-6">
       <h2 class="text-base sm:text-lg font-bold text-zinc-900 tracking-tight">

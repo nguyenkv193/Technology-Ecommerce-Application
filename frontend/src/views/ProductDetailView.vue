@@ -81,7 +81,8 @@
             <span>{{ storefront.storePolicy.officialProductText }}</span>
           </div>
           <div v-if="selectedCityAvailability?.deliveryEstimate" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 text-amber-700 text-xs font-semibold border border-amber-200">
-            <span>⚡ {{ selectedCityAvailability.deliveryEstimate }}</span>
+            <svg class="w-3.5 h-3.5 text-amber-600 fill-current shrink-0" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            <span>{{ selectedCityAvailability.deliveryEstimate }}</span>
           </div>
         </div>
       </div>
@@ -103,7 +104,7 @@
                 class="px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition cursor-pointer"
                 :class="activeSection === nav.id ? 'bg-red-600 text-white font-semibold shadow-xs' : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100'"
               >
-                <span class="mr-1">{{ nav.icon }}</span>
+                <span class="mr-1.5 inline-flex items-center" v-html="nav.iconSvg"></span>
                 <span>{{ nav.label }}</span>
               </button>
             </div>
@@ -126,7 +127,7 @@
         <div 
           @touchstart="handleTouchStart"
           @touchend="handleTouchEnd"
-          class="bg-white border border-zinc-200/90 rounded-3xl p-6 sm:p-8 aspect-[4/3] sm:aspect-square flex items-center justify-center relative overflow-hidden shadow-xs group select-none"
+          class="bg-white border border-zinc-200/90 rounded-xl p-6 sm:p-8 aspect-[4/3] sm:aspect-square flex items-center justify-center relative overflow-hidden shadow-xs group select-none"
         >
           <!-- Top Left Tag Badges -->
           <div class="absolute top-4 left-4 z-10 flex flex-col gap-2">
@@ -135,7 +136,8 @@
               <span>Trả góp</span>
             </span>
             <span v-if="primaryPromotion" class="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-md bg-amber-500 text-white shadow-xs">
-              🔥 {{ primaryPromotion.title }}
+              <svg class="w-3 h-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+              <span>{{ primaryPromotion.title }}</span>
             </span>
           </div>
 
@@ -193,7 +195,7 @@
           <!-- Video Review Tab -->
           <button v-if="storefront.media.reviewVideoUrl"
             @click="openVideoModal"
-            class="flex flex-col items-center justify-center w-16 h-16 sm:w-18 sm:h-18 rounded-2xl border bg-white text-zinc-700 hover:border-red-500 hover:text-red-600 shrink-0 transition p-2 cursor-pointer group/btn"
+            class="flex flex-col items-center justify-center w-16 h-16 sm:w-18 sm:h-18 rounded-lg border bg-white text-zinc-700 hover:border-red-500 hover:text-red-600 shrink-0 transition p-2 cursor-pointer group/btn"
           >
             <div class="w-6 h-6 rounded-full bg-red-100 text-red-600 group-hover/btn:bg-red-600 group-hover/btn:text-white flex items-center justify-center transition">
               <svg class="w-3.5 h-3.5 ml-0.5 fill-current" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
@@ -204,7 +206,7 @@
           <!-- Highlight Feature Icon Tab -->
           <button v-if="storefront.storySections.length > 0 || product.description"
             @click="scrollToSection('description')"
-            class="flex flex-col items-center justify-center w-16 h-16 sm:w-18 sm:h-18 rounded-2xl border bg-white text-zinc-700 hover:border-amber-500 hover:text-amber-600 shrink-0 transition p-2 cursor-pointer"
+            class="flex flex-col items-center justify-center w-16 h-16 sm:w-18 sm:h-18 rounded-lg border bg-white text-zinc-700 hover:border-amber-500 hover:text-amber-600 shrink-0 transition p-2 cursor-pointer"
           >
             <div class="w-6 h-6 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center">
               <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
@@ -217,7 +219,7 @@
             v-for="(img, idx) in galleryImages" 
             :key="idx"
             @click="selectImage(idx)"
-            class="w-16 h-16 sm:w-18 sm:h-18 rounded-2xl bg-white border p-1.5 shrink-0 transition relative cursor-pointer overflow-hidden flex items-center justify-center"
+            class="w-16 h-16 sm:w-18 sm:h-18 rounded-lg bg-white border p-1.5 shrink-0 transition relative cursor-pointer overflow-hidden flex items-center justify-center"
             :class="activeImageIndex === idx ? 'border-red-600 ring-2 ring-red-600/30' : 'border-zinc-200 hover:border-zinc-300'"
           >
             <img :src="img" class="object-contain w-full h-full pointer-events-none select-none" :alt="`Góc ảnh ${idx + 1}`" />
@@ -226,7 +228,7 @@
           <!-- Unbox Tab -->
           <button v-if="storefront.media.unboxingDescription || storefront.media.unboxingVideoUrl"
             @click="openUnboxModal"
-            class="flex flex-col items-center justify-center w-16 h-16 sm:w-18 sm:h-18 rounded-2xl border bg-white text-zinc-700 hover:border-zinc-400 shrink-0 transition p-2 cursor-pointer"
+            class="flex flex-col items-center justify-center w-16 h-16 sm:w-18 sm:h-18 rounded-lg border bg-white text-zinc-700 hover:border-zinc-400 shrink-0 transition p-2 cursor-pointer"
           >
             <div class="w-6 h-6 rounded-full bg-zinc-100 text-zinc-600 flex items-center justify-center">
               <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
@@ -237,7 +239,7 @@
           <!-- 360 View Tab -->
           <button v-if="storefront.media.view360Url"
             @click="open360Modal"
-            class="flex flex-col items-center justify-center w-16 h-16 sm:w-18 sm:h-18 rounded-2xl border bg-white text-zinc-700 hover:border-zinc-400 shrink-0 transition p-2 cursor-pointer"
+            class="flex flex-col items-center justify-center w-16 h-16 sm:w-18 sm:h-18 rounded-lg border bg-white text-zinc-700 hover:border-zinc-400 shrink-0 transition p-2 cursor-pointer"
           >
             <div class="w-6 h-6 rounded-full bg-zinc-100 text-zinc-600 flex items-center justify-center">
               <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
@@ -247,9 +249,9 @@
         </div>
 
         <!-- TechStore Policy & Gold Guarantees Bar (FPT Style) -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 rounded-2xl bg-zinc-50 border border-zinc-200/80 text-xs">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 rounded-xl bg-zinc-50 border border-zinc-200/80 text-xs">
           <div v-for="(policy, index) in policyTexts" :key="`${index}-${policy}`" class="flex items-center gap-2.5">
-            <div class="w-8 h-8 rounded-xl bg-white border border-zinc-200 flex items-center justify-center text-red-600 shrink-0 shadow-2xs">
+            <div class="w-8 h-8 rounded-lg bg-white border border-zinc-200 flex items-center justify-center text-red-600 shrink-0 shadow-2xs">
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
             </div>
             <span class="text-zinc-700 font-medium leading-tight">{{ policy }}</span>
@@ -260,7 +262,7 @@
         </div>
 
         <!-- Thông số nổi bật (Quick Key Specs preview card) -->
-        <div class="bg-white rounded-3xl border border-zinc-200/80 p-5 sm:p-6 space-y-4 shadow-xs">
+        <div class="bg-white rounded-xl border border-zinc-200/80 p-5 sm:p-6 space-y-4 shadow-xs">
           <div class="flex items-center justify-between">
             <h3 class="text-sm font-bold text-zinc-900 flex items-center gap-2">
               <span class="w-2 h-2 rounded-full bg-red-600"></span>
@@ -279,9 +281,9 @@
             <div 
               v-for="(spec, sIdx) in highlightSpecs" 
               :key="sIdx"
-              class="p-3.5 rounded-2xl bg-zinc-50/80 border border-zinc-200/60 flex items-start gap-3"
+              class="p-3.5 rounded-lg bg-zinc-50/80 border border-zinc-200/60 flex items-start gap-3"
             >
-              <div class="p-2 rounded-xl bg-white border border-zinc-200 text-zinc-700 shrink-0">
+              <div class="p-2 rounded-lg bg-white border border-zinc-200 text-zinc-700 shrink-0">
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" v-html="spec.iconSvg"></svg>
               </div>
               <div class="space-y-0.5 min-w-0">
@@ -293,7 +295,7 @@
         </div>
 
         <!-- Section: Mô tả - Thông tin hay (Rich Product Story) -->
-        <div id="description" class="bg-white rounded-3xl border border-zinc-200/80 p-6 sm:p-8 space-y-5 shadow-xs relative scroll-mt-24">
+        <div id="description" class="bg-white rounded-xl border border-zinc-200/80 p-6 sm:p-8 space-y-5 shadow-xs relative scroll-mt-24">
           <div class="flex items-center justify-between pb-3 border-b border-zinc-100">
             <h2 class="text-lg font-bold text-zinc-900 flex items-center gap-2">
               <span class="w-2.5 h-2.5 rounded-full bg-red-600"></span>
@@ -313,7 +315,7 @@
             <article v-for="(section, index) in storefront.storySections" :key="`${section.heading || 'story'}-${index}`" class="space-y-3">
               <h4 v-if="section.heading" class="text-sm font-bold text-zinc-900 mt-4">{{ section.heading }}</h4>
               <p v-if="section.body">{{ section.body }}</p>
-              <div v-if="section.imageUrl" class="rounded-2xl overflow-hidden border border-zinc-200 my-3">
+              <div v-if="section.imageUrl" class="rounded-lg overflow-hidden border border-zinc-200 my-3">
                 <img :src="section.imageUrl" class="w-full h-56 sm:h-72 object-cover" :alt="section.heading || product.name" />
                 <div v-if="section.imageCaption" class="p-2.5 bg-zinc-50 text-[11px] text-zinc-500 text-center border-t border-zinc-200">
                   {{ section.imageCaption }}
@@ -329,11 +331,11 @@
           <!-- Bottom Fade Gradient & Read More Button -->
           <div 
             v-if="!isExpandedStory" 
-            class="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-white via-white/80 to-transparent flex items-end justify-center pb-4 rounded-b-3xl"
+            class="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-white via-white/80 to-transparent flex items-end justify-center pb-4 rounded-b-xl"
           >
             <button 
               @click="isExpandedStory = true"
-              class="px-5 py-2 rounded-xl text-xs font-bold text-red-600 bg-white border border-red-200 shadow-md hover:bg-red-50 flex items-center gap-1.5 transition cursor-pointer"
+              class="px-5 py-2 rounded-lg text-xs font-bold text-red-600 bg-white border border-red-200 shadow-md hover:bg-red-50 flex items-center gap-1.5 transition cursor-pointer"
             >
               <span>Đọc thêm nội dung</span>
               <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
@@ -343,7 +345,7 @@
           <div v-else class="text-center pt-2">
             <button 
               @click="isExpandedStory = false"
-              class="px-4 py-1.5 rounded-xl text-xs font-bold text-zinc-600 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200 transition cursor-pointer"
+              class="px-4 py-1.5 rounded-lg text-xs font-bold text-zinc-600 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200 transition cursor-pointer"
             >
               Thu gọn nội dung ▲
             </button>
@@ -355,13 +357,13 @@
       <div class="lg:col-span-5 space-y-5">
         
         <!-- FPT GIÁ SỐC ONLINE / FLASH SALE BANNER -->
-        <div class="rounded-3xl border p-5 sm:p-6 shadow-sm space-y-4" :class="primaryPromotion ? 'border-red-200/90 bg-gradient-to-br from-red-50/50 via-white to-red-50/30' : 'border-zinc-200/90 bg-white'">
+        <div class="rounded-xl border p-5 sm:p-6 shadow-sm space-y-4" :class="primaryPromotion ? 'border-red-200/90 bg-gradient-to-br from-red-50/50 via-white to-red-50/30' : 'border-zinc-200/90 bg-white'">
           
           <!-- Flash Sale Header with Animated Fire & Live Countdown -->
           <div class="flex items-center justify-between pb-3 border-b border-red-100">
             <div class="flex items-center gap-2">
               <span class="flex h-6 px-2.5 rounded-lg text-white font-extrabold text-[11px] uppercase items-center gap-1 shadow-xs" :class="primaryPromotion ? 'bg-red-600 animate-pulse' : 'bg-zinc-700'">
-                <span v-if="primaryPromotion">🔥</span>
+                <svg v-if="primaryPromotion" class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
                 <span>{{ primaryPromotion?.title || 'Giá bán' }}</span>
               </span>
             </div>
@@ -396,7 +398,7 @@
             <!-- Loyalty F-Points Earn Badge -->
             <div v-if="loyaltyPoints != null" class="pt-1 flex items-center gap-2 text-xs">
               <div class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 text-[11px] font-semibold">
-                <span>🪙</span>
+                <svg class="w-3.5 h-3.5 text-amber-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M14.8 9A2 2 0 0 0 13 8h-2a2 2 0 0 0 0 4h2a2 2 0 0 1 0 4h-2a2 2 0 0 1-1.8-1"/><path d="M12 6v2m0 8v2"/></svg>
                 <span>Tích lũy +{{ loyaltyPoints.toLocaleString('vi-VN') }} điểm thưởng TechStore</span>
               </div>
             </div>
@@ -415,9 +417,9 @@
         </div>
 
         <!-- Thu Cũ Đổi Mới Banner (Trade-In Offer) -->
-        <div v-if="activeTradeInOffers.length" class="p-3.5 rounded-2xl bg-gradient-to-r from-blue-50/80 to-indigo-50/80 border border-blue-200/80 flex items-center justify-between shadow-2xs">
+        <div v-if="activeTradeInOffers.length" class="p-3.5 rounded-lg bg-gradient-to-r from-blue-50/80 to-indigo-50/80 border border-blue-200/80 flex items-center justify-between shadow-2xs">
           <div class="flex items-center gap-2.5">
-            <div class="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0">
+            <div class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center shrink-0">
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
             </div>
             <div>
@@ -430,7 +432,7 @@
           </div>
           <button 
             @click="showTradeInModal = true"
-            class="text-xs font-bold text-blue-700 hover:text-blue-800 bg-white px-3 py-1.5 rounded-xl border border-blue-200 shadow-2xs hover:bg-blue-50 transition shrink-0 cursor-pointer"
+            class="text-xs font-bold text-blue-700 hover:text-blue-800 bg-white px-3 py-1.5 rounded-lg border border-blue-200 shadow-2xs hover:bg-blue-50 transition shrink-0 cursor-pointer"
           >
             Định giá ngay ›
           </button>
@@ -447,7 +449,7 @@
               v-for="v in availableVariants"
               :key="v.id"
               @click="selectVariant(v)"
-              class="p-3 rounded-2xl border text-left transition relative flex flex-col justify-between cursor-pointer"
+              class="p-3 rounded-lg border text-left transition relative flex flex-col justify-between cursor-pointer"
               :class="selectedVariant?.id === v.id ? 'bg-red-50/40 border-red-600 ring-1 ring-red-600 text-zinc-900 shadow-xs' : 'bg-white border-zinc-200 hover:border-zinc-300 text-zinc-700'"
             >
               <div class="font-bold text-xs truncate">{{ v.name }}</div>
@@ -478,7 +480,7 @@
               v-for="c in colorOptions" 
               :key="c.name"
               @click="selectColor(c.name)"
-              class="p-2.5 rounded-2xl border transition flex items-center gap-2 cursor-pointer relative"
+              class="p-2.5 rounded-lg border transition flex items-center gap-2 cursor-pointer relative"
               :class="selectedColorName === c.name ? 'border-red-600 bg-red-50/30 ring-1 ring-red-600' : 'border-zinc-200 bg-white hover:border-zinc-300'"
             >
               <span v-if="c.hex" class="w-4 h-4 rounded-full shrink-0 border border-black/10" :style="{ backgroundColor: c.hex }"></span>
@@ -495,7 +497,7 @@
         </div>
 
         <!-- Store Location & Stock Status -->
-        <div class="p-3.5 rounded-2xl bg-zinc-50 border border-zinc-200/80 space-y-2 text-xs">
+        <div class="p-3.5 rounded-lg bg-zinc-50 border border-zinc-200/80 space-y-2 text-xs">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-1.5 text-zinc-600 font-medium">
               <svg class="w-4 h-4 text-red-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
@@ -528,7 +530,7 @@
         </div>
 
         <!-- Khuyến mãi chính -->
-        <div class="rounded-3xl border border-red-200 bg-white overflow-hidden shadow-xs">
+        <div class="rounded-xl border border-red-200 bg-white overflow-hidden shadow-xs">
           <div class="bg-gradient-to-r from-red-600 to-rose-600 px-4 py-2.5 flex items-center justify-between text-white">
             <div class="flex items-center gap-2">
               <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
@@ -563,17 +565,17 @@
         </div>
 
         <!-- Mua Kèm Với Giá Ưu Đãi -->
-        <div v-if="activeBundleOffers.length" class="rounded-3xl border border-zinc-200/90 bg-white p-4 sm:p-5 space-y-3 shadow-xs">
+        <div v-if="activeBundleOffers.length" class="rounded-xl border border-zinc-200/90 bg-white p-4 sm:p-5 space-y-3 shadow-xs">
           <div class="flex items-center justify-between">
             <h4 class="text-xs font-bold text-zinc-900 flex items-center gap-1.5">
-              <span>🔥</span>
+              <svg class="w-3.5 h-3.5 text-red-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
               <span>Mua kèm với giá ưu đãi</span>
             </h4>
             <span class="text-[11px] text-zinc-400">Ưu đãi đang áp dụng</span>
           </div>
 
           <div class="space-y-2">
-            <div v-for="(combo, index) in activeBundleOffers" :key="combo.id || `${combo.title}-${index}`" class="flex items-center justify-between gap-3 p-3 rounded-2xl border bg-zinc-50/50 border-zinc-200/80">
+            <div v-for="(combo, index) in activeBundleOffers" :key="combo.id || `${combo.title}-${index}`" class="flex items-center justify-between gap-3 p-3 rounded-lg border bg-zinc-50/50 border-zinc-200/80">
               <div>
                 <div class="text-xs font-semibold text-zinc-800">{{ combo.title }}</div>
                 <div v-if="combo.description" class="text-[11px] text-zinc-500 mt-0.5">{{ combo.description }}</div>
@@ -588,14 +590,14 @@
         </div>
 
         <!-- Khuyến mãi thanh toán (Payment Partner Bank Cards) -->
-        <div v-if="activePaymentOffers.length" class="rounded-3xl border border-zinc-200/90 bg-white p-4 sm:p-5 space-y-3 shadow-xs">
+        <div v-if="activePaymentOffers.length" class="rounded-xl border border-zinc-200/90 bg-white p-4 sm:p-5 space-y-3 shadow-xs">
           <div class="flex items-center justify-between">
             <h4 class="text-xs font-bold text-zinc-900">Ưu đãi thanh toán</h4>
             <span class="text-[11px] text-red-600 font-semibold">Ưu đãi đối tác</span>
           </div>
 
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-[10px] font-bold">
-            <div v-for="(offer, index) in activePaymentOffers" :key="offer.id || `${offer.partnerName || offer.title}-${index}`" class="p-2 rounded-xl bg-zinc-50 border border-zinc-200 text-zinc-700">
+            <div v-for="(offer, index) in activePaymentOffers" :key="offer.id || `${offer.partnerName || offer.title}-${index}`" class="p-2 rounded-lg bg-zinc-50 border border-zinc-200 text-zinc-700">
               {{ offer.partnerName || offer.title }}
             </div>
           </div>
@@ -637,7 +639,7 @@
             <button 
               @click="handleBuyNow"
               :disabled="currentStock <= 0 || addingToCart"
-              class="py-3.5 px-4 rounded-2xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-extrabold shadow-md transition-all active:scale-98 disabled:opacity-40 disabled:pointer-events-none flex flex-col items-center justify-center cursor-pointer"
+              class="py-3.5 px-4 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-extrabold shadow-md transition-all active:scale-98 disabled:opacity-40 disabled:pointer-events-none flex flex-col items-center justify-center cursor-pointer"
             >
               <span class="text-sm uppercase tracking-wide">MUA NGAY</span>
               <span v-if="storefront.storePolicy.shippingText" class="text-[11px] font-normal opacity-90">{{ storefront.storePolicy.shippingText }}</span>
@@ -647,7 +649,7 @@
             <button v-if="activeInstallmentPlans.length"
               @click="openInstallmentModal"
               :disabled="currentStock <= 0"
-              class="py-3.5 px-4 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-white font-extrabold shadow-md transition-all active:scale-98 disabled:opacity-40 disabled:pointer-events-none flex flex-col items-center justify-center cursor-pointer"
+              class="py-3.5 px-4 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white font-extrabold shadow-md transition-all active:scale-98 disabled:opacity-40 disabled:pointer-events-none flex flex-col items-center justify-center cursor-pointer"
             >
               <span class="text-sm uppercase tracking-wide">TRẢ GÓP</span>
               <span class="text-[11px] font-normal opacity-90">{{ activeInstallmentPlans[0].providerName }}</span>
@@ -658,14 +660,14 @@
           <button 
             @click="handleAddToCart"
             :disabled="currentStock <= 0 || addingToCart"
-            class="w-full py-3 px-4 rounded-2xl border-2 border-red-600 text-red-600 hover:bg-red-50 font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40"
+            class="w-full py-3 px-4 rounded-xl border-2 border-red-600 text-red-600 hover:bg-red-50 font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40"
           >
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 11V7a4 4 0 0 0-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
             <span>{{ addingToCart ? 'Đang thêm vào giỏ...' : 'Thêm vào giỏ hàng' }}</span>
           </button>
 
           <!-- Toast Message Feedback -->
-          <div v-if="toastMessage" class="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl text-xs font-semibold text-center animate-fade-in">
+          <div v-if="toastMessage" class="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-lg text-xs font-semibold text-center animate-fade-in">
             {{ toastMessage }}
           </div>
 
@@ -685,7 +687,7 @@
     </div>
 
     <!-- ================= CUSTOMER REVIEWS & FEEDBACK SECTION ================= -->
-    <section id="reviews" class="bg-white border border-zinc-200/80 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xs scroll-mt-24">
+    <section id="reviews" class="bg-white border border-zinc-200/80 rounded-xl p-6 sm:p-8 space-y-6 shadow-xs scroll-mt-24">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-zinc-100 gap-4">
         <div>
           <h3 class="text-lg font-bold text-zinc-900 flex items-center gap-2">
@@ -704,7 +706,7 @@
       </div>
 
       <!-- FPT Style Rating Overview Score Card -->
-      <div class="grid grid-cols-1 md:grid-cols-12 gap-6 p-6 rounded-3xl bg-zinc-50 border border-zinc-200/80 items-center">
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-6 p-6 rounded-xl bg-zinc-50 border border-zinc-200/80 items-center">
         <!-- Big Rating Number -->
         <div class="md:col-span-4 text-center border-b md:border-b-0 md:border-r border-zinc-200 pb-4 md:pb-0 md:pr-4">
           <div class="text-4xl sm:text-5xl font-black text-zinc-900 tracking-tight">
@@ -742,7 +744,7 @@
       <form 
         v-if="showReviewForm" 
         @submit.prevent="handleSubmitReview" 
-        class="p-5 sm:p-6 bg-red-50/40 rounded-3xl border border-red-200 space-y-4 animate-fade-in"
+        class="p-5 sm:p-6 bg-red-50/40 rounded-xl border border-red-200 space-y-4 animate-fade-in"
       >
         <h4 class="text-xs font-bold text-zinc-800 uppercase tracking-wider">Gửi nhận xét trải nghiệm thiết bị</h4>
         
@@ -771,7 +773,7 @@
             rows="3"
             required
             placeholder="Chia sẻ trải nghiệm thực tế của bạn về sản phẩm..."
-            class="w-full bg-white border border-zinc-300 rounded-2xl p-3.5 text-xs text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 transition"
+            class="w-full bg-white border border-zinc-300 rounded-lg p-3.5 text-xs text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 transition"
           ></textarea>
         </div>
 
@@ -802,7 +804,7 @@
         <div 
           v-for="rev in displayReviews" 
           :key="rev.id"
-          class="p-5 rounded-2xl bg-zinc-50/70 border border-zinc-200/70 space-y-2.5"
+          class="p-5 rounded-lg bg-zinc-50/70 border border-zinc-200/70 space-y-2.5"
         >
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2.5">
@@ -839,7 +841,7 @@
     </div>
 
     <!-- ================= FREQUENTLY ASKED QUESTIONS (FAQ) ================= -->
-    <section id="faq" class="bg-white border border-zinc-200/80 rounded-3xl p-6 sm:p-8 space-y-4 shadow-xs scroll-mt-24">
+    <section id="faq" class="bg-white border border-zinc-200/80 rounded-xl p-6 sm:p-8 space-y-4 shadow-xs scroll-mt-24">
       <div class="pb-3 border-b border-zinc-100">
         <h3 class="text-lg font-bold text-zinc-900 flex items-center gap-2">
           <span class="w-2.5 h-2.5 rounded-full bg-red-600"></span>
@@ -852,7 +854,7 @@
         <div 
           v-for="(faq, fIdx) in storefront.faqs"
           :key="fIdx"
-          class="rounded-2xl border transition overflow-hidden"
+          class="rounded-lg border transition overflow-hidden"
           :class="openFaqIndex === fIdx ? 'border-red-200 bg-red-50/20' : 'border-zinc-200/80 bg-white'"
         >
           <button 
@@ -871,7 +873,7 @@
     </section>
 
     <!-- ================= SATISFACTION FEEDBACK WIDGET ================= -->
-    <div class="p-6 rounded-3xl bg-zinc-100/80 border border-zinc-200 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+    <div class="p-6 rounded-xl bg-zinc-100/80 border border-zinc-200 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
       <div>
         <h4 class="text-sm font-bold text-zinc-900">Bạn có hài lòng với thông tin tại trang chi tiết sản phẩm này không?</h4>
         <p class="text-xs text-zinc-500 mt-0.5">Ý kiến đóng góp giúp TechStore liên tục nâng cấp chất lượng phục vụ</p>
@@ -879,17 +881,19 @@
       <div class="flex items-center gap-2 shrink-0">
         <button 
           @click="handleFeedback(true)"
-          class="px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer"
+          class="px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5"
           :class="feedbackState === 'yes' ? 'bg-red-600 text-white' : 'bg-white border border-zinc-300 text-zinc-800 hover:bg-zinc-50'"
         >
-          👍 Hài lòng
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+          <span>Hài lòng</span>
         </button>
         <button 
           @click="handleFeedback(false)"
-          class="px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer"
+          class="px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5"
           :class="feedbackState === 'no' ? 'bg-zinc-800 text-white' : 'bg-white border border-zinc-300 text-zinc-800 hover:bg-zinc-50'"
         >
-          👎 Chưa hài lòng
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"/></svg>
+          <span>Chưa hài lòng</span>
         </button>
       </div>
     </div>
@@ -961,14 +965,14 @@
     <!-- 1. Video Review Modal -->
     <Teleport to="body">
       <div v-if="showVideoModal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl max-w-2xl w-full overflow-hidden shadow-2xl space-y-3 p-4">
+        <div class="bg-white rounded-xl max-w-2xl w-full overflow-hidden shadow-2xl space-y-3 p-4">
           <div class="flex items-center justify-between px-2">
             <h4 class="text-sm font-bold text-zinc-900">Video giới thiệu & Trải nghiệm thực tế</h4>
             <button @click="showVideoModal = false" class="p-1 rounded-full hover:bg-zinc-100 text-zinc-500 cursor-pointer">
               ✕
             </button>
           </div>
-          <div class="aspect-video w-full rounded-2xl overflow-hidden bg-black flex items-center justify-center">
+          <div class="aspect-video w-full rounded-lg overflow-hidden bg-black flex items-center justify-center">
             <iframe 
               class="w-full h-full"
               :src="storefront.media.reviewVideoUrl"
@@ -983,12 +987,12 @@
 
     <Teleport to="body">
       <div v-if="showUnboxModal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4" @click.self="showUnboxModal = false">
-        <div class="bg-white rounded-3xl max-w-2xl w-full overflow-hidden shadow-2xl space-y-3 p-4">
+        <div class="bg-white rounded-xl max-w-2xl w-full overflow-hidden shadow-2xl space-y-3 p-4">
           <div class="flex items-center justify-between px-2">
             <h4 class="text-sm font-bold text-zinc-900">Nội dung mở hộp</h4>
             <button @click="showUnboxModal = false" class="p-1 rounded-full hover:bg-zinc-100 text-zinc-500 cursor-pointer">✕</button>
           </div>
-          <iframe v-if="storefront.media.unboxingVideoUrl" :src="storefront.media.unboxingVideoUrl" title="Video mở hộp sản phẩm" class="aspect-video w-full rounded-2xl bg-black" allowfullscreen></iframe>
+          <iframe v-if="storefront.media.unboxingVideoUrl" :src="storefront.media.unboxingVideoUrl" title="Video mở hộp sản phẩm" class="aspect-video w-full rounded-lg bg-black" allowfullscreen></iframe>
           <p v-if="storefront.media.unboxingDescription" class="px-2 text-xs text-zinc-600">{{ storefront.media.unboxingDescription }}</p>
         </div>
       </div>
@@ -996,12 +1000,12 @@
 
     <Teleport to="body">
       <div v-if="show360Modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4" @click.self="show360Modal = false">
-        <div class="bg-white rounded-3xl max-w-3xl w-full overflow-hidden shadow-2xl p-4 space-y-3">
+        <div class="bg-white rounded-xl max-w-3xl w-full overflow-hidden shadow-2xl p-4 space-y-3">
           <div class="flex items-center justify-between px-2">
             <h4 class="text-sm font-bold text-zinc-900">Góc nhìn 360° sản phẩm</h4>
             <button @click="show360Modal = false" class="p-1 rounded-full hover:bg-zinc-100 text-zinc-500 cursor-pointer">✕</button>
           </div>
-          <iframe :src="storefront.media.view360Url" title="Góc nhìn 360 độ sản phẩm" class="aspect-video w-full rounded-2xl bg-zinc-100" allowfullscreen></iframe>
+          <iframe :src="storefront.media.view360Url" title="Góc nhìn 360 độ sản phẩm" class="aspect-video w-full rounded-lg bg-zinc-100" allowfullscreen></iframe>
         </div>
       </div>
     </Teleport>
@@ -1009,7 +1013,7 @@
     <!-- 2. Trade-In Estimation Modal -->
     <Teleport to="body">
       <div v-if="showTradeInModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+        <div class="bg-white rounded-xl max-w-md w-full p-6 space-y-4 shadow-2xl">
           <div class="flex items-center justify-between">
             <h4 class="text-sm font-bold text-zinc-900">Định giá thu cũ đổi mới</h4>
             <button @click="showTradeInModal = false" class="text-zinc-400 hover:text-zinc-600 cursor-pointer">✕</button>
@@ -1026,7 +1030,7 @@
             <p v-if="selectedTradeInOffer?.condition || selectedTradeInOffer?.terms" class="text-zinc-500">
               {{ selectedTradeInOffer?.condition || selectedTradeInOffer?.terms }}
             </p>
-            <div class="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 space-y-1">
+            <div class="p-3.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 space-y-1">
               <div class="text-[11px] font-semibold">Thông tin trợ giá do cửa hàng cung cấp:</div>
               <div v-if="selectedTradeInOffer?.minimumTopUp != null || selectedTradeInOffer?.maximumTopUp != null" class="text-base font-black text-emerald-700">
                 Bù thêm {{ selectedTradeInOffer?.minimumTopUp != null ? formatPrice(selectedTradeInOffer.minimumTopUp) : '—' }} – {{ selectedTradeInOffer?.maximumTopUp != null ? formatPrice(selectedTradeInOffer.maximumTopUp) : '—' }}
@@ -1048,7 +1052,7 @@
     <!-- 3. Installment Calculator Modal -->
     <Teleport to="body">
       <div v-if="showInstallmentModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
+        <div class="bg-white rounded-xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
           <div class="flex items-center justify-between">
             <h4 class="text-sm font-bold text-zinc-900 flex items-center gap-2">
               <span class="w-2 h-2 rounded-full bg-red-600"></span>
@@ -1058,13 +1062,13 @@
           </div>
 
           <div class="space-y-3 text-xs">
-            <div class="p-3 bg-zinc-50 rounded-2xl border border-zinc-200 flex justify-between items-center">
+            <div class="p-3 bg-zinc-50 rounded-lg border border-zinc-200 flex justify-between items-center">
               <span class="text-zinc-500">Giá trị sản phẩm:</span>
               <span class="font-extrabold text-sm text-red-600">{{ formatPrice(currentPrice) }}</span>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-center">
-              <div v-for="(plan, index) in activeInstallmentPlans" :key="`${plan.providerName}-${plan.months}-${index}`" class="p-3 rounded-2xl border border-zinc-200 bg-white">
+              <div v-for="(plan, index) in activeInstallmentPlans" :key="`${plan.providerName}-${plan.months}-${index}`" class="p-3 rounded-lg border border-zinc-200 bg-white">
                 <div class="text-[11px] text-zinc-500 font-medium">{{ plan.providerName }} · {{ plan.months }} tháng</div>
                 <div v-if="plan.monthlyPayment != null" class="text-xs font-black text-zinc-900 mt-1">{{ formatPrice(plan.monthlyPayment) }}/tháng</div>
                 <div v-if="plan.interestRatePercent != null" class="text-[10px] text-red-600 font-bold mt-0.5">Lãi suất {{ plan.interestRatePercent }}%</div>
@@ -1085,14 +1089,14 @@
     <!-- 4. Compare Modal -->
     <Teleport to="body">
       <div v-if="showCompareModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl max-w-2xl w-full p-6 space-y-4 shadow-2xl max-h-[85vh] overflow-y-auto">
+        <div class="bg-white rounded-xl max-w-2xl w-full p-6 space-y-4 shadow-2xl max-h-[85vh] overflow-y-auto">
           <div class="flex items-center justify-between pb-2 border-b border-zinc-100">
             <h4 class="text-sm font-bold text-zinc-900">So sánh sản phẩm</h4>
             <button @click="showCompareModal = false" class="text-zinc-400 hover:text-zinc-600 cursor-pointer">✕</button>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-            <div class="p-4 rounded-2xl bg-red-50/30 border border-red-200 space-y-2 text-center">
+            <div class="p-4 rounded-lg bg-red-50/30 border border-red-200 space-y-2 text-center">
               <img v-if="activeImage" :src="activeImage" class="w-20 h-20 object-contain mx-auto" :alt="product.name" />
               <div class="font-bold text-zinc-900">{{ product.name }}</div>
               <div class="font-black text-red-600">{{ formatPrice(currentPrice) }}</div>
@@ -1101,7 +1105,7 @@
               </div>
             </div>
 
-            <div v-if="comparisonProduct" class="p-4 rounded-2xl bg-zinc-50 border border-zinc-200 space-y-2 text-center">
+            <div v-if="comparisonProduct" class="p-4 rounded-lg bg-zinc-50 border border-zinc-200 space-y-2 text-center">
               <img v-if="comparisonProduct.thumbnailUrl || comparisonProduct.images?.[0]?.url" :src="comparisonProduct.thumbnailUrl || comparisonProduct.images?.[0]?.url" class="w-20 h-20 object-contain mx-auto" :alt="comparisonProduct.name" />
               <div class="font-bold text-zinc-900">{{ comparisonProduct.name }}</div>
               <div class="font-black text-zinc-900">{{ formatPrice(comparisonProduct.minPrice) }}</div>
@@ -1109,7 +1113,7 @@
                 <div v-for="attribute in (comparisonProduct.attributes || []).slice(0, 4)" :key="attribute.id || attribute.name">• {{ attribute.name }}: {{ attribute.value }}</div>
               </div>
             </div>
-            <div v-else class="p-4 rounded-2xl bg-zinc-50 border border-zinc-200 text-center text-xs text-zinc-500">
+            <div v-else class="p-4 rounded-lg bg-zinc-50 border border-zinc-200 text-center text-xs text-zinc-500">
               {{ loadingComparison ? 'Đang tải sản phẩm so sánh...' : 'Chưa có sản phẩm so sánh được cấu hình.' }}
             </div>
           </div>
@@ -1209,12 +1213,36 @@ const startCountdown = (endsAt?: string) => {
 
 // Sub Nav Tabs
 const navTabs = [
-  { id: 'overview', label: 'Thông tin sản phẩm', icon: '⭐' },
-  { id: 'description', label: 'Mô tả chi tiết', icon: '📝' },
-  { id: 'specs', label: 'Thông số kỹ thuật', icon: '⚙️' },
-  { id: 'reviews', label: 'Đánh giá & Bình luận', icon: '💬' },
-  { id: 'similar', label: 'Có thể bạn quan tâm', icon: '❤️' },
-  { id: 'faq', label: 'Câu hỏi thường gặp', icon: '❓' }
+  { 
+    id: 'overview', 
+    label: 'Thông tin sản phẩm', 
+    iconSvg: '<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>' 
+  },
+  { 
+    id: 'description', 
+    label: 'Mô tả chi tiết', 
+    iconSvg: '<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>' 
+  },
+  { 
+    id: 'specs', 
+    label: 'Thông số kỹ thuật', 
+    iconSvg: '<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3"/></svg>' 
+  },
+  { 
+    id: 'reviews', 
+    label: 'Đánh giá & Bình luận', 
+    iconSvg: '<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>' 
+  },
+  { 
+    id: 'similar', 
+    label: 'Có thể bạn quan tâm', 
+    iconSvg: '<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>' 
+  },
+  { 
+    id: 'faq', 
+    label: 'Câu hỏi thường gặp', 
+    iconSvg: '<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>' 
+  }
 ]
 
 // Similar Products
