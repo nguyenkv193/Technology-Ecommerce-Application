@@ -1,10 +1,10 @@
 <template>
-  <div class="group relative bg-white border border-zinc-200/80 hover:border-zinc-300 rounded-2xl p-4 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 flex flex-col justify-between">
+  <div class="group relative bg-white border border-zinc-200/80 hover:border-zinc-300 rounded-xl p-4 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 flex flex-col justify-between">
     <div>
       <!-- Product Image Canvas -->
       <div
         ref="imageFrame"
-        class="product-image-frame relative overflow-hidden rounded-xl bg-[#f6f6f8] aspect-square flex items-center justify-center mb-3.5 select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:ring-offset-2"
+        class="product-image-frame relative overflow-hidden rounded-lg bg-[#f6f6f8] aspect-square flex items-center justify-center mb-3.5 select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:ring-offset-2"
         tabindex="0"
         role="group"
         :aria-label="`Ảnh ${product.name}. Kính lúp: dùng phím mũi tên để xem các góc, Escape để đóng.`"

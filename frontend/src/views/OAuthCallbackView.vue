@@ -1,6 +1,6 @@
 <template>
   <section class="min-h-[50vh] flex items-center justify-center">
-    <div class="w-full max-w-md rounded-3xl border border-zinc-200 bg-white p-8 text-center shadow-sm">
+    <div class="w-full max-w-md rounded-xl border border-zinc-200 bg-white p-8 text-center shadow-sm">
       <div
         v-if="loading"
         class="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-zinc-200 border-t-zinc-900"

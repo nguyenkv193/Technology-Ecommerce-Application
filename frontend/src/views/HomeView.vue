@@ -40,7 +40,7 @@
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-3.5 sm:gap-4 items-stretch">
         
         <!-- COLUMN 1: Vertical Category Navigation Sidebar (lg:col-span-3) -->
-        <div class="hidden lg:flex lg:col-span-3 rounded-3xl border border-zinc-200/90 bg-white p-3 shadow-xs flex-col justify-between select-none">
+        <div class="hidden lg:flex lg:col-span-3 rounded-xl border border-zinc-200/90 bg-white p-3 shadow-xs flex-col justify-between select-none">
           <div>
             <div class="px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-wider text-zinc-400 flex items-center justify-between">
               <span>Danh mục sản phẩm</span>
@@ -52,7 +52,7 @@
                 v-for="cat in sidebarCategories"
                 :key="cat.name"
                 :to="cat.link"
-                class="flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-medium text-zinc-700 hover:text-red-600 hover:bg-red-50/60 transition-all duration-150 group cursor-pointer"
+                class="flex items-center justify-between px-2.5 py-2 rounded-lg text-xs font-medium text-zinc-700 hover:text-red-600 hover:bg-red-50/60 transition-all duration-150 group cursor-pointer"
               >
                 <div class="flex items-center gap-2.5 truncate">
                   <span 
@@ -70,7 +70,7 @@
           <div class="pt-2 border-t border-zinc-100 px-1">
             <router-link
               to="/products"
-              class="flex items-center justify-between text-xs font-bold text-red-600 hover:text-red-700 py-1.5 px-2 rounded-xl hover:bg-red-50/50 transition-colors"
+              class="flex items-center justify-between text-xs font-bold text-red-600 hover:text-red-700 py-1.5 px-2 rounded-lg hover:bg-red-50/50 transition-colors"
             >
               <span class="flex items-center gap-1.5">
                 <svg class="w-3.5 h-3.5 text-red-600 fill-current" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
@@ -83,7 +83,7 @@
 
         <!-- COLUMN 2: Center Main Carousel Banner (lg:col-span-6) -->
         <div 
-          class="lg:col-span-6 relative isolate overflow-hidden rounded-3xl border border-zinc-900 bg-[#07090e] shadow-md flex flex-col justify-between min-h-[420px] sm:min-h-[440px]"
+          class="lg:col-span-6 relative isolate overflow-hidden rounded-xl border border-zinc-900 bg-[#07090e] shadow-md flex flex-col justify-between min-h-[420px] sm:min-h-[440px]"
           @mouseenter="stopSlideTimer"
           @mouseleave="startSlideTimer"
         >
@@ -204,7 +204,7 @@
             v-for="b in sidePromoBanners"
             :key="b.id"
             :to="b.link"
-            class="relative rounded-3xl overflow-hidden p-4 sm:p-5 flex flex-col justify-between group shadow-xs transition-all duration-300 hover:shadow-md cursor-pointer border border-zinc-200/80"
+            class="relative rounded-xl overflow-hidden p-4 sm:p-5 flex flex-col justify-between group shadow-xs transition-all duration-300 hover:shadow-md cursor-pointer border border-zinc-200/80"
             :class="b.bgClass"
           >
             <!-- Background Image overlay with blend -->
@@ -227,7 +227,7 @@
                 <span>{{ b.ctaText }}</span>
                 <span class="group-hover:translate-x-1 transition-transform">›</span>
               </span>
-              <div class="w-9 h-9 rounded-xl bg-white/90 shadow-2xs border border-zinc-200/80 flex items-center justify-center shrink-0" v-html="b.iconSvg"></div>
+              <div class="w-9 h-9 rounded-lg bg-white/90 shadow-2xs border border-zinc-200/80 flex items-center justify-center shrink-0" v-html="b.iconSvg"></div>
             </div>
           </router-link>
         </div>
@@ -240,7 +240,7 @@
           v-for="card in bottomMiniCards"
           :key="card.id"
           :to="card.link"
-          class="rounded-2xl border border-zinc-200/90 bg-white p-3.5 sm:p-4 hover:border-zinc-300 hover:shadow-xs transition-all flex items-center justify-between gap-3 group cursor-pointer"
+          class="rounded-xl border border-zinc-200/90 bg-white p-3.5 sm:p-4 hover:border-zinc-300 hover:shadow-xs transition-all flex items-center justify-between gap-3 group cursor-pointer"
         >
           <div class="space-y-1 min-w-0">
             <span class="inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md" :class="card.badgeClass">
@@ -253,16 +253,16 @@
               {{ card.highlight }}
             </div>
           </div>
-          <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-zinc-50 border border-zinc-100 flex items-center justify-center p-1 shrink-0 group-hover:scale-105 transition-transform">
+          <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-lg bg-zinc-50 border border-zinc-100 flex items-center justify-center p-1 shrink-0 group-hover:scale-105 transition-transform">
             <img :src="card.image" :alt="card.title" class="max-h-full max-w-full object-contain" />
           </div>
         </router-link>
       </div>
 
       <!-- 4. Trust Badges Row (Enterprise Brand Guarantees) -->
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 rounded-2xl bg-white border border-zinc-200/80 text-xs shadow-2xs">
-        <div class="flex items-center justify-center gap-2.5">
-          <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+      <div class="grid grid-cols-2 sm:grid-cols-4 p-4 rounded-xl bg-white border border-zinc-200/80 text-xs shadow-2xs">
+        <div class="flex items-center justify-center gap-2.5 px-3 border-r border-b sm:border-b-0 border-zinc-200/80 pb-3 sm:pb-0">
+          <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
           </div>
           <div>
@@ -271,8 +271,8 @@
           </div>
         </div>
 
-        <div class="flex items-center justify-center gap-2.5">
-          <div class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+        <div class="flex items-center justify-center gap-2.5 px-3 border-b sm:border-b-0 sm:border-r border-zinc-200/80 pb-3 sm:pb-0">
+          <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
           </div>
           <div>
@@ -281,8 +281,8 @@
           </div>
         </div>
 
-        <div class="flex items-center justify-center gap-2.5">
-          <div class="w-8 h-8 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center shrink-0">
+        <div class="flex items-center justify-center gap-2.5 px-3 border-r border-zinc-200/80 pt-3 sm:pt-0">
+          <div class="w-8 h-8 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center shrink-0">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
           </div>
           <div>
@@ -291,8 +291,8 @@
           </div>
         </div>
 
-        <div class="flex items-center justify-center gap-2.5">
-          <div class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+        <div class="flex items-center justify-center gap-2.5 px-3 pt-3 sm:pt-0">
+          <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
           </div>
           <div>

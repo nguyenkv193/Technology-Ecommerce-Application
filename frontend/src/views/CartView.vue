@@ -172,7 +172,7 @@
 
     <!-- Success Modal -->
     <div v-if="placedOrder" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs">
-      <div class="bg-white border border-zinc-200 rounded-3xl p-8 max-w-md w-full text-center space-y-4 shadow-2xl">
+      <div class="bg-white border border-zinc-200 rounded-xl p-8 max-w-md w-full text-center space-y-4 shadow-2xl">
         <div class="w-14 h-14 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 mx-auto flex items-center justify-center text-xl font-bold">
           ✓
         </div>

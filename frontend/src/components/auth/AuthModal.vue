@@ -15,7 +15,7 @@
 
         <!-- Modal Dialog Card -->
         <div 
-          class="modal-card relative w-full max-w-[430px] my-auto bg-white rounded-3xl shadow-2xl border border-zinc-200/80 p-6 sm:p-8 overflow-hidden z-10 text-zinc-900 select-none will-change-transform"
+          class="modal-card relative w-full max-w-[430px] my-auto bg-white rounded-xl shadow-2xl border border-zinc-200/80 p-6 sm:p-8 overflow-hidden z-10 text-zinc-900 select-none will-change-transform"
           @click.stop
         >
           <!-- Close Button -->
