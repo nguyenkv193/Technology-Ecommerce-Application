@@ -12,7 +12,8 @@ Xem [hướng dẫn CI/CD](docs/ci-cd.md) để bật workflow, xem artifacts v�
 ## Cấu trúc
 
 - `backend/`: Spring Boot 3.4, Java 21, PostgreSQL, JWT.
-- `frontend/`: Vue 3, TypeScript, Vite, Pinia, Tailwind CSS.
+- `frontend/`: Vue 3, TypeScript, Vite, Pinia, Tailwind CSS (Storefront khách hàng).
+- `admin/`: Vue 3, TypeScript, Vite, Pinia, Tailwind CSS (Backoffice Admin Portal độc lập).
 - `aiservice/`: FastAPI, Scikit-learn và ma trận user-item sparse; Content-Based, Item-Item Collaborative và Hybrid.
 - `docker-compose.yml`: PostgreSQL, Elasticsearch, backend, AI service và frontend.
 
