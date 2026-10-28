@@ -1,56 +1,158 @@
 <template>
-  <aside class="w-64 bg-slate-900 border-r border-slate-800 flex flex-col shrink-0 select-none">
-    <!-- Brand / Logo -->
-    <div class="h-16 flex items-center px-6 gap-3 border-b border-slate-800/80">
-      <div class="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-600/30">
-        <Cpu class="w-5 h-5" />
+  <aside class="w-64 bg-zinc-950 border-r border-zinc-800/80 flex flex-col shrink-0 select-none backdrop-blur-xl relative z-20">
+    <!-- Brand / Workspace Header -->
+    <div class="h-16 flex items-center px-5 gap-3 border-b border-zinc-800/70">
+      <div class="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-700/80 flex items-center justify-center text-white shadow-inner">
+        <Cpu class="w-4 h-4 text-zinc-100" />
       </div>
-      <div>
-        <span class="font-bold text-slate-100 text-base tracking-tight">TechStore</span>
-        <span class="block text-[10px] uppercase font-semibold tracking-wider text-blue-400">Backoffice Admin</span>
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-1.5">
+          <span class="font-semibold text-zinc-100 text-sm tracking-tight truncate">TechStore</span>
+          <span class="px-1.5 py-0.5 rounded text-[9px] font-mono font-medium bg-zinc-800 text-zinc-400 border border-zinc-700/50">PRO</span>
+        </div>
+        <span class="block text-[11px] font-mono text-zinc-500 truncate">admin.techstore.vn</span>
       </div>
     </div>
 
-    <!-- Navigation Menu -->
-    <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-      <router-link
-        v-for="item in menuItems"
-        :key="item.path"
-        :to="item.path"
-        class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all group"
-        :class="[
-          isActive(item.path)
-            ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
-            : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
-        ]"
-      >
-        <component
-          :is="item.icon"
-          class="w-5 h-5 transition-transform group-hover:scale-110"
-          :class="isActive(item.path) ? 'text-white' : 'text-slate-400 group-hover:text-slate-200'"
-        />
-        <span>{{ item.label }}</span>
-      </router-link>
+    <!-- Navigation Menu with Groups -->
+    <nav class="flex-1 px-3 py-4 space-y-5 overflow-y-auto">
+      <!-- Section: Tổng quan -->
+      <div>
+        <div class="px-3 pb-1.5 text-[10px] font-semibold tracking-wider text-zinc-500 uppercase font-mono">
+          Tổng quan
+        </div>
+        <div class="space-y-1">
+          <router-link
+            to="/"
+            class="flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all group"
+            :class="[
+              isActive('/')
+                ? 'bg-zinc-800/90 text-white shadow-sm border border-zinc-700/60'
+                : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60'
+            ]"
+          >
+            <div class="flex items-center gap-2.5">
+              <LayoutDashboard class="w-4 h-4 transition-colors" :class="isActive('/') ? 'text-white' : 'text-zinc-400 group-hover:text-zinc-200'" />
+              <span>Dashboard</span>
+            </div>
+            <kbd class="text-[10px] font-mono text-zinc-500 bg-zinc-900/80 px-1.5 py-0.5 rounded border border-zinc-800">⌘1</kbd>
+          </router-link>
+        </div>
+      </div>
+
+      <!-- Section: Quản lý thương mại -->
+      <div>
+        <div class="px-3 pb-1.5 text-[10px] font-semibold tracking-wider text-zinc-500 uppercase font-mono">
+          Thương mại & Kho
+        </div>
+        <div class="space-y-1">
+          <router-link
+            to="/products"
+            class="flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all group"
+            :class="[
+              isActive('/products')
+                ? 'bg-zinc-800/90 text-white shadow-sm border border-zinc-700/60'
+                : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60'
+            ]"
+          >
+            <div class="flex items-center gap-2.5">
+              <Package class="w-4 h-4 transition-colors" :class="isActive('/products') ? 'text-white' : 'text-zinc-400 group-hover:text-zinc-200'" />
+              <span>Sản phẩm</span>
+            </div>
+            <kbd class="text-[10px] font-mono text-zinc-500 bg-zinc-900/80 px-1.5 py-0.5 rounded border border-zinc-800">⌘2</kbd>
+          </router-link>
+
+          <router-link
+            to="/categories"
+            class="flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all group"
+            :class="[
+              isActive('/categories')
+                ? 'bg-zinc-800/90 text-white shadow-sm border border-zinc-700/60'
+                : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60'
+            ]"
+          >
+            <div class="flex items-center gap-2.5">
+              <Layers class="w-4 h-4 transition-colors" :class="isActive('/categories') ? 'text-white' : 'text-zinc-400 group-hover:text-zinc-200'" />
+              <span>Danh mục</span>
+            </div>
+          </router-link>
+
+          <router-link
+            to="/brands"
+            class="flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all group"
+            :class="[
+              isActive('/brands')
+                ? 'bg-zinc-800/90 text-white shadow-sm border border-zinc-700/60'
+                : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60'
+            ]"
+          >
+            <div class="flex items-center gap-2.5">
+              <Award class="w-4 h-4 transition-colors" :class="isActive('/brands') ? 'text-white' : 'text-zinc-400 group-hover:text-zinc-200'" />
+              <span>Thương hiệu</span>
+            </div>
+          </router-link>
+
+          <router-link
+            to="/orders"
+            class="flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all group"
+            :class="[
+              isActive('/orders')
+                ? 'bg-zinc-800/90 text-white shadow-sm border border-zinc-700/60'
+                : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60'
+            ]"
+          >
+            <div class="flex items-center gap-2.5">
+              <ShoppingCart class="w-4 h-4 transition-colors" :class="isActive('/orders') ? 'text-white' : 'text-zinc-400 group-hover:text-zinc-200'" />
+              <span>Đơn hàng</span>
+            </div>
+            <span class="px-1.5 py-0.2 rounded-full text-[10px] font-mono bg-zinc-800 text-zinc-300 border border-zinc-700">Mới</span>
+          </router-link>
+        </div>
+      </div>
+
+      <!-- Section: Hệ thống -->
+      <div>
+        <div class="px-3 pb-1.5 text-[10px] font-semibold tracking-wider text-zinc-500 uppercase font-mono">
+          Hạ tầng
+        </div>
+        <div class="space-y-1">
+          <router-link
+            to="/system-ops"
+            class="flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all group"
+            :class="[
+              isActive('/system-ops')
+                ? 'bg-zinc-800/90 text-white shadow-sm border border-zinc-700/60'
+                : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60'
+            ]"
+          >
+            <div class="flex items-center gap-2.5">
+              <Activity class="w-4 h-4 transition-colors" :class="isActive('/system-ops') ? 'text-white' : 'text-zinc-400 group-hover:text-zinc-200'" />
+              <span>Vận hành</span>
+            </div>
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          </router-link>
+        </div>
+      </div>
     </nav>
 
-    <!-- Footer Profile & Logout -->
-    <div class="p-3 border-t border-slate-800/80">
-      <div class="p-3 rounded-xl bg-slate-950/60 border border-slate-800/60 flex items-center justify-between">
+    <!-- Footer Profile & Logout (Linear Style) -->
+    <div class="p-3 border-t border-zinc-800/70">
+      <div class="p-2.5 rounded-xl bg-zinc-900/70 border border-zinc-800/90 flex items-center justify-between">
         <div class="flex items-center gap-2.5 overflow-hidden">
-          <div class="w-8 h-8 rounded-full bg-blue-500/20 border border-blue-500/30 text-blue-400 flex items-center justify-center text-xs font-bold uppercase shrink-0">
+          <div class="w-7 h-7 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-200 flex items-center justify-center text-xs font-semibold shrink-0">
             {{ userInitial }}
           </div>
           <div class="truncate">
-            <p class="text-xs font-semibold text-slate-200 truncate">{{ authStore.user?.fullName || 'Quản trị viên' }}</p>
-            <p class="text-[10px] text-slate-400 truncate">{{ authStore.user?.email || 'admin@techstore.vn' }}</p>
+            <p class="text-xs font-medium text-zinc-200 truncate">{{ authStore.user?.fullName || 'Quản trị viên' }}</p>
+            <p class="text-[10px] font-mono text-zinc-500 truncate">{{ authStore.user?.email || 'admin@techstore.vn' }}</p>
           </div>
         </div>
         <button
           @click="handleLogout"
           title="Đăng xuất"
-          class="text-slate-400 hover:text-rose-400 p-1.5 rounded-lg hover:bg-slate-800 transition-colors"
+          class="text-zinc-400 hover:text-rose-400 p-1.5 rounded-lg hover:bg-zinc-800 transition-colors shrink-0"
         >
-          <LogOut class="w-4 h-4" />
+          <LogOut class="w-3.5 h-3.5" />
         </button>
       </div>
     </div>
@@ -75,15 +177,6 @@ import { useAdminAuthStore } from '@/stores/auth'
 const route = useRoute()
 const router = useRouter()
 const authStore = useAdminAuthStore()
-
-const menuItems = [
-  { path: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { path: '/products', label: 'Sản phẩm', icon: Package },
-  { path: '/categories', label: 'Danh mục', icon: Layers },
-  { path: '/brands', label: 'Thương hiệu', icon: Award },
-  { path: '/orders', label: 'Đơn hàng', icon: ShoppingCart },
-  { path: '/system-ops', label: 'Vận hành', icon: Activity }
-]
 
 function isActive(path: string) {
   if (path === '/') {

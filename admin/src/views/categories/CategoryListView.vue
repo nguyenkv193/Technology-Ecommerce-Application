@@ -1,85 +1,91 @@
 <template>
   <div class="space-y-6">
     <!-- Top Action Bar -->
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-zinc-800/80">
       <div>
-        <h1 class="text-2xl font-bold tracking-tight text-slate-100">Quản lý Danh mục</h1>
-        <p class="text-xs text-slate-400 mt-1">Cấu trúc cây danh mục ngành hàng sản phẩm</p>
+        <div class="flex items-center gap-2">
+          <h1 class="text-xl font-semibold tracking-tight text-white">Quản lý Danh mục</h1>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-medium bg-zinc-900 text-zinc-400 border border-zinc-800">
+            {{ categories.length }} danh mục
+          </span>
+        </div>
+        <p class="text-xs text-zinc-400 mt-1 font-mono">Cấu trúc cây danh mục ngành hàng sản phẩm trên toàn sàn</p>
       </div>
+
       <button
         type="button"
         @click="openAddModal"
-        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-md shadow-blue-600/30 transition-all"
+        class="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-white hover:bg-zinc-200 text-zinc-950 text-xs font-medium shadow-sm transition-all self-start sm:self-auto"
       >
-        <Plus class="w-4 h-4" />
+        <Plus class="w-3.5 h-3.5" />
         <span>Thêm danh mục</span>
       </button>
     </div>
 
-    <!-- Data Table -->
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-sm">
+    <!-- Data Table (Linear High-Density) -->
+    <div class="bg-zinc-900/60 border border-zinc-800/80 rounded-xl overflow-hidden shadow-subtle">
       <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm text-slate-300">
-          <thead class="text-xs font-semibold text-slate-400 uppercase bg-slate-950/60 border-b border-slate-800">
+        <table class="w-full text-left text-xs text-zinc-300">
+          <thead class="text-[11px] font-mono font-medium text-zinc-400 uppercase bg-zinc-950/70 border-b border-zinc-800/80">
             <tr>
-              <th class="py-3.5 px-6">Tên danh mục</th>
-              <th class="py-3.5 px-4 font-mono">Slug URL</th>
-              <th class="py-3.5 px-4">Mô tả</th>
-              <th class="py-3.5 px-4 text-center">Số sản phẩm</th>
-              <th class="py-3.5 px-6 text-right">Thao tác</th>
+              <th class="py-3 px-5">Tên danh mục</th>
+              <th class="py-3 px-4 font-mono">Slug URL</th>
+              <th class="py-3 px-4">Mô tả</th>
+              <th class="py-3 px-4 text-center">Số sản phẩm</th>
+              <th class="py-3 px-5 text-right">Thao tác</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-800/60">
+          <tbody class="divide-y divide-zinc-800/60 font-mono">
             <tr v-if="isLoading">
-              <td colspan="5" class="py-12 text-center text-slate-500">
+              <td colspan="5" class="py-12 text-center text-zinc-500 font-sans">
                 <div class="flex items-center justify-center gap-2">
-                  <Loader2 class="w-5 h-5 animate-spin text-blue-500" />
+                  <Loader2 class="w-4 h-4 animate-spin text-zinc-400" />
                   <span>Đang tải danh mục...</span>
                 </div>
               </td>
             </tr>
             <tr v-else-if="categories.length === 0">
-              <td colspan="5" class="py-12 text-center text-slate-500 text-xs">
+              <td colspan="5" class="py-12 text-center text-zinc-500 text-xs font-sans">
                 Chưa có danh mục nào.
               </td>
             </tr>
             <tr
               v-for="cat in categories"
               :key="cat.id"
-              class="hover:bg-slate-800/40 transition-colors"
+              class="hover:bg-zinc-800/40 transition-colors group"
             >
-              <td class="py-3.5 px-6 font-semibold text-slate-100 flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center">
-                  <Folder class="w-4 h-4" />
+              <td class="py-3 px-5 font-semibold text-zinc-100 flex items-center gap-2.5 font-sans">
+                <div class="w-7 h-7 rounded-md bg-zinc-800 border border-zinc-700/70 text-zinc-300 flex items-center justify-center shrink-0">
+                  <Folder class="w-3.5 h-3.5" />
                 </div>
                 <span>{{ cat.name }}</span>
               </td>
-              <td class="py-3.5 px-4 font-mono text-xs text-slate-400">
+              <td class="py-3 px-4 font-mono text-[11px] text-zinc-400">
                 {{ cat.slug }}
               </td>
-              <td class="py-3.5 px-4 text-xs text-slate-400 max-w-sm truncate">
+              <td class="py-3 px-4 text-xs font-sans text-zinc-400 max-w-sm truncate">
                 {{ cat.description || '—' }}
               </td>
-              <td class="py-3.5 px-4 text-center">
-                <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-800 text-slate-300">
+              <td class="py-3 px-4 text-center">
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-zinc-800/80 text-zinc-300 border border-zinc-700/60">
                   {{ cat.productCount ?? 0 }}
                 </span>
               </td>
-              <td class="py-3.5 px-6 text-right">
+              <td class="py-3 px-5 text-right font-sans">
                 <div class="flex items-center justify-end gap-1">
                   <button
                     @click="openEditModal(cat)"
-                    class="p-2 rounded-lg text-slate-400 hover:text-blue-400 hover:bg-slate-800 transition-colors"
+                    class="p-1.5 rounded-md text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
                     title="Chỉnh sửa"
                   >
-                    <Edit3 class="w-4 h-4" />
+                    <Edit3 class="w-3.5 h-3.5" />
                   </button>
                   <button
                     @click="askDelete(cat)"
-                    class="p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition-colors"
+                    class="p-1.5 rounded-md text-zinc-400 hover:text-rose-400 hover:bg-zinc-800 transition-colors"
                     title="Xóa"
                   >
-                    <Trash2 class="w-4 h-4" />
+                    <Trash2 class="w-3.5 h-3.5" />
                   </button>
                 </div>
               </td>
@@ -92,60 +98,63 @@
     <!-- Category Form Modal (Add / Edit) -->
     <div
       v-if="isModalOpen"
-      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm"
+      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/80 backdrop-blur-sm"
       @click.self="isModalOpen = false"
     >
-      <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl space-y-5">
-        <h3 class="text-base font-semibold text-slate-100">
-          {{ editingId ? 'Cập nhật danh mục' : 'Thêm danh mục mới' }}
-        </h3>
+      <div class="w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-xl p-5 shadow-2xl space-y-4">
+        <div class="flex items-center justify-between pb-2 border-b border-zinc-800/80">
+          <h3 class="text-sm font-semibold text-zinc-100">
+            {{ editingId ? 'Cập nhật danh mục' : 'Thêm danh mục mới' }}
+          </h3>
+          <button @click="isModalOpen = false" class="text-zinc-500 hover:text-zinc-300 text-xs">✕</button>
+        </div>
 
-        <form @submit.prevent="submitCategory" class="space-y-4">
+        <form @submit.prevent="submitCategory" class="space-y-3.5">
           <div>
-            <label class="block text-xs font-medium text-slate-300 mb-1.5">Tên danh mục *</label>
+            <label class="block text-xs font-mono font-medium text-zinc-300 mb-1">Tên danh mục *</label>
             <input
               v-model="modalForm.name"
               @input="autoGenerateSlug"
               type="text"
               required
               placeholder="e.g. Điện thoại & Phụ kiện"
-              class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors"
+              class="w-full bg-zinc-950/80 border border-zinc-800/80 rounded-lg px-3 py-2 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-zinc-600 transition-colors"
             />
           </div>
 
           <div>
-            <label class="block text-xs font-medium text-slate-300 mb-1.5">Slug URL *</label>
+            <label class="block text-xs font-mono font-medium text-zinc-300 mb-1">Slug URL *</label>
             <input
               v-model="modalForm.slug"
               type="text"
               required
               placeholder="e.g. dien-thoai-phu-kien"
-              class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs font-mono text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors"
+              class="w-full bg-zinc-950/80 border border-zinc-800/80 rounded-lg px-3 py-2 text-xs font-mono text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-zinc-600 transition-colors"
             />
           </div>
 
           <div>
-            <label class="block text-xs font-medium text-slate-300 mb-1.5">Mô tả</label>
+            <label class="block text-xs font-mono font-medium text-zinc-300 mb-1">Mô tả</label>
             <textarea
               v-model="modalForm.description"
               rows="3"
               placeholder="Mô tả ngành hàng..."
-              class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors"
+              class="w-full bg-zinc-950/80 border border-zinc-800/80 rounded-lg px-3 py-2 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-zinc-600 transition-colors"
             ></textarea>
           </div>
 
-          <div class="pt-3 border-t border-slate-800/80 flex items-center justify-end gap-3">
+          <div class="pt-3 border-t border-zinc-800/80 flex items-center justify-end gap-2.5">
             <button
               type="button"
               @click="isModalOpen = false"
-              class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800 transition-colors"
+              class="px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors font-mono"
             >
               Hủy
             </button>
             <button
               type="submit"
               :disabled="isSubmitting"
-              class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-md shadow-blue-600/30 flex items-center gap-2 transition-all disabled:opacity-50"
+              class="px-3.5 py-1.5 rounded-lg bg-white hover:bg-zinc-200 text-zinc-950 text-xs font-medium shadow-sm flex items-center gap-2 transition-all disabled:opacity-50 font-mono"
             >
               <Loader2 v-if="isSubmitting" class="w-3.5 h-3.5 animate-spin" />
               <span>{{ isSubmitting ? 'Đang lưu...' : 'Lưu danh mục' }}</span>

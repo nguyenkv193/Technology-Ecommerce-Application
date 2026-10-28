@@ -1,139 +1,155 @@
 <template>
   <div class="space-y-6">
     <!-- Top Action Bar -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-zinc-800/80">
       <div>
-        <h1 class="text-2xl font-bold tracking-tight text-slate-100">Quản lý Sản phẩm</h1>
-        <p class="text-xs text-slate-400 mt-1">Danh mục sản phẩm công nghệ, thiết bị và linh kiện</p>
+        <div class="flex items-center gap-2">
+          <h1 class="text-xl font-semibold tracking-tight text-white">Quản lý Sản phẩm</h1>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-medium bg-zinc-900 text-zinc-400 border border-zinc-800">
+            {{ totalElements }} items
+          </span>
+        </div>
+        <p class="text-xs text-zinc-400 mt-1 font-mono">Danh mục thiết bị công nghệ, cấu hình thông số và giá bán sàn</p>
       </div>
+
       <router-link
         to="/products/create"
-        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-md shadow-blue-600/30 transition-all self-start sm:self-auto"
+        class="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-white hover:bg-zinc-200 text-zinc-950 text-xs font-medium shadow-sm transition-all self-start sm:self-auto"
       >
-        <Plus class="w-4 h-4" />
+        <Plus class="w-3.5 h-3.5" />
         <span>Thêm sản phẩm</span>
       </router-link>
     </div>
 
-    <!-- Filters Bar -->
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col md:flex-row gap-4 items-center justify-between shadow-sm">
+    <!-- Filters Bar (Linear Style) -->
+    <div class="bg-zinc-900/60 border border-zinc-800/80 rounded-xl p-3 flex flex-col md:flex-row gap-3 items-center justify-between shadow-subtle">
+      <!-- Search Input -->
       <div class="relative w-full md:w-80">
-        <Search class="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+        <Search class="w-3.5 h-3.5 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
         <input
           v-model="keyword"
           @keyup.enter="handleSearch"
           type="text"
-          placeholder="Tìm theo tên hoặc slug..."
-          class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors"
+          placeholder="Tìm theo tên sản phẩm, slug..."
+          class="w-full bg-zinc-950/80 border border-zinc-800/80 rounded-lg pl-9 pr-8 py-2 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-zinc-600 transition-colors font-mono"
         />
+        <button
+          v-if="keyword"
+          @click="resetFilters"
+          class="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 text-xs"
+        >
+          ✕
+        </button>
       </div>
 
-      <div class="flex items-center gap-3 w-full md:w-auto justify-end">
+      <!-- Quick Action Buttons -->
+      <div class="flex items-center gap-2 w-full md:w-auto justify-end font-mono">
         <button
           @click="handleSearch"
-          class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-slate-700 transition-colors"
+          class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-medium border border-zinc-700/60 transition-colors flex items-center gap-1.5"
         >
-          Lọc kết quả
+          <span>Lọc</span>
         </button>
         <button
           @click="resetFilters"
-          class="px-3 py-2 rounded-xl text-slate-400 hover:text-slate-200 text-xs font-medium transition-colors"
+          class="px-2.5 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/60 text-xs transition-colors"
         >
           Đặt lại
         </button>
       </div>
     </div>
 
-    <!-- Data Table -->
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-sm">
+    <!-- Data Table (Linear High-Density) -->
+    <div class="bg-zinc-900/60 border border-zinc-800/80 rounded-xl overflow-hidden shadow-subtle">
       <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm text-slate-300">
-          <thead class="text-xs font-semibold text-slate-400 uppercase bg-slate-950/60 border-b border-slate-800">
+        <table class="w-full text-left text-xs text-zinc-300">
+          <thead class="text-[11px] font-mono font-medium text-zinc-400 uppercase bg-zinc-950/70 border-b border-zinc-800/80">
             <tr>
-              <th class="py-3.5 px-4 w-16">Ảnh</th>
-              <th class="py-3.5 px-4">Tên sản phẩm</th>
-              <th class="py-3.5 px-4">Thương hiệu</th>
-              <th class="py-3.5 px-4">Danh mục</th>
-              <th class="py-3.5 px-4">Giá bán</th>
-              <th class="py-3.5 px-4 text-center">Tồn kho</th>
-              <th class="py-3.5 px-4 text-right">Thao tác</th>
+              <th class="py-3 px-4 w-14">Ảnh</th>
+              <th class="py-3 px-4">Tên sản phẩm</th>
+              <th class="py-3 px-4">Thương hiệu</th>
+              <th class="py-3 px-4">Danh mục</th>
+              <th class="py-3 px-4">Giá bán</th>
+              <th class="py-3 px-4 text-center">Tồn kho</th>
+              <th class="py-3 px-4 text-right">Thao tác</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-800/60">
+          <tbody class="divide-y divide-zinc-800/60 font-mono">
             <tr v-if="isLoading">
-              <td colspan="7" class="py-12 text-center text-slate-500">
+              <td colspan="7" class="py-12 text-center text-zinc-500 font-sans">
                 <div class="flex items-center justify-center gap-2">
-                  <Loader2 class="w-5 h-5 animate-spin text-blue-500" />
+                  <Loader2 class="w-4 h-4 animate-spin text-zinc-400" />
                   <span>Đang tải danh sách sản phẩm...</span>
                 </div>
               </td>
             </tr>
             <tr v-else-if="products.length === 0">
-              <td colspan="7" class="py-12 text-center text-slate-500 text-xs">
+              <td colspan="7" class="py-12 text-center text-zinc-500 text-xs font-sans">
                 Không tìm thấy sản phẩm nào phù hợp.
               </td>
             </tr>
             <tr
               v-for="product in products"
               :key="product.id"
-              class="hover:bg-slate-800/40 transition-colors"
+              class="hover:bg-zinc-800/40 transition-colors group"
             >
-              <td class="py-3.5 px-4">
-                <div class="w-12 h-12 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center overflow-hidden shrink-0">
+              <td class="py-3 px-4">
+                <div class="w-10 h-10 rounded-lg bg-zinc-950 border border-zinc-800 flex items-center justify-center overflow-hidden shrink-0">
                   <img
                     v-if="product.primaryImageUrl"
                     :src="product.primaryImageUrl"
                     :alt="product.name"
                     class="w-full h-full object-cover"
                   />
-                  <Package v-else class="w-5 h-5 text-slate-600" />
+                  <Package v-else class="w-4 h-4 text-zinc-600" />
                 </div>
               </td>
-              <td class="py-3.5 px-4 max-w-xs">
-                <div class="font-medium text-slate-100 truncate" :title="product.name">
+              <td class="py-3 px-4 max-w-xs font-sans">
+                <div class="font-medium text-zinc-200 truncate group-hover:text-blue-400 transition-colors" :title="product.name">
                   {{ product.name }}
                 </div>
-                <div class="text-[11px] font-mono text-slate-500 truncate">{{ product.slug }}</div>
+                <div class="text-[11px] font-mono text-zinc-500 truncate">{{ product.slug }}</div>
               </td>
-              <td class="py-3.5 px-4">
-                <span class="px-2.5 py-1 rounded-md bg-slate-800 text-slate-300 text-xs font-medium">
+              <td class="py-3 px-4">
+                <span class="px-2 py-0.5 rounded-md bg-zinc-800/80 border border-zinc-700/50 text-zinc-300 text-[11px]">
                   {{ product.brandName || 'Chưa gắn' }}
                 </span>
               </td>
-              <td class="py-3.5 px-4">
-                <span class="text-xs text-slate-300">{{ product.categoryName || 'Mặc định' }}</span>
+              <td class="py-3 px-4 font-sans text-xs text-zinc-300">
+                <span>{{ product.categoryName || 'Mặc định' }}</span>
               </td>
-              <td class="py-3.5 px-4">
-                <div class="font-semibold text-slate-100 text-xs">
+              <td class="py-3 px-4">
+                <div class="font-semibold text-zinc-100 tabular-nums">
                   {{ formatCurrency(product.salePrice) }}
                 </div>
-                <div v-if="product.originalPrice > product.salePrice" class="text-[11px] text-slate-500 line-through">
+                <div v-if="product.originalPrice > product.salePrice" class="text-[10px] text-zinc-500 line-through tabular-nums">
                   {{ formatCurrency(product.originalPrice) }}
                 </div>
               </td>
-              <td class="py-3.5 px-4 text-center">
+              <td class="py-3 px-4 text-center">
                 <span
-                  class="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold"
+                  class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium"
                   :class="(product.stockQuantity ?? 0) > 5 ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'"
                 >
-                  {{ product.stockQuantity ?? 0 }}
+                  <span class="w-1 h-1 rounded-full" :class="(product.stockQuantity ?? 0) > 5 ? 'bg-emerald-400' : 'bg-rose-400'"></span>
+                  <span>{{ product.stockQuantity ?? 0 }}</span>
                 </span>
               </td>
-              <td class="py-3.5 px-4 text-right">
-                <div class="flex items-center justify-end gap-1">
+              <td class="py-3 px-4 text-right">
+                <div class="flex items-center justify-end gap-1 font-sans">
                   <router-link
                     :to="`/products/${product.id}/edit`"
-                    class="p-2 rounded-lg text-slate-400 hover:text-blue-400 hover:bg-slate-800 transition-colors"
+                    class="p-1.5 rounded-md text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
                     title="Chỉnh sửa"
                   >
-                    <Edit3 class="w-4 h-4" />
+                    <Edit3 class="w-3.5 h-3.5" />
                   </router-link>
                   <button
                     @click="askDeleteProduct(product)"
-                    class="p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition-colors"
+                    class="p-1.5 rounded-md text-zinc-400 hover:text-rose-400 hover:bg-zinc-800 transition-colors"
                     title="Xóa"
                   >
-                    <Trash2 class="w-4 h-4" />
+                    <Trash2 class="w-3.5 h-3.5" />
                   </button>
                 </div>
               </td>
@@ -143,22 +159,22 @@
       </div>
 
       <!-- Pagination Footer -->
-      <div class="p-4 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
+      <div class="p-3.5 border-t border-zinc-800/80 flex items-center justify-between text-xs text-zinc-400 font-mono">
         <div>
-          Tổng số <span class="font-semibold text-slate-200">{{ totalElements }}</span> sản phẩm (Trang {{ currentPage + 1 }} / {{ totalPages || 1 }})
+          Tổng số <span class="font-semibold text-zinc-200">{{ totalElements }}</span> sản phẩm (Trang {{ currentPage + 1 }} / {{ totalPages || 1 }})
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-1.5">
           <button
             @click="changePage(currentPage - 1)"
             :disabled="currentPage === 0"
-            class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            class="px-2.5 py-1 rounded-md bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-300 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-xs"
           >
             Trước
           </button>
           <button
             @click="changePage(currentPage + 1)"
             :disabled="currentPage >= totalPages - 1"
-            class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            class="px-2.5 py-1 rounded-md bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-300 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-xs"
           >
             Sau
           </button>

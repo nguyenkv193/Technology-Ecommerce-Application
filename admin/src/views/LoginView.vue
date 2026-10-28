@@ -1,70 +1,69 @@
 <template>
-  <div class="min-h-screen bg-slate-950 flex items-center justify-center p-4 relative overflow-hidden">
-    <!-- Subtle Background Glow -->
-    <div class="absolute -top-40 -left-40 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
-    <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none"></div>
+  <div class="min-h-screen bg-zinc-950 flex items-center justify-center p-4 relative overflow-hidden font-sans">
+    <!-- Subtle Ambient Glow -->
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(120,119,198,0.12),transparent_50%)] pointer-events-none"></div>
 
-    <!-- Login Container -->
-    <div class="w-full max-w-md bg-slate-900/80 border border-slate-800 rounded-2xl shadow-2xl backdrop-blur-xl p-8 relative z-10">
+    <!-- Login Container (Linear/Vercel Minimalist) -->
+    <div class="w-full max-w-sm bg-zinc-900/80 border border-zinc-800/80 rounded-2xl shadow-2xl backdrop-blur-xl p-7 relative z-10">
       <!-- Header -->
-      <div class="text-center mb-8">
-        <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-600/10 border border-blue-500/20 text-blue-400 mb-4 shadow-inner">
-          <ShieldAlert class="w-7 h-7" />
+      <div class="text-center mb-6">
+        <div class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-zinc-800 border border-zinc-700 text-white mb-3 shadow-inner">
+          <ShieldAlert class="w-5 h-5 text-zinc-200" />
         </div>
-        <h1 class="text-2xl font-bold text-slate-100 tracking-tight">TechStore Backoffice</h1>
-        <p class="text-sm text-slate-400 mt-1">Cổng điều hành & quản trị hệ thống</p>
-        <div class="mt-3 inline-block px-3 py-1 bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-medium rounded-full">
-          Dành riêng cho Quản trị viên (ADMIN)
+        <h1 class="text-lg font-semibold text-white tracking-tight">TechStore Backoffice</h1>
+        <p class="text-xs text-zinc-400 mt-0.5 font-mono">Cổng điều hành & quản trị hệ thống</p>
+        <div class="mt-2.5 inline-block px-2.5 py-0.5 bg-zinc-800/80 border border-zinc-700/60 text-zinc-300 text-[10px] font-mono font-medium rounded-full">
+          Quản trị viên (ADMIN)
         </div>
       </div>
 
       <!-- Alert Error Message -->
-      <div v-if="errorMessage" class="mb-6 p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-sm flex items-start gap-3">
-        <AlertCircle class="w-5 h-5 shrink-0 mt-0.5" />
+      <div v-if="errorMessage" class="mb-5 p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs flex items-start gap-2.5 font-mono">
+        <AlertCircle class="w-4 h-4 shrink-0 mt-0.5" />
         <div>
-          <p class="font-medium">Đăng nhập không thành công</p>
-          <p class="text-xs text-rose-400/80 mt-0.5">{{ errorMessage }}</p>
+          <p class="font-medium font-sans">Đăng nhập không thành công</p>
+          <p class="text-[11px] opacity-80 mt-0.5">{{ errorMessage }}</p>
         </div>
       </div>
 
       <!-- Form -->
-      <form @submit.prevent="handleLogin" class="space-y-5">
+      <form @submit.prevent="handleLogin" class="space-y-4">
         <div>
-          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">Email Quản trị</label>
+          <label class="block text-[11px] font-mono font-medium text-zinc-400 mb-1.5">EMAIL QUẢN TRỊ</label>
           <div class="relative">
-            <Mail class="w-5 h-5 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Mail class="w-4 h-4 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               v-model="email"
               type="email"
               required
               autocomplete="email"
               placeholder="admin@techstore.vn"
-              class="w-full bg-slate-950/60 border border-slate-800 rounded-xl pl-11 pr-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all text-sm"
+              class="w-full bg-zinc-950/80 border border-zinc-800/80 rounded-lg pl-9 pr-3.5 py-2 text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-zinc-600 transition-all text-xs font-mono"
             />
           </div>
         </div>
 
         <div>
-          <div class="flex items-center justify-between mb-2">
-            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300">Mật khẩu</label>
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="block text-[11px] font-mono font-medium text-zinc-400">MẬT KHẨU</label>
           </div>
           <div class="relative">
-            <Lock class="w-5 h-5 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Lock class="w-4 h-4 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               v-model="password"
               :type="showPassword ? 'text' : 'password'"
               required
               autocomplete="current-password"
               placeholder="••••••••"
-              class="w-full bg-slate-950/60 border border-slate-800 rounded-xl pl-11 pr-11 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all text-sm"
+              class="w-full bg-zinc-950/80 border border-zinc-800/80 rounded-lg pl-9 pr-9 py-2 text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-zinc-600 transition-all text-xs font-mono"
             />
             <button
               type="button"
               @click="showPassword = !showPassword"
-              class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
             >
-              <EyeOff v-if="showPassword" class="w-4 h-4" />
-              <Eye v-else class="w-4 h-4" />
+              <EyeOff v-if="showPassword" class="w-3.5 h-3.5" />
+              <Eye v-else class="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
@@ -72,16 +71,16 @@
         <button
           type="submit"
           :disabled="isLoading"
-          class="w-full py-3.5 px-4 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-medium rounded-xl text-sm transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          class="w-full py-2.5 px-4 bg-white hover:bg-zinc-200 active:bg-zinc-300 text-zinc-950 font-medium rounded-lg text-xs transition-all shadow-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed font-mono mt-2"
         >
-          <Loader2 v-if="isLoading" class="w-4 h-4 animate-spin" />
+          <Loader2 v-if="isLoading" class="w-3.5 h-3.5 animate-spin" />
           <span>{{ isLoading ? 'Đang xác thực...' : 'Truy cập Hệ thống' }}</span>
         </button>
       </form>
 
-      <div class="mt-8 pt-6 border-t border-slate-800/80 text-center">
-        <p class="text-xs text-slate-500">
-          TechStore Platform Architecture • Phiên bản 1.0.0
+      <div class="mt-6 pt-4 border-t border-zinc-800/60 text-center font-mono">
+        <p class="text-[10px] text-zinc-500">
+          TechStore Platform Architecture • v2.4.0
         </p>
       </div>
     </div>

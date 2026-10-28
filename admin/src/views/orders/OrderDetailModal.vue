@@ -1,76 +1,79 @@
 <template>
   <div
     v-if="isOpen && order"
-    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fade-in"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/80 backdrop-blur-sm animate-fade-in"
     @click.self="emit('close')"
   >
-    <div class="w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div class="w-full max-w-2xl bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
       <!-- Header -->
-      <div class="p-6 border-b border-slate-800 flex items-center justify-between shrink-0">
+      <div class="px-6 py-4 border-b border-zinc-800/80 flex items-center justify-between shrink-0 bg-zinc-900/50">
         <div>
           <div class="flex items-center gap-3">
-            <h3 class="text-lg font-bold text-slate-100 font-mono">{{ order.orderCode }}</h3>
+            <h3 class="text-base font-bold text-zinc-100 font-mono tracking-tight">{{ order.orderCode }}</h3>
             <BadgeStatus :status="order.status" />
           </div>
-          <p class="text-xs text-slate-400 mt-1">
-            Đặt lúc: {{ formatDate(order.createdAt) }}
+          <p class="text-[11px] text-zinc-500 font-mono mt-0.5">
+            Thời gian tạo: {{ formatDate(order.createdAt) }}
           </p>
         </div>
         <button
           @click="emit('close')"
-          class="p-2 rounded-xl text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors"
+          class="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/80 transition-colors"
         >
-          <X class="w-5 h-5" />
+          <X class="w-4 h-4" />
         </button>
       </div>
 
       <!-- Scrollable Body -->
-      <div class="p-6 overflow-y-auto space-y-6 flex-1">
+      <div class="p-6 overflow-y-auto space-y-5 flex-1">
         <!-- Customer & Delivery Information -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-xl bg-slate-950/60 border border-slate-800/80 text-xs">
-          <div class="space-y-1">
-            <span class="font-semibold text-slate-400 uppercase tracking-wider text-[10px]">Thông tin người nhận</span>
-            <p class="font-semibold text-slate-200 text-sm">{{ order.customerName }}</p>
-            <p class="text-slate-300">SĐT: {{ order.customerPhone }}</p>
-            <p class="text-slate-400">Email: {{ order.customerEmail }}</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-xl bg-zinc-950/60 border border-zinc-800/80 text-xs">
+          <div class="space-y-1.5">
+            <span class="font-mono text-[10px] uppercase tracking-wider text-zinc-500 font-semibold">Khách hàng nhận</span>
+            <p class="font-semibold text-zinc-200 text-sm">{{ order.customerName }}</p>
+            <p class="text-zinc-400 font-mono text-[11px]">SĐT: <span class="text-zinc-300">{{ order.customerPhone }}</span></p>
+            <p class="text-zinc-400 font-mono text-[11px]">Email: <span class="text-zinc-300">{{ order.customerEmail }}</span></p>
           </div>
-          <div class="space-y-1">
-            <span class="font-semibold text-slate-400 uppercase tracking-wider text-[10px]">Địa chỉ giao hàng</span>
-            <p class="text-slate-200 leading-relaxed">{{ order.shippingAddress }}</p>
-            <div class="pt-2 flex items-center gap-2">
-              <span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-medium">
+          <div class="space-y-1.5">
+            <span class="font-mono text-[10px] uppercase tracking-wider text-zinc-500 font-semibold">Giao hàng & Thanh toán</span>
+            <p class="text-zinc-300 leading-relaxed text-[11px]">{{ order.shippingAddress }}</p>
+            <div class="pt-1.5 flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded font-mono text-[10px] bg-zinc-800 text-zinc-300 border border-zinc-700/60 font-medium">
                 {{ order.paymentMethod }}
               </span>
-              <span class="text-[11px] text-slate-400">({{ order.paymentStatus }})</span>
+              <span class="text-[10px] font-mono text-zinc-500">({{ order.paymentStatus }})</span>
             </div>
           </div>
         </div>
 
         <!-- Items Table -->
-        <div class="space-y-3">
-          <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-400">Danh sách sản phẩm</h4>
-          <div class="border border-slate-800 rounded-xl overflow-hidden">
+        <div class="space-y-2.5">
+          <div class="flex items-center justify-between">
+            <h4 class="text-xs font-mono font-semibold uppercase tracking-wider text-zinc-400">Danh mục sản phẩm</h4>
+            <span class="text-[10px] font-mono text-zinc-500">{{ (order.items || []).length }} mặt hàng</span>
+          </div>
+          <div class="border border-zinc-800/80 rounded-xl overflow-hidden">
             <table class="w-full text-left text-xs">
-              <thead class="bg-slate-950/80 text-slate-400 border-b border-slate-800 uppercase font-semibold">
+              <thead class="bg-zinc-950/80 text-zinc-400 border-b border-zinc-800 uppercase font-mono text-[10px] tracking-wider">
                 <tr>
-                  <th class="py-2.5 px-3">Sản phẩm</th>
-                  <th class="py-2.5 px-3 text-right">Đơn giá</th>
-                  <th class="py-2.5 px-3 text-center">SL</th>
-                  <th class="py-2.5 px-3 text-right">Thành tiền</th>
+                  <th class="py-2.5 px-3.5 font-medium">Sản phẩm</th>
+                  <th class="py-2.5 px-3.5 text-right font-medium">Đơn giá</th>
+                  <th class="py-2.5 px-3.5 text-center font-medium">SL</th>
+                  <th class="py-2.5 px-3.5 text-right font-medium">Thành tiền</th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-slate-800/60">
-                <tr v-for="item in (order.items || [])" :key="item.id" class="text-slate-300">
-                  <td class="py-3 px-3">
-                    <div class="font-medium text-slate-100">{{ item.productName }}</div>
-                    <div v-if="item.skuCode" class="font-mono text-[10px] text-slate-500">SKU: {{ item.skuCode }}</div>
+              <tbody class="divide-y divide-zinc-800/60 bg-zinc-900/30">
+                <tr v-for="item in (order.items || [])" :key="item.id" class="text-zinc-300 hover:bg-zinc-800/20 transition-colors">
+                  <td class="py-3 px-3.5">
+                    <div class="font-medium text-zinc-200">{{ item.productName }}</div>
+                    <div v-if="item.skuCode" class="font-mono text-[10px] text-zinc-500">SKU: {{ item.skuCode }}</div>
                   </td>
-                  <td class="py-3 px-3 text-right font-mono">{{ formatCurrency(item.unitPrice) }}</td>
-                  <td class="py-3 px-3 text-center font-semibold">{{ item.quantity }}</td>
-                  <td class="py-3 px-3 text-right font-mono font-medium text-slate-100">{{ formatCurrency(item.totalPrice) }}</td>
+                  <td class="py-3 px-3.5 text-right font-mono text-zinc-400 tabular-nums">{{ formatCurrency(item.unitPrice) }}</td>
+                  <td class="py-3 px-3.5 text-center font-mono font-semibold text-zinc-300">{{ item.quantity }}</td>
+                  <td class="py-3 px-3.5 text-right font-mono font-medium text-zinc-100 tabular-nums">{{ formatCurrency(item.totalPrice) }}</td>
                 </tr>
                 <tr v-if="!order.items || order.items.length === 0">
-                  <td colspan="4" class="py-4 text-center text-slate-500">
+                  <td colspan="4" class="py-6 text-center text-zinc-500 text-xs">
                     Chi tiết sản phẩm đang được cập nhật.
                   </td>
                 </tr>
@@ -80,35 +83,35 @@
         </div>
 
         <!-- Payment Breakdown -->
-        <div class="p-4 rounded-xl bg-slate-950/60 border border-slate-800/80 space-y-2 text-xs">
-          <div class="flex justify-between text-slate-400">
-            <span>Tạm tính hàng hóa:</span>
-            <span class="font-mono text-slate-200">{{ formatCurrency(order.subtotal) }}</span>
+        <div class="p-4 rounded-xl bg-zinc-950/60 border border-zinc-800/80 space-y-2 text-xs">
+          <div class="flex justify-between text-zinc-400">
+            <span>Tạm tính tiền hàng:</span>
+            <span class="font-mono text-zinc-200 tabular-nums">{{ formatCurrency(order.subtotal) }}</span>
           </div>
-          <div class="flex justify-between text-slate-400">
+          <div class="flex justify-between text-zinc-400">
             <span>Phí vận chuyển:</span>
-            <span class="font-mono text-slate-200">{{ formatCurrency(order.shippingFee) }}</span>
+            <span class="font-mono text-zinc-200 tabular-nums">{{ formatCurrency(order.shippingFee) }}</span>
           </div>
           <div v-if="order.discountAmount > 0" class="flex justify-between text-emerald-400">
             <span>Khuyến mãi / Giảm giá:</span>
-            <span class="font-mono">-{{ formatCurrency(order.discountAmount) }}</span>
+            <span class="font-mono tabular-nums">-{{ formatCurrency(order.discountAmount) }}</span>
           </div>
-          <div class="pt-2 border-t border-slate-800 flex justify-between text-sm font-bold text-slate-100">
+          <div class="pt-2 border-t border-zinc-800 flex justify-between text-xs font-semibold text-zinc-100">
             <span>Tổng thanh toán:</span>
-            <span class="font-mono text-emerald-400 text-base">{{ formatCurrency(order.totalAmount) }}</span>
+            <span class="font-mono text-emerald-400 text-sm font-bold tabular-nums">{{ formatCurrency(order.totalAmount) }}</span>
           </div>
         </div>
       </div>
 
       <!-- Footer Workflow Action Bar -->
-      <div class="p-5 border-t border-slate-800 bg-slate-950/40 flex flex-wrap items-center justify-between gap-3 shrink-0">
+      <div class="px-6 py-3.5 border-t border-zinc-800/80 bg-zinc-950/60 flex flex-wrap items-center justify-between gap-3 shrink-0">
         <div>
           <button
             v-if="canCancel"
             type="button"
             @click="handleCancel"
             :disabled="isProcessing"
-            class="px-3.5 py-2 rounded-xl text-xs font-semibold text-rose-400 hover:bg-rose-500/10 border border-rose-500/20 transition-colors disabled:opacity-50"
+            class="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-rose-400 hover:bg-rose-500/10 border border-rose-500/25 transition-colors disabled:opacity-50"
           >
             Hủy đơn hàng
           </button>
@@ -121,9 +124,9 @@
             type="button"
             @click="advanceStatus('CONFIRMED')"
             :disabled="isProcessing"
-            class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-md shadow-blue-600/30 flex items-center gap-1.5 transition-all"
+            class="px-3.5 py-1.5 rounded-lg bg-white hover:bg-zinc-200 text-zinc-950 text-xs font-semibold shadow-sm flex items-center gap-1.5 transition-all"
           >
-            <Check class="w-4 h-4" />
+            <Check class="w-3.5 h-3.5" />
             <span>Xác nhận đơn</span>
           </button>
 
@@ -132,9 +135,9 @@
             type="button"
             @click="advanceStatus('SHIPPING')"
             :disabled="isProcessing"
-            class="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold shadow-md shadow-purple-600/30 flex items-center gap-1.5 transition-all"
+            class="px-3.5 py-1.5 rounded-lg bg-white hover:bg-zinc-200 text-zinc-950 text-xs font-semibold shadow-sm flex items-center gap-1.5 transition-all"
           >
-            <Truck class="w-4 h-4" />
+            <Truck class="w-3.5 h-3.5" />
             <span>Giao vận chuyển</span>
           </button>
 
@@ -143,16 +146,16 @@
             type="button"
             @click="advanceStatus('DELIVERED')"
             :disabled="isProcessing"
-            class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-md shadow-emerald-600/30 flex items-center gap-1.5 transition-all"
+            class="px-3.5 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-zinc-950 text-xs font-semibold shadow-sm flex items-center gap-1.5 transition-all"
           >
-            <CheckCircle class="w-4 h-4" />
+            <CheckCircle class="w-3.5 h-3.5" />
             <span>Giao thành công</span>
           </button>
 
           <button
             type="button"
             @click="emit('close')"
-            class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition-colors"
+            class="px-3.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-750 text-zinc-300 text-xs font-medium transition-colors border border-zinc-700/60"
           >
             Đóng
           </button>

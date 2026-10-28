@@ -1,96 +1,104 @@
 <template>
   <div class="space-y-6">
     <!-- Top Bar -->
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-zinc-800/80">
       <div>
-        <h1 class="text-2xl font-bold tracking-tight text-slate-100">Quản lý Đơn hàng</h1>
-        <p class="text-xs text-slate-400 mt-1">Theo dõi, duyệt đơn và điều phối giao vận toàn sàn</p>
+        <div class="flex items-center gap-2">
+          <h1 class="text-xl font-semibold tracking-tight text-white">Quản lý Đơn hàng</h1>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-medium bg-zinc-900 text-zinc-400 border border-zinc-800">
+            {{ totalElements }} đơn
+          </span>
+        </div>
+        <p class="text-xs text-zinc-400 mt-1 font-mono">Theo dõi, duyệt đơn thanh toán và điều phối giao vận toàn sàn</p>
       </div>
+
       <button
         @click="loadOrders"
-        class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 flex items-center gap-2 transition-colors"
+        class="px-3.5 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white text-xs font-medium border border-zinc-800 hover:border-zinc-700 flex items-center gap-2 transition-all self-start sm:self-auto font-mono"
       >
         <RefreshCw class="w-3.5 h-3.5" :class="{ 'animate-spin': isLoading }" />
         <span>Làm mới</span>
       </button>
     </div>
 
-    <!-- Status Tabs -->
-    <div class="flex items-center gap-2 overflow-x-auto pb-2 border-b border-slate-800/80">
+    <!-- Status Tabs (Linear Style) -->
+    <div class="flex items-center gap-1.5 overflow-x-auto pb-2 border-b border-zinc-800/60 font-mono">
       <button
         v-for="tab in statusTabs"
         :key="tab.value"
         @click="selectTab(tab.value)"
-        class="px-4 py-2 rounded-xl text-xs font-semibold transition-all shrink-0 flex items-center gap-2"
+        class="px-3 py-1.5 rounded-lg text-xs transition-all shrink-0 flex items-center gap-1.5"
         :class="[
           currentStatusTab === tab.value
-            ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
-            : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+            ? 'bg-zinc-800 text-white font-medium shadow-sm border border-zinc-700/60'
+            : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60'
         ]"
       >
         <span>{{ tab.label }}</span>
       </button>
     </div>
 
-    <!-- Data Table -->
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-sm">
+    <!-- Data Table (Linear High-Density) -->
+    <div class="bg-zinc-900/60 border border-zinc-800/80 rounded-xl overflow-hidden shadow-subtle">
       <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm text-slate-300">
-          <thead class="text-xs font-semibold text-slate-400 uppercase bg-slate-950/60 border-b border-slate-800">
+        <table class="w-full text-left text-xs text-zinc-300">
+          <thead class="text-[11px] font-mono font-medium text-zinc-400 uppercase bg-zinc-950/70 border-b border-zinc-800/80">
             <tr>
-              <th class="py-3.5 px-6 font-mono">Mã đơn hàng</th>
-              <th class="py-3.5 px-4">Khách hàng</th>
-              <th class="py-3.5 px-4">Thanh toán</th>
-              <th class="py-3.5 px-4">Tổng tiền</th>
-              <th class="py-3.5 px-4">Trạng thái</th>
-              <th class="py-3.5 px-4">Ngày đặt</th>
-              <th class="py-3.5 px-6 text-right">Thao tác</th>
+              <th class="py-3 px-5 font-mono">Mã đơn hàng</th>
+              <th class="py-3 px-4">Khách hàng</th>
+              <th class="py-3 px-4">Thanh toán</th>
+              <th class="py-3 px-4">Tổng tiền</th>
+              <th class="py-3 px-4">Trạng thái</th>
+              <th class="py-3 px-4">Ngày đặt</th>
+              <th class="py-3 px-5 text-right">Thao tác</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-800/60">
+          <tbody class="divide-y divide-zinc-800/60 font-mono">
             <tr v-if="isLoading">
-              <td colspan="7" class="py-12 text-center text-slate-500">
+              <td colspan="7" class="py-12 text-center text-zinc-500 font-sans">
                 <div class="flex items-center justify-center gap-2">
-                  <Loader2 class="w-5 h-5 animate-spin text-blue-500" />
+                  <Loader2 class="w-4 h-4 animate-spin text-zinc-400" />
                   <span>Đang tải danh sách đơn hàng...</span>
                 </div>
               </td>
             </tr>
             <tr v-else-if="orders.length === 0">
-              <td colspan="7" class="py-12 text-center text-slate-500 text-xs">
+              <td colspan="7" class="py-12 text-center text-zinc-500 text-xs font-sans">
                 Không có đơn hàng nào trong mục này.
               </td>
             </tr>
             <tr
               v-for="order in orders"
               :key="order.id"
-              class="hover:bg-slate-800/40 transition-colors"
+              class="hover:bg-zinc-800/40 transition-colors group"
             >
-              <td class="py-3.5 px-6 font-mono font-semibold text-slate-100">
-                {{ order.orderCode }}
+              <td class="py-3 px-5 font-semibold text-zinc-200">
+                <span class="px-2 py-0.5 rounded bg-zinc-950 border border-zinc-800 text-[11px]">
+                  {{ order.orderCode }}
+                </span>
               </td>
-              <td class="py-3.5 px-4">
-                <div class="font-medium text-slate-100 text-xs">{{ order.customerName }}</div>
-                <div class="text-[11px] text-slate-400">{{ order.customerPhone }}</div>
+              <td class="py-3 px-4 font-sans">
+                <div class="font-medium text-zinc-200 text-xs">{{ order.customerName }}</div>
+                <div class="text-[11px] font-mono text-zinc-500">{{ order.customerPhone }}</div>
               </td>
-              <td class="py-3.5 px-4 text-xs">
-                <span class="px-2 py-0.5 rounded bg-slate-950 border border-slate-800 text-slate-300 font-mono text-[11px]">
+              <td class="py-3 px-4 text-xs">
+                <span class="px-2 py-0.5 rounded bg-zinc-950 border border-zinc-800 text-zinc-300 font-mono text-[11px]">
                   {{ order.paymentMethod }}
                 </span>
               </td>
-              <td class="py-3.5 px-4 font-semibold text-emerald-400 text-xs">
+              <td class="py-3 px-4 font-semibold text-zinc-100 tabular-nums">
                 {{ formatCurrency(order.totalAmount) }}
               </td>
-              <td class="py-3.5 px-4">
+              <td class="py-3 px-4 font-sans">
                 <BadgeStatus :status="order.status" />
               </td>
-              <td class="py-3.5 px-4 text-xs text-slate-400">
+              <td class="py-3 px-4 text-xs text-zinc-400 tabular-nums">
                 {{ formatDate(order.createdAt) }}
               </td>
-              <td class="py-3.5 px-6 text-right">
+              <td class="py-3 px-5 text-right font-sans">
                 <button
                   @click="openDetail(order)"
-                  class="px-3 py-1.5 rounded-lg bg-blue-600/10 border border-blue-500/20 hover:bg-blue-600/20 text-blue-400 text-xs font-semibold transition-colors"
+                  class="px-2.5 py-1 rounded-md bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700/60 text-xs font-medium transition-colors"
                 >
                   Xử lý
                 </button>
@@ -101,23 +109,23 @@
       </div>
 
       <!-- Pagination Footer -->
-      <div class="p-4 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
+      <div class="p-3.5 border-t border-zinc-800/80 flex items-center justify-between text-xs text-zinc-400 font-mono">
         <div>
-          Tổng số <span class="font-semibold text-slate-200">{{ totalElements }}</span> đơn hàng
+          Tổng số <span class="font-semibold text-zinc-200">{{ totalElements }}</span> đơn hàng
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-1.5">
           <button
             @click="changePage(currentPage - 1)"
             :disabled="currentPage === 0"
-            class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            class="px-2.5 py-1 rounded-md bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-300 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-xs"
           >
             Trước
           </button>
-          <span class="text-slate-400 px-2">Trang {{ currentPage + 1 }} / {{ totalPages || 1 }}</span>
+          <span class="text-zinc-500 px-2">Trang {{ currentPage + 1 }} / {{ totalPages || 1 }}</span>
           <button
             @click="changePage(currentPage + 1)"
             :disabled="currentPage >= totalPages - 1"
-            class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            class="px-2.5 py-1 rounded-md bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-300 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-xs"
           >
             Sau
           </button>

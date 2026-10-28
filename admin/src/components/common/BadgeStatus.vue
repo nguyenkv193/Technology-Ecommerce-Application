@@ -1,9 +1,9 @@
 <template>
   <span
-    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border"
+    class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-mono font-medium border"
     :class="statusClass"
   >
-    <span class="w-1.5 h-1.5 rounded-full" :class="dotClass"></span>
+    <span class="w-1.5 h-1.5 rounded-full shrink-0" :class="dotClass"></span>
     <span>{{ statusLabel }}</span>
   </span>
 </template>

@@ -1,19 +1,34 @@
 <template>
   <div class="space-y-6">
     <!-- Top Bar -->
-    <div class="flex items-center justify-between">
+    <div class="flex items-center justify-between pb-4 border-b border-zinc-800/80">
       <div>
-        <h1 class="text-2xl font-bold tracking-tight text-slate-100">
-          {{ isEditMode ? 'Cập nhật sản phẩm' : 'Thêm sản phẩm mới' }}
-        </h1>
-        <p class="text-xs text-slate-400 mt-1">
+        <div class="flex items-center gap-2">
+          <router-link
+            to="/products"
+            class="p-1 rounded-md text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/60 transition-colors"
+            title="Quay lại danh sách"
+          >
+            <ArrowLeft class="w-4 h-4" />
+          </router-link>
+          <h1 class="text-lg font-semibold tracking-tight text-zinc-100">
+            {{ isEditMode ? 'Cập nhật sản phẩm' : 'Thêm sản phẩm mới' }}
+          </h1>
+          <span
+            v-if="isEditMode"
+            class="px-2 py-0.5 rounded text-[10px] font-mono font-medium bg-zinc-800 text-zinc-400 border border-zinc-700/50"
+          >
+            #{{ productId }}
+          </span>
+        </div>
+        <p class="text-xs text-zinc-400 mt-1 pl-6">
           Thiết lập thông tin thương mại, hình ảnh, biến thể và thông số kỹ thuật
         </p>
       </div>
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2.5">
         <router-link
           to="/products"
-          class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800 transition-colors"
+          class="px-3.5 py-1.5 rounded-lg text-xs font-medium text-zinc-300 hover:text-white bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 transition-colors"
         >
           Hủy bỏ
         </router-link>
@@ -21,134 +36,141 @@
           type="button"
           @click="saveProduct"
           :disabled="isSaving"
-          class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-md shadow-blue-600/30 flex items-center gap-2 transition-all disabled:opacity-50"
+          class="px-4 py-1.5 rounded-lg bg-white hover:bg-zinc-200 text-zinc-950 text-xs font-semibold shadow-sm flex items-center gap-2 transition-all disabled:opacity-50"
         >
-          <Loader2 v-if="isSaving" class="w-4 h-4 animate-spin" />
+          <Loader2 v-if="isSaving" class="w-3.5 h-3.5 animate-spin" />
           <span>{{ isSaving ? 'Đang lưu...' : 'Lưu sản phẩm' }}</span>
         </button>
       </div>
     </div>
 
     <!-- Loading State -->
-    <div v-if="isLoadingData" class="py-16 text-center text-slate-500">
-      <Loader2 class="w-6 h-6 animate-spin text-blue-500 mx-auto mb-2" />
-      <span>Đang tải thông tin sản phẩm...</span>
+    <div v-if="isLoadingData" class="py-16 text-center text-zinc-500">
+      <Loader2 class="w-5 h-5 animate-spin text-zinc-400 mx-auto mb-2" />
+      <span class="text-xs">Đang tải thông tin sản phẩm...</span>
     </div>
 
     <!-- Main Form Grid -->
-    <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <!-- Left 2 Cols: Core Information & Specs -->
-      <div class="lg:col-span-2 space-y-6">
+      <div class="lg:col-span-2 space-y-5">
         <!-- Card 1: Basic Information -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-sm space-y-4">
-          <h2 class="text-sm font-semibold uppercase tracking-wider text-blue-400">Thông tin cơ bản</h2>
+        <div class="bg-zinc-900/60 border border-zinc-800/80 rounded-xl p-5 shadow-sm space-y-4">
+          <div class="flex items-center justify-between pb-3 border-b border-zinc-800/60">
+            <h2 class="text-xs font-mono font-semibold uppercase tracking-wider text-zinc-300">Thông tin cơ bản</h2>
+            <span class="text-[10px] text-zinc-500">Bắt buộc nhập tên & URL</span>
+          </div>
 
           <div class="space-y-4">
             <div>
-              <label class="block text-xs font-medium text-slate-300 mb-1.5">Tên sản phẩm *</label>
+              <label class="block text-xs font-medium text-zinc-300 mb-1.5">Tên sản phẩm *</label>
               <input
                 v-model="form.name"
                 @input="autoGenerateSlug"
                 type="text"
                 required
                 placeholder="e.g. Laptop ASUS ROG Zephyrus G16 (2024)"
-                class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors"
+                class="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3.5 py-2 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 transition-colors"
               />
             </div>
 
             <div>
-              <label class="block text-xs font-medium text-slate-300 mb-1.5">Slug URL *</label>
+              <label class="block text-xs font-medium text-zinc-300 mb-1.5">Slug URL *</label>
               <input
                 v-model="form.slug"
                 type="text"
                 required
                 placeholder="e.g. laptop-asus-rog-zephyrus-g16-2024"
-                class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs font-mono text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors"
+                class="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3.5 py-2 text-xs font-mono text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 transition-colors"
               />
             </div>
 
             <div>
-              <label class="block text-xs font-medium text-slate-300 mb-1.5">Mô tả ngắn</label>
+              <label class="block text-xs font-medium text-zinc-300 mb-1.5">Mô tả ngắn</label>
               <textarea
                 v-model="form.shortDescription"
                 rows="2"
                 placeholder="Tóm tắt điểm nhấn nổi bật của sản phẩm..."
-                class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors"
+                class="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3.5 py-2 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 transition-colors"
               ></textarea>
             </div>
 
             <div>
-              <label class="block text-xs font-medium text-slate-300 mb-1.5">Mô tả chi tiết</label>
+              <label class="block text-xs font-medium text-zinc-300 mb-1.5">Mô tả chi tiết</label>
               <textarea
                 v-model="form.description"
-                rows="5"
+                rows="6"
                 placeholder="Bài viết giới thiệu chi tiết sản phẩm..."
-                class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors"
+                class="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3.5 py-2 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 transition-colors"
               ></textarea>
             </div>
           </div>
         </div>
 
         <!-- Card 2: Technical Specifications -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-sm">
+        <div class="bg-zinc-900/60 border border-zinc-800/80 rounded-xl p-5 shadow-sm">
           <ProductSpecsEditor v-model="formSpecs" />
         </div>
       </div>
 
       <!-- Right 1 Col: Pricing, Brand, Category, Image -->
-      <div class="space-y-6">
+      <div class="space-y-5">
         <!-- Pricing & Inventory -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-sm space-y-4">
-          <h2 class="text-sm font-semibold uppercase tracking-wider text-blue-400">Giá bán & Tồn kho</h2>
+        <div class="bg-zinc-900/60 border border-zinc-800/80 rounded-xl p-5 shadow-sm space-y-4">
+          <h2 class="text-xs font-mono font-semibold uppercase tracking-wider text-zinc-300 pb-3 border-b border-zinc-800/60">
+            Giá bán & Bảo hành
+          </h2>
 
-          <div class="space-y-4">
+          <div class="space-y-3.5">
             <div>
-              <label class="block text-xs font-medium text-slate-300 mb-1.5">Giá gốc niêm yết (VND) *</label>
+              <label class="block text-xs font-medium text-zinc-300 mb-1.5">Giá gốc niêm yết (VND) *</label>
               <input
                 v-model.number="form.originalPrice"
                 type="number"
                 min="0"
                 step="1000"
                 required
-                class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs font-semibold text-slate-100 focus:outline-none focus:border-blue-500 transition-colors"
+                class="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3.5 py-2 text-xs font-mono tabular-nums text-zinc-100 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 transition-colors"
               />
             </div>
 
             <div>
-              <label class="block text-xs font-medium text-slate-300 mb-1.5">Giá khuyến mãi / Thực bán (VND) *</label>
+              <label class="block text-xs font-medium text-zinc-300 mb-1.5">Giá khuyến mãi / Thực bán (VND) *</label>
               <input
                 v-model.number="form.salePrice"
                 type="number"
                 min="0"
                 step="1000"
                 required
-                class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs font-semibold text-emerald-400 focus:outline-none focus:border-blue-500 transition-colors"
+                class="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3.5 py-2 text-xs font-mono tabular-nums font-semibold text-emerald-400 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 transition-colors"
               />
             </div>
 
             <div>
-              <label class="block text-xs font-medium text-slate-300 mb-1.5">Thời hạn bảo hành (Tháng)</label>
+              <label class="block text-xs font-medium text-zinc-300 mb-1.5">Thời hạn bảo hành (Tháng)</label>
               <input
                 v-model.number="form.warrantyMonths"
                 type="number"
                 min="0"
-                class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-blue-500 transition-colors"
+                class="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3.5 py-2 text-xs font-mono tabular-nums text-zinc-100 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 transition-colors"
               />
             </div>
           </div>
         </div>
 
         <!-- Taxonomy -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-sm space-y-4">
-          <h2 class="text-sm font-semibold uppercase tracking-wider text-blue-400">Phân loại</h2>
+        <div class="bg-zinc-900/60 border border-zinc-800/80 rounded-xl p-5 shadow-sm space-y-4">
+          <h2 class="text-xs font-mono font-semibold uppercase tracking-wider text-zinc-300 pb-3 border-b border-zinc-800/60">
+            Phân loại
+          </h2>
 
-          <div class="space-y-4">
+          <div class="space-y-3.5">
             <div>
-              <label class="block text-xs font-medium text-slate-300 mb-1.5">Danh mục sản phẩm *</label>
+              <label class="block text-xs font-medium text-zinc-300 mb-1.5">Danh mục sản phẩm *</label>
               <select
                 v-model.number="form.categoryId"
                 required
-                class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-blue-500 transition-colors"
+                class="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3.5 py-2 text-xs text-zinc-100 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 transition-colors"
               >
                 <option value="" disabled>-- Chọn danh mục --</option>
                 <option v-for="c in categories" :key="c.id" :value="c.id">
@@ -158,11 +180,11 @@
             </div>
 
             <div>
-              <label class="block text-xs font-medium text-slate-300 mb-1.5">Thương hiệu *</label>
+              <label class="block text-xs font-medium text-zinc-300 mb-1.5">Thương hiệu *</label>
               <select
                 v-model.number="form.brandId"
                 required
-                class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-blue-500 transition-colors"
+                class="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3.5 py-2 text-xs text-zinc-100 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 transition-colors"
               >
                 <option value="" disabled>-- Chọn thương hiệu --</option>
                 <option v-for="b in brands" :key="b.id" :value="b.id">
@@ -174,26 +196,34 @@
         </div>
 
         <!-- Primary Image -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-sm space-y-4">
-          <h2 class="text-sm font-semibold uppercase tracking-wider text-blue-400">Hình ảnh sản phẩm</h2>
+        <div class="bg-zinc-900/60 border border-zinc-800/80 rounded-xl p-5 shadow-sm space-y-4">
+          <h2 class="text-xs font-mono font-semibold uppercase tracking-wider text-zinc-300 pb-3 border-b border-zinc-800/60">
+            Hình ảnh đại diện
+          </h2>
 
           <div>
-            <label class="block text-xs font-medium text-slate-300 mb-1.5">URL ảnh đại diện chính</label>
+            <label class="block text-xs font-medium text-zinc-300 mb-1.5">URL ảnh sản phẩm</label>
             <input
               v-model="form.primaryImageUrl"
               type="url"
               placeholder="https://example.com/image.png"
-              class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors mb-3"
+              class="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3.5 py-2 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 transition-colors mb-3"
             />
             <div
               v-if="form.primaryImageUrl"
-              class="w-full h-44 rounded-xl bg-slate-950 border border-slate-800 overflow-hidden flex items-center justify-center p-2"
+              class="w-full h-44 rounded-lg bg-zinc-950 border border-zinc-800/80 overflow-hidden flex items-center justify-center p-2"
             >
               <img
                 :src="form.primaryImageUrl"
                 alt="Preview"
-                class="max-w-full max-h-full object-contain rounded-lg"
+                class="max-w-full max-h-full object-contain rounded"
               />
+            </div>
+            <div
+              v-else
+              class="w-full h-32 rounded-lg bg-zinc-950/40 border border-dashed border-zinc-800 flex items-center justify-center text-[11px] text-zinc-500"
+            >
+              Chưa có ảnh đại diện
             </div>
           </div>
         </div>
@@ -205,7 +235,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Loader2 } from 'lucide-vue-next'
+import { Loader2, ArrowLeft } from 'lucide-vue-next'
 import ProductSpecsEditor from '@/components/products/ProductSpecsEditor.vue'
 import { fetchProductById, createProduct, updateProduct, type ProductFormData } from '@/api/products'
 import { fetchCategories } from '@/api/categories'

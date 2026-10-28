@@ -34,6 +34,15 @@ export default {
           900: '#1e3a8a',
           950: '#172554',
         }
+      },
+      fontFamily: {
+        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+        mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
+      },
+      boxShadow: {
+        'subtle': '0 1px 2px 0 rgba(0, 0, 0, 0.4)',
+        'glow-sm': '0 0 15px -3px rgba(255, 255, 255, 0.05)',
+        'glow-primary': '0 0 20px -5px rgba(59, 130, 246, 0.3)',
       }
     },
   },
