@@ -106,4 +106,9 @@ router.beforeEach(async (to, from, next) => {
   next()
 })
 
+router.afterEach((to) => {
+  const title = to.meta.title as string | undefined
+  document.title = title ? `${title} | TechStore Admin` : 'TechStore Admin'
+})
+
 export default router
