@@ -1,5 +1,5 @@
 import { apiClient } from './client'
-import type { ApiResponse, User } from '@/types'
+import type { ApiResponse, User, UserAddress, CreateAddressRequest } from '@/types'
 
 export interface LoginResponseData {
   accessToken: string
@@ -31,9 +31,9 @@ export const authApi = {
   changePassword: (data: { oldPassword: string; newPassword: string }): Promise<ApiResponse<void>> => 
     apiClient.post('/users/change-password', data),
     
-  getAddresses: (): Promise<ApiResponse<any[]>> => 
+  getAddresses: (): Promise<ApiResponse<UserAddress[]>> => 
     apiClient.get('/users/addresses'),
     
-  addAddress: (data: any): Promise<ApiResponse<any>> => 
+  addAddress: (data: CreateAddressRequest): Promise<ApiResponse<UserAddress>> => 
     apiClient.post('/users/addresses', data)
 }
