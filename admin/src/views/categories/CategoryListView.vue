@@ -180,6 +180,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { Plus, Edit3, Trash2, Folder, Loader2 } from 'lucide-vue-next'
+import { toast } from 'vue-sonner'
 import ConfirmModal from '@/components/common/ConfirmModal.vue'
 import { fetchCategories, createCategory, updateCategory, deleteCategory } from '@/api/categories'
 import type { Category } from '@/types'
@@ -241,18 +242,23 @@ function autoGenerateSlug() {
 }
 
 async function submitCategory() {
-  if (!modalForm.name || !modalForm.slug) return
+  if (!modalForm.name || !modalForm.slug) {
+    toast.warning('Vui lòng nhập tên và slug cho danh mục.')
+    return
+  }
   isSubmitting.value = true
   try {
     if (editingId.value) {
       await updateCategory(editingId.value, modalForm)
+      toast.success('Đã cập nhật danh mục thành công!')
     } else {
       await createCategory(modalForm)
+      toast.success('Đã thêm danh mục mới thành công!')
     }
     isModalOpen.value = false
     await loadCategories()
   } catch (err: any) {
-    alert(err.response?.data?.message || 'Có lỗi xảy ra khi lưu danh mục.')
+    toast.error(err.response?.data?.message || 'Có lỗi xảy ra khi lưu danh mục.')
   } finally {
     isSubmitting.value = false
   }
@@ -265,14 +271,16 @@ function askDelete(c: Category) {
 
 async function executeDelete() {
   if (!categoryToDelete.value) return
+  const deletedName = categoryToDelete.value.name
   isDeleting.value = true
   try {
     await deleteCategory(categoryToDelete.value.id)
     isConfirmOpen.value = false
     categoryToDelete.value = null
+    toast.success(`Đã xóa danh mục "${deletedName}" thành công`)
     await loadCategories()
   } catch (err: any) {
-    alert(err.response?.data?.message || 'Không thể xóa danh mục.')
+    toast.error(err.response?.data?.message || 'Không thể xóa danh mục.')
   } finally {
     isDeleting.value = false
   }

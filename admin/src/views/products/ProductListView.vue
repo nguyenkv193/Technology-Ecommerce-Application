@@ -198,6 +198,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { Plus, Search, Edit3, Trash2, Package, Loader2 } from 'lucide-vue-next'
+import { toast } from 'vue-sonner'
 import ConfirmModal from '@/components/common/ConfirmModal.vue'
 import { fetchProducts, deleteProduct } from '@/api/products'
 import type { Product } from '@/types'
@@ -259,14 +260,16 @@ function askDeleteProduct(p: Product) {
 
 async function executeDelete() {
   if (!productToDelete.value) return
+  const deletedName = productToDelete.value.name
   isDeleting.value = true
   try {
     await deleteProduct(productToDelete.value.id)
     isConfirmOpen.value = false
     productToDelete.value = null
+    toast.success(`Đã xóa sản phẩm "${deletedName}" thành công`)
     await loadProducts()
-  } catch (err) {
-    alert('Không thể xóa sản phẩm. Vui lòng thử lại.')
+  } catch (err: any) {
+    toast.error(err.response?.data?.message || 'Không thể xóa sản phẩm. Vui lòng thử lại.')
   } finally {
     isDeleting.value = false
   }

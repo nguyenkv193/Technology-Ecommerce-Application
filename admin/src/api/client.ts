@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { toast } from 'vue-sonner'
 
 export const ADMIN_TOKEN_KEY = 'techstore_admin_token'
 
@@ -27,6 +28,7 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
+      toast.error('Phiên làm việc đã hết hạn. Vui lòng đăng nhập lại.')
       localStorage.removeItem(ADMIN_TOKEN_KEY)
       if (window.location.pathname !== '/login') {
         window.location.href = '/login'

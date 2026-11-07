@@ -165,6 +165,7 @@ import {
   Cpu,
   LogOut
 } from 'lucide-vue-next'
+import { toast } from 'vue-sonner'
 import { useAdminAuthStore } from '@/stores/auth'
 
 const route = useRoute()
@@ -185,6 +186,7 @@ const userInitial = computed(() => {
 
 function handleLogout() {
   authStore.logout()
+  toast.success('Đã đăng xuất khỏi hệ thống')
   router.push('/login')
 }
 </script>

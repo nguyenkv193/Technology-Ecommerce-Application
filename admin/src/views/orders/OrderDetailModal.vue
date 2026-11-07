@@ -168,9 +168,18 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { X, Check, Truck, CheckCircle } from 'lucide-vue-next'
+import { toast } from 'vue-sonner'
 import BadgeStatus from '@/components/common/BadgeStatus.vue'
 import { updateOrderStatus, cancelOrder } from '@/api/orders'
 import type { Order, OrderStatus } from '@/types'
+
+const statusLabels: Record<OrderStatus, string> = {
+  PENDING: 'Chờ xác nhận',
+  CONFIRMED: 'Đã xác nhận',
+  SHIPPING: 'Đang giao',
+  DELIVERED: 'Đã giao hàng',
+  CANCELLED: 'Đã hủy'
+}
 
 const props = defineProps<{
   isOpen: boolean
@@ -199,12 +208,14 @@ function formatDate(dateStr: string): string {
 
 async function advanceStatus(newStatus: OrderStatus) {
   if (!props.order) return
+  const code = props.order.orderCode
   isProcessing.value = true
   try {
     await updateOrderStatus(props.order.id, newStatus)
+    toast.success(`Đơn hàng #${code} đã chuyển sang "${statusLabels[newStatus]}"`)
     emit('updated')
   } catch (err: any) {
-    alert(err.response?.data?.message || 'Không thể cập nhật trạng thái đơn hàng.')
+    toast.error(err.response?.data?.message || 'Không thể cập nhật trạng thái đơn hàng.')
   } finally {
     isProcessing.value = false
   }
@@ -212,15 +223,17 @@ async function advanceStatus(newStatus: OrderStatus) {
 
 async function handleCancel() {
   if (!props.order) return
-  if (!confirm(`Xác nhận hủy đơn hàng ${props.order.orderCode}? Hệ thống sẽ tự động hoàn lại tồn kho.`)) {
+  const code = props.order.orderCode
+  if (!confirm(`Xác nhận hủy đơn hàng ${code}? Hệ thống sẽ tự động hoàn lại tồn kho.`)) {
     return
   }
   isProcessing.value = true
   try {
     await cancelOrder(props.order.id)
+    toast.success(`Đã hủy đơn hàng #${code} và hoàn trả tồn kho thành công`)
     emit('updated')
   } catch (err: any) {
-    alert(err.response?.data?.message || 'Không thể hủy đơn hàng.')
+    toast.error(err.response?.data?.message || 'Không thể hủy đơn hàng.')
   } finally {
     isProcessing.value = false
   }

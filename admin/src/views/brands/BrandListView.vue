@@ -199,6 +199,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { Plus, Edit3, Trash2, Award, Loader2 } from 'lucide-vue-next'
+import { toast } from 'vue-sonner'
 import ConfirmModal from '@/components/common/ConfirmModal.vue'
 import { fetchBrands, createBrand, updateBrand, deleteBrand } from '@/api/brands'
 import type { Brand } from '@/types'
@@ -266,18 +267,23 @@ function autoGenerateSlug() {
 }
 
 async function submitBrand() {
-  if (!modalForm.name || !modalForm.slug) return
+  if (!modalForm.name || !modalForm.slug) {
+    toast.warning('Vui lòng nhập tên và slug cho thương hiệu.')
+    return
+  }
   isSubmitting.value = true
   try {
     if (editingId.value) {
       await updateBrand(editingId.value, modalForm)
+      toast.success('Đã cập nhật thương hiệu thành công!')
     } else {
       await createBrand(modalForm)
+      toast.success('Đã thêm thương hiệu mới thành công!')
     }
     isModalOpen.value = false
     await loadBrands()
   } catch (err: any) {
-    alert(err.response?.data?.message || 'Có lỗi xảy ra khi lưu thương hiệu.')
+    toast.error(err.response?.data?.message || 'Có lỗi xảy ra khi lưu thương hiệu.')
   } finally {
     isSubmitting.value = false
   }
@@ -290,14 +296,16 @@ function askDelete(b: Brand) {
 
 async function executeDelete() {
   if (!brandToDelete.value) return
+  const deletedName = brandToDelete.value.name
   isDeleting.value = true
   try {
     await deleteBrand(brandToDelete.value.id)
     isConfirmOpen.value = false
     brandToDelete.value = null
+    toast.success(`Đã xóa thương hiệu "${deletedName}" thành công`)
     await loadBrands()
   } catch (err: any) {
-    alert(err.response?.data?.message || 'Không thể xóa thương hiệu.')
+    toast.error(err.response?.data?.message || 'Không thể xóa thương hiệu.')
   } finally {
     isDeleting.value = false
   }

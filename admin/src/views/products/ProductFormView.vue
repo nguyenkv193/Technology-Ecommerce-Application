@@ -236,6 +236,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Loader2, ArrowLeft } from 'lucide-vue-next'
+import { toast } from 'vue-sonner'
 import ProductSpecsEditor from '@/components/products/ProductSpecsEditor.vue'
 import { fetchProductById, createProduct, updateProduct, type ProductFormData } from '@/api/products'
 import { fetchCategories } from '@/api/categories'
@@ -314,7 +315,7 @@ async function loadProductDetail() {
       }))
     }
   } catch (err) {
-    alert('Không thể tải thông tin chi tiết sản phẩm.')
+    toast.error('Không thể tải thông tin chi tiết sản phẩm.')
     router.push('/products')
   } finally {
     isLoadingData.value = false
@@ -323,7 +324,7 @@ async function loadProductDetail() {
 
 async function saveProduct() {
   if (!form.name || !form.slug || form.salePrice <= 0) {
-    alert('Vui lòng nhập đầy đủ tên, slug và giá bán hợp lệ.')
+    toast.warning('Vui lòng nhập đầy đủ tên, slug và giá bán hợp lệ.')
     return
   }
 
@@ -336,12 +337,14 @@ async function saveProduct() {
 
     if (isEditMode.value) {
       await updateProduct(productId.value, payload)
+      toast.success('Đã cập nhật sản phẩm thành công!')
     } else {
       await createProduct(payload)
+      toast.success('Đã tạo sản phẩm mới thành công!')
     }
     router.push('/products')
   } catch (err: any) {
-    alert(err.response?.data?.message || 'Có lỗi xảy ra khi lưu sản phẩm.')
+    toast.error(err.response?.data?.message || 'Có lỗi xảy ra khi lưu sản phẩm.')
   } finally {
     isSaving.value = false
   }

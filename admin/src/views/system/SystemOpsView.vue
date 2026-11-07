@@ -133,6 +133,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { Database, RefreshCw, Server, CheckCircle, AlertCircle } from 'lucide-vue-next'
+import { toast } from 'vue-sonner'
 import { checkSystemHealth, type SystemHealthData } from '@/api/system'
 
 interface ActivityLog {
@@ -169,6 +170,7 @@ async function handleHealthCheck() {
       time: new Date().toLocaleTimeString('vi-VN'),
       success: true
     })
+    toast.success(res.message || 'Kiểm tra thành công: Hệ thống đang hoạt động ổn định!')
   } catch (err: any) {
     const msg = err.response?.data?.message || err.message || 'Lỗi khi kiểm tra sức khỏe hệ thống'
     checkResult.value = {
@@ -181,6 +183,7 @@ async function handleHealthCheck() {
       time: new Date().toLocaleTimeString('vi-VN'),
       success: false
     })
+    toast.error(msg)
   } finally {
     isChecking.value = false
   }

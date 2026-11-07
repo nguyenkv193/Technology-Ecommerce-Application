@@ -91,6 +91,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ShieldAlert, Mail, Lock, Eye, EyeOff, AlertCircle, Loader2 } from 'lucide-vue-next'
+import { toast } from 'vue-sonner'
 import { useAdminAuthStore } from '@/stores/auth'
 
 const router = useRouter()
@@ -107,9 +108,12 @@ async function handleLogin() {
   isLoading.value = true
   try {
     await authStore.login(email.value, password.value)
+    toast.success('Đăng nhập thành công! Chào mừng trở lại.')
     router.push('/')
   } catch (err: any) {
-    errorMessage.value = err.response?.data?.message || err.message || 'Email hoặc mật khẩu không chính xác.'
+    const msg = err.response?.data?.message || err.message || 'Email hoặc mật khẩu không chính xác.'
+    errorMessage.value = msg
+    toast.error(msg)
   } finally {
     isLoading.value = false
   }
