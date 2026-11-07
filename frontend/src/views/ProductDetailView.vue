@@ -164,7 +164,7 @@
           <img v-if="activeImage"
             :src="activeImage"
             :alt="product.name"
-            class="object-contain max-h-[85%] max-w-[85%] transition-transform duration-500 group-hover:scale-105 select-none"
+            class="object-contain max-h-[85%] max-w-[85%] transition-transform duration-500 group-hover:scale-105 select-none text-xs text-zinc-400 text-center"
           />
           <div v-else class="text-xs text-zinc-400">Chưa có hình ảnh sản phẩm</div>
 
@@ -222,7 +222,7 @@
             class="w-16 h-16 sm:w-18 sm:h-18 rounded-lg bg-white border p-1.5 shrink-0 transition relative cursor-pointer overflow-hidden flex items-center justify-center"
             :class="activeImageIndex === idx ? 'border-red-600 ring-2 ring-red-600/30' : 'border-zinc-200 hover:border-zinc-300'"
           >
-            <img :src="img" class="object-contain w-full h-full pointer-events-none select-none" :alt="`Góc ảnh ${idx + 1}`" />
+            <img :src="img" class="object-contain w-full h-full pointer-events-none select-none text-[8px] sm:text-[9px] text-zinc-400 leading-none text-center" :alt="`Góc ảnh ${idx + 1}`" />
           </button>
 
           <!-- Unbox Tab -->
