@@ -144,6 +144,18 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
+    public PageResponse<OrderResponse> getAllOrders(OrderStatus status, int page, int size) {
+        Pageable pageable = PageRequest.of(Math.max(0, page), Math.max(1, size));
+        Page<Order> orderPage;
+        if (status != null) {
+            orderPage = orderRepository.findByOrderStatusOrderByCreatedAtDesc(status, pageable);
+        } else {
+            orderPage = orderRepository.findAllByOrderByCreatedAtDesc(pageable);
+        }
+        return PageResponse.of(orderPage.map(OrderResponse::from));
+    }
+
+    @Transactional(readOnly = true)
     public OrderResponse getOrderDetails(Long userId, Long orderId, boolean isAdmin) {
         Order order = orderRepository.findWithDetailsById(orderId)
                 .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND, "Không tìm thấy đơn hàng với ID: " + orderId));

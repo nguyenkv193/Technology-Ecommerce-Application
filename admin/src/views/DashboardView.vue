@@ -1,18 +1,13 @@
 <template>
   <div class="space-y-6">
-    <!-- Top Minimalist Welcome Header -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-zinc-800/80">
+    <!-- Top Clean Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 border-b border-zinc-800/80">
       <div>
-        <div class="flex items-center gap-2">
-          <h1 class="text-xl font-semibold tracking-tight text-white flex items-center gap-2">
-            <span>Xin chào, {{ authStore.user?.fullName || 'Quản trị viên' }}</span>
-          </h1>
-          <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-            Hệ thống ổn định
-          </span>
-        </div>
+        <h1 class="text-xl font-semibold tracking-tight text-white">
+          Xin chào, {{ authStore.user?.fullName || 'Quản trị viên' }}
+        </h1>
         <p class="text-xs text-zinc-400 mt-1 font-mono">
-          {{ formattedDate }} • Tổng quan tình hình kinh doanh và vận hành sàn
+          {{ formattedDate }} • Dữ liệu đơn hàng và doanh thu theo thời gian thực
         </p>
       </div>
 
@@ -24,13 +19,14 @@
           <Plus class="w-3.5 h-3.5" />
           <span>Thêm sản phẩm</span>
         </router-link>
-        <router-link
-          to="/system-ops"
-          class="px-3.5 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white text-xs font-medium border border-zinc-800 hover:border-zinc-700 flex items-center gap-2 transition-all"
+        <button
+          type="button"
+          @click="loadData"
+          class="px-3.5 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white text-xs font-medium border border-zinc-800 hover:border-zinc-700 flex items-center gap-2 transition-all font-mono"
         >
-          <RefreshCw class="w-3.5 h-3.5" />
-          <span>Đồng bộ Search</span>
-        </router-link>
+          <RefreshCw class="w-3.5 h-3.5" :class="{ 'animate-spin': isLoading }" />
+          <span>Làm mới</span>
+        </button>
       </div>
     </div>
 
@@ -41,44 +37,41 @@
         :value="formatCurrency(metrics.totalRevenue)"
         :icon="DollarSign"
         theme="emerald"
-        change="12.5%"
-        :is-positive="true"
+        subtitle="Doanh thu đơn thành công"
       />
       <StatCard
         title="Tổng đơn hàng"
         :value="metrics.totalOrders"
         :icon="ShoppingBag"
         theme="blue"
-        change="8.2%"
-        :is-positive="true"
+        subtitle="Tất cả đơn đã tạo"
       />
       <StatCard
         title="Đơn chờ xác nhận"
         :value="metrics.pendingOrders"
         :icon="Clock"
         theme="amber"
+        :subtitle="metrics.pendingOrders > 0 ? 'Cần duyệt giao vận' : 'Không có đơn tồn đọng'"
       />
       <StatCard
         title="Sản phẩm hoạt động"
         :value="metrics.totalProducts"
         :icon="Layers"
         theme="purple"
+        subtitle="Mặt hàng đang mở bán"
       />
     </div>
 
-    <!-- Interactive Analytics Chart (Vercel Minimalist Style) -->
-    <div class="p-6 rounded-xl bg-zinc-900/60 border border-zinc-800/80 shadow-subtle relative overflow-hidden">
-      <!-- Top Chart Controls -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+    <!-- Dynamic Revenue Chart -->
+    <div class="p-5 rounded-xl bg-zinc-900/60 border border-zinc-800/80 shadow-subtle relative overflow-hidden">
+      <!-- Chart Header & Range Filter -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
         <div>
-          <div class="flex items-center gap-2">
-            <h2 class="text-sm font-semibold text-zinc-100 tracking-tight">Doanh thu & Lưu lượng đơn</h2>
-            <span class="text-[11px] font-mono text-zinc-500">Live Analytics</span>
-          </div>
-          <p class="text-xs text-zinc-400 mt-0.5">Biểu đồ tổng hợp doanh thu theo chu kỳ thời gian</p>
+          <h2 class="text-sm font-semibold text-zinc-100 tracking-tight">Doanh thu & Số lượng đơn</h2>
+          <p class="text-xs text-zinc-400 mt-0.5">Biểu đồ tổng hợp từ dữ liệu đơn hàng thực tế</p>
         </div>
 
-        <div class="flex items-center gap-1.5 p-1 rounded-lg bg-zinc-950 border border-zinc-800/80 text-xs font-mono self-start sm:self-auto">
+        <div class="flex items-center gap-1 p-1 rounded-lg bg-zinc-950 border border-zinc-800/80 text-xs font-mono self-start sm:self-auto">
           <button
             v-for="range in timeRanges"
             :key="range.id"
@@ -91,107 +84,90 @@
         </div>
       </div>
 
-      <!-- Key Metrics Header Ribbon -->
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 py-3 px-4 mb-6 rounded-lg bg-zinc-950/70 border border-zinc-800/60 font-mono text-xs">
-        <div>
-          <span class="text-zinc-500 text-[10px] uppercase block">Doanh thu trung bình / ngày</span>
-          <span class="text-zinc-200 font-semibold tabular-nums">17.850.000 ₫</span>
-        </div>
-        <div>
-          <span class="text-zinc-500 text-[10px] uppercase block">Tỷ lệ hoàn thành đơn</span>
-          <span class="text-emerald-400 font-semibold tabular-nums">96.4%</span>
-        </div>
-        <div>
-          <span class="text-zinc-500 text-[10px] uppercase block">Thời gian xác nhận</span>
-          <span class="text-zinc-200 font-semibold tabular-nums">~12 phút</span>
-        </div>
-        <div>
-          <span class="text-zinc-500 text-[10px] uppercase block">Giá trị TB / đơn hàng</span>
-          <span class="text-zinc-200 font-semibold tabular-nums">2.604.000 ₫</span>
-        </div>
-      </div>
-
-      <!-- SVG Chart Area -->
-      <div class="relative h-60 w-full pt-4">
-        <!-- SVG Grid Lines -->
+      <!-- Chart Content Area -->
+      <div class="relative h-56 w-full pt-2">
+        <!-- Horizontal Reference Gridlines -->
         <div class="absolute inset-0 flex flex-col justify-between pointer-events-none text-[10px] font-mono text-zinc-600">
-          <div class="border-b border-zinc-800/40 w-full flex justify-between pr-2"><span>30M</span></div>
-          <div class="border-b border-zinc-800/40 w-full flex justify-between pr-2"><span>20M</span></div>
-          <div class="border-b border-zinc-800/40 w-full flex justify-between pr-2"><span>10M</span></div>
-          <div class="border-b border-zinc-800/40 w-full flex justify-between pr-2"><span>0M</span></div>
+          <div class="border-b border-zinc-800/40 w-full flex justify-between pr-2">
+            <span>{{ formatCompactCurrency(chartMax) }}</span>
+          </div>
+          <div class="border-b border-zinc-800/40 w-full flex justify-between pr-2">
+            <span>{{ formatCompactCurrency(chartMax / 2) }}</span>
+          </div>
+          <div class="border-b border-zinc-800/40 w-full flex justify-between pr-2">
+            <span>0 ₫</span>
+          </div>
         </div>
 
-        <!-- Interactive SVG Curve -->
+        <!-- SVG Line & Fill -->
         <svg
           class="w-full h-full overflow-visible relative z-10"
           preserveAspectRatio="none"
-          viewBox="0 0 700 200"
+          viewBox="0 0 700 180"
         >
           <defs>
-            <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.25" />
-              <stop offset="100%" stop-color="#3b82f6" stop-opacity="0" />
-            </linearGradient>
-            <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stop-color="#60a5fa" />
-              <stop offset="100%" stop-color="#a855f7" />
+            <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.2" />
+              <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.0" />
             </linearGradient>
           </defs>
 
-          <!-- Area fill under line -->
+          <!-- Area under curve -->
           <path
-            d="M 20 160 C 100 130, 150 150, 220 90 C 290 30, 360 80, 440 50 C 520 20, 600 70, 680 30 L 680 200 L 20 200 Z"
-            fill="url(#areaGradient)"
+            v-if="chartPoints.length > 0"
+            :d="areaPath"
+            fill="url(#chartGradient)"
           />
 
-          <!-- Glowing main trend line -->
+          <!-- Line -->
           <path
-            d="M 20 160 C 100 130, 150 150, 220 90 C 290 30, 360 80, 440 50 C 520 20, 600 70, 680 30"
+            v-if="chartPoints.length > 0"
+            :d="linePath"
             fill="none"
-            stroke="url(#lineGradient)"
-            stroke-width="2.5"
+            stroke="#60a5fa"
+            stroke-width="2"
             stroke-linecap="round"
+            stroke-linejoin="round"
           />
 
-          <!-- Interactive data points -->
-          <g v-for="(point, idx) in chartPoints" :key="idx">
+          <!-- Interactive Data Points -->
+          <g v-for="(pt, idx) in chartPoints" :key="idx">
             <circle
-              :cx="point.x"
-              :cy="point.y"
+              :cx="pt.x"
+              :cy="pt.y"
               r="4"
-              class="fill-zinc-950 stroke-blue-400 stroke-2 hover:r-6 hover:fill-blue-400 transition-all cursor-pointer"
+              class="fill-zinc-950 stroke-blue-400 stroke-2 hover:r-5 hover:fill-blue-400 transition-all cursor-pointer"
             >
-              <title>{{ point.day }}: {{ point.amount }} ({{ point.orders }} đơn)</title>
+              <title>{{ pt.label }}: {{ formatCurrency(pt.amount) }} ({{ pt.count }} đơn hàng)</title>
             </circle>
           </g>
         </svg>
 
-        <!-- X Axis Labels -->
-        <div class="flex justify-between text-[11px] font-mono text-zinc-500 mt-2 px-2">
-          <span v-for="point in chartPoints" :key="point.day">{{ point.day }}</span>
+        <!-- X-Axis Labels -->
+        <div class="flex justify-between text-[11px] font-mono text-zinc-500 mt-2 px-1">
+          <span v-for="pt in chartPoints" :key="pt.label">{{ pt.label }}</span>
         </div>
       </div>
     </div>
 
-    <!-- Quick Operations & Recent Orders Layout -->
+    <!-- 2-Column Bottom Layout -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <!-- Recent Orders Table (2 Cols) -->
       <div class="lg:col-span-2 bg-zinc-900/60 border border-zinc-800/80 rounded-xl p-5 shadow-subtle space-y-4">
         <div class="flex items-center justify-between pb-3 border-b border-zinc-800/60">
           <div>
             <h2 class="text-sm font-semibold text-zinc-100 tracking-tight">Đơn hàng mới nhất</h2>
-            <p class="text-xs text-zinc-400 mt-0.5">Các giao dịch phát sinh gần đây trên sàn</p>
+            <p class="text-xs text-zinc-400 mt-0.5">Các giao dịch phát sinh gần đây</p>
           </div>
           <router-link
             to="/orders"
-            class="text-xs font-medium text-zinc-400 hover:text-white flex items-center gap-1 transition-colors px-2 py-1 rounded hover:bg-zinc-800"
+            class="text-xs font-medium text-zinc-400 hover:text-white flex items-center gap-1 transition-colors px-2.5 py-1 rounded-md hover:bg-zinc-800"
           >
             <span>Xem tất cả</span>
             <ChevronRight class="w-3.5 h-3.5" />
           </router-link>
         </div>
 
-        <!-- Table -->
         <div class="overflow-x-auto">
           <table class="w-full text-left text-xs text-zinc-300">
             <thead class="text-[11px] font-mono font-medium text-zinc-400 uppercase bg-zinc-950/60 border-b border-zinc-800/80">
@@ -208,13 +184,13 @@
                 <td colspan="5" class="py-8 text-zinc-500">
                   <div class="flex items-center justify-center gap-2">
                     <Loader2 class="w-4 h-4 animate-spin text-zinc-400" />
-                    <span>Đang tải dữ liệu đơn hàng...</span>
+                    <span>Đang tải dữ liệu...</span>
                   </div>
                 </td>
               </tr>
               <tr v-else-if="recentOrders.length === 0" class="text-center">
-                <td colspan="5" class="py-8 text-zinc-500 text-xs">
-                  Chưa có đơn hàng nào được tạo.
+                <td colspan="5" class="py-8 text-zinc-500 text-xs font-sans">
+                  Chưa có đơn hàng nào phát sinh.
                 </td>
               </tr>
               <tr
@@ -223,7 +199,7 @@
                 class="hover:bg-zinc-800/40 transition-colors group"
               >
                 <td class="py-3 px-3 font-semibold text-zinc-200">
-                  <span class="px-1.5 py-0.5 rounded bg-zinc-800/80 border border-zinc-700/50 text-[11px]">
+                  <span class="px-1.5 py-0.5 rounded bg-zinc-950 border border-zinc-800 text-[11px]">
                     {{ order.orderCode }}
                   </span>
                 </td>
@@ -242,7 +218,7 @@
                     to="/orders"
                     class="text-xs font-medium text-zinc-400 hover:text-white px-2.5 py-1 rounded-md hover:bg-zinc-800 transition-colors inline-block"
                   >
-                    Chi tiết
+                    Xem đơn
                   </router-link>
                 </td>
               </tr>
@@ -251,98 +227,115 @@
         </div>
       </div>
 
-      <!-- Quick Operations Sidebar (1 Col) -->
+      <!-- Right Column: Status Breakdown & Shortcuts -->
       <div class="space-y-6">
-        <!-- Quick Action Panel -->
+        <!-- Order Status Breakdown (Truly Dynamic) -->
         <div class="bg-zinc-900/60 border border-zinc-800/80 rounded-xl p-5 shadow-subtle space-y-3">
           <div class="flex items-center justify-between pb-2 border-b border-zinc-800/60">
-            <h2 class="text-xs font-mono font-medium text-zinc-300 uppercase tracking-wider">Tác vụ nhanh</h2>
-            <span class="text-[10px] font-mono text-zinc-500">Shortcuts</span>
+            <h2 class="text-xs font-semibold text-zinc-200 uppercase tracking-wider font-mono">
+              Trạng thái đơn hàng
+            </h2>
+            <span class="text-[10px] font-mono text-zinc-500">Phân loại</span>
           </div>
 
-          <div class="space-y-2">
+          <div class="space-y-2 text-xs font-mono">
             <router-link
-              to="/products/create"
-              class="w-full flex items-center justify-between p-3 rounded-lg bg-zinc-950/70 border border-zinc-800/80 hover:border-zinc-700 hover:bg-zinc-900/90 transition-all group"
+              to="/orders?status=PENDING"
+              class="flex items-center justify-between p-2 rounded-lg hover:bg-zinc-800/60 transition-colors"
             >
-              <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-md bg-zinc-900 border border-zinc-800 text-zinc-300 flex items-center justify-center group-hover:text-white group-hover:border-zinc-700">
-                  <PackagePlus class="w-4 h-4" />
-                </div>
-                <div>
-                  <div class="text-xs font-medium text-zinc-200 group-hover:text-white transition-colors">Tạo sản phẩm mới</div>
-                  <div class="text-[11px] text-zinc-500">Đăng bán và cấu hình SKU</div>
-                </div>
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                <span class="text-zinc-300 font-sans">Chờ xác nhận</span>
               </div>
-              <ChevronRight class="w-3.5 h-3.5 text-zinc-600 group-hover:text-zinc-400 group-hover:translate-x-0.5 transition-all" />
+              <span class="font-semibold text-zinc-100 px-2 py-0.5 rounded bg-zinc-950 border border-zinc-800">
+                {{ statusCounts.PENDING }}
+              </span>
             </router-link>
 
             <router-link
-              to="/orders"
-              class="w-full flex items-center justify-between p-3 rounded-lg bg-zinc-950/70 border border-zinc-800/80 hover:border-zinc-700 hover:bg-zinc-900/90 transition-all group"
+              to="/orders?status=CONFIRMED"
+              class="flex items-center justify-between p-2 rounded-lg hover:bg-zinc-800/60 transition-colors"
             >
-              <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-md bg-zinc-900 border border-zinc-800 text-zinc-300 flex items-center justify-center group-hover:text-white group-hover:border-zinc-700">
-                  <Clock class="w-4 h-4" />
-                </div>
-                <div>
-                  <div class="text-xs font-medium text-zinc-200 group-hover:text-white transition-colors">Duyệt đơn chờ</div>
-                  <div class="text-[11px] text-zinc-500">Xác nhận đơn và giao vận</div>
-                </div>
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-blue-400"></span>
+                <span class="text-zinc-300 font-sans">Đã xác nhận</span>
               </div>
-              <ChevronRight class="w-3.5 h-3.5 text-zinc-600 group-hover:text-zinc-400 group-hover:translate-x-0.5 transition-all" />
+              <span class="font-semibold text-zinc-100 px-2 py-0.5 rounded bg-zinc-950 border border-zinc-800">
+                {{ statusCounts.CONFIRMED }}
+              </span>
             </router-link>
 
             <router-link
-              to="/system-ops"
-              class="w-full flex items-center justify-between p-3 rounded-lg bg-zinc-950/70 border border-zinc-800/80 hover:border-zinc-700 hover:bg-zinc-900/90 transition-all group"
+              to="/orders?status=SHIPPING"
+              class="flex items-center justify-between p-2 rounded-lg hover:bg-zinc-800/60 transition-colors"
             >
-              <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-md bg-zinc-900 border border-zinc-800 text-zinc-300 flex items-center justify-center group-hover:text-white group-hover:border-zinc-700">
-                  <Search class="w-4 h-4" />
-                </div>
-                <div>
-                  <div class="text-xs font-medium text-zinc-200 group-hover:text-white transition-colors">Đồng bộ Elasticsearch</div>
-                  <div class="text-[11px] text-zinc-500">Cập nhật chỉ mục tìm kiếm</div>
-                </div>
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-purple-400"></span>
+                <span class="text-zinc-300 font-sans">Đang giao hàng</span>
               </div>
-              <ChevronRight class="w-3.5 h-3.5 text-zinc-600 group-hover:text-zinc-400 group-hover:translate-x-0.5 transition-all" />
+              <span class="font-semibold text-zinc-100 px-2 py-0.5 rounded bg-zinc-950 border border-zinc-800">
+                {{ statusCounts.SHIPPING }}
+              </span>
+            </router-link>
+
+            <router-link
+              to="/orders?status=DELIVERED"
+              class="flex items-center justify-between p-2 rounded-lg hover:bg-zinc-800/60 transition-colors"
+            >
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                <span class="text-zinc-300 font-sans">Hoàn thành</span>
+              </div>
+              <span class="font-semibold text-zinc-100 px-2 py-0.5 rounded bg-zinc-950 border border-zinc-800">
+                {{ statusCounts.DELIVERED }}
+              </span>
+            </router-link>
+
+            <router-link
+              to="/orders?status=CANCELLED"
+              class="flex items-center justify-between p-2 rounded-lg hover:bg-zinc-800/60 transition-colors"
+            >
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-zinc-500"></span>
+                <span class="text-zinc-400 font-sans">Đã hủy</span>
+              </div>
+              <span class="font-semibold text-zinc-400 px-2 py-0.5 rounded bg-zinc-950 border border-zinc-800">
+                {{ statusCounts.CANCELLED }}
+              </span>
             </router-link>
           </div>
         </div>
 
-        <!-- Infrastructure Status Card (Linear style) -->
-        <div class="bg-zinc-900/60 border border-zinc-800/80 rounded-xl p-5 shadow-subtle space-y-3 font-mono">
+        <!-- Quick Shortcuts -->
+        <div class="bg-zinc-900/60 border border-zinc-800/80 rounded-xl p-5 shadow-subtle space-y-3">
           <div class="flex items-center justify-between pb-2 border-b border-zinc-800/60">
-            <h2 class="text-xs font-medium uppercase tracking-wider text-zinc-400">Trạng thái Dịch vụ</h2>
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+            <h2 class="text-xs font-semibold text-zinc-200 uppercase tracking-wider font-mono">
+              Phím tắt thao tác
+            </h2>
           </div>
 
-          <div class="space-y-2.5 text-xs">
-            <div class="flex items-center justify-between py-1 border-b border-zinc-800/40">
-              <span class="text-zinc-400">Spring Boot REST API</span>
-              <span class="text-emerald-400 font-medium flex items-center gap-1.5 text-[11px]">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> :8080 (0.4ms)
-              </span>
-            </div>
-            <div class="flex items-center justify-between py-1 border-b border-zinc-800/40">
-              <span class="text-zinc-400">Elasticsearch Service</span>
-              <span class="text-emerald-400 font-medium flex items-center gap-1.5 text-[11px]">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> :9200 (Synced)
-              </span>
-            </div>
-            <div class="flex items-center justify-between py-1 border-b border-zinc-800/40">
-              <span class="text-zinc-400">PostgreSQL 16 DB</span>
-              <span class="text-emerald-400 font-medium flex items-center gap-1.5 text-[11px]">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Pool OK
-              </span>
-            </div>
-            <div class="flex items-center justify-between py-1">
-              <span class="text-zinc-400">Redis Cache Layer</span>
-              <span class="text-emerald-400 font-medium flex items-center gap-1.5 text-[11px]">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> 98.2% Hit
-              </span>
-            </div>
+          <div class="space-y-2 font-sans">
+            <router-link
+              to="/products/create"
+              class="w-full flex items-center justify-between p-2.5 rounded-lg bg-zinc-950/60 border border-zinc-800/80 hover:border-zinc-700 hover:bg-zinc-800/40 transition-all text-xs"
+            >
+              <span class="text-zinc-200 font-medium">Tạo sản phẩm & SKU mới</span>
+              <ChevronRight class="w-3.5 h-3.5 text-zinc-500" />
+            </router-link>
+            <router-link
+              to="/orders"
+              class="w-full flex items-center justify-between p-2.5 rounded-lg bg-zinc-950/60 border border-zinc-800/80 hover:border-zinc-700 hover:bg-zinc-800/40 transition-all text-xs"
+            >
+              <span class="text-zinc-200 font-medium">Xử lý toàn bộ đơn hàng</span>
+              <ChevronRight class="w-3.5 h-3.5 text-zinc-500" />
+            </router-link>
+            <router-link
+              to="/system-ops"
+              class="w-full flex items-center justify-between p-2.5 rounded-lg bg-zinc-950/60 border border-zinc-800/80 hover:border-zinc-700 hover:bg-zinc-800/40 transition-all text-xs"
+            >
+              <span class="text-zinc-200 font-medium">Đồng bộ Elasticsearch & Cache</span>
+              <ChevronRight class="w-3.5 h-3.5 text-zinc-500" />
+            </router-link>
           </div>
         </div>
       </div>
@@ -360,34 +353,22 @@ import {
   Plus,
   RefreshCw,
   ChevronRight,
-  PackagePlus,
-  Search,
   Loader2
 } from 'lucide-vue-next'
 import { useAdminAuthStore } from '@/stores/auth'
 import StatCard from '@/components/common/StatCard.vue'
 import BadgeStatus from '@/components/common/BadgeStatus.vue'
-import { fetchDashboardMetrics, fetchRecentOrders } from '@/api/dashboard'
+import { fetchDashboardOverview } from '@/api/dashboard'
 import type { DashboardMetrics, Order } from '@/types'
 
 const authStore = useAdminAuthStore()
-
 const isLoading = ref(true)
-const activeRange = ref('7d')
-const timeRanges = [
-  { id: '7d', label: '7 ngày' },
-  { id: '30d', label: '30 ngày' },
-  { id: 'year', label: 'Năm nay' }
-]
 
-const chartPoints = [
-  { day: 'T2', x: 20, y: 160, amount: '12.4M', orders: 6 },
-  { day: 'T3', x: 130, y: 130, amount: '15.2M', orders: 8 },
-  { day: 'T4', x: 220, y: 90, amount: '22.8M', orders: 11 },
-  { day: 'T5', x: 330, y: 60, amount: '26.1M', orders: 14 },
-  { day: 'T6', x: 440, y: 50, amount: '28.5M', orders: 15 },
-  { day: 'T7', x: 550, y: 35, amount: '32.0M', orders: 18 },
-  { day: 'CN', x: 680, y: 30, amount: '34.5M', orders: 20 },
+const activeRange = ref<'7d' | '30d' | 'year'>('7d')
+const timeRanges = [
+  { id: '7d' as const, label: '7 ngày' },
+  { id: '30d' as const, label: '30 ngày' },
+  { id: 'year' as const, label: 'Năm nay' }
 ]
 
 const formattedDate = computed(() => {
@@ -406,23 +387,178 @@ const metrics = ref<DashboardMetrics>({
   totalProducts: 0,
   lowStockCount: 0
 })
+
 const recentOrders = ref<Order[]>([])
+const allOrders = ref<Order[]>([])
+
+// Real dynamic status distribution
+const statusCounts = computed(() => {
+  const counts = {
+    PENDING: 0,
+    CONFIRMED: 0,
+    SHIPPING: 0,
+    DELIVERED: 0,
+    CANCELLED: 0
+  }
+  allOrders.value.forEach((o) => {
+    if (o.status && counts[o.status] !== undefined) {
+      counts[o.status]++
+    }
+  })
+  return counts
+})
+
+// Dynamic Chart Calculations based on actual orders
+interface ChartPoint {
+  label: string
+  amount: number
+  count: number
+  x: number
+  y: number
+}
+
+const chartPoints = computed<ChartPoint[]>(() => {
+  const points: { label: string; amount: number; count: number }[] = []
+  const now = new Date()
+
+  if (activeRange.value === '7d') {
+    // 7 past days
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now)
+      d.setDate(d.getDate() - i)
+      const dayStr = d.toISOString().split('T')[0]
+      const label = i === 0 ? 'Hôm nay' : `${d.getDate()}/${d.getMonth() + 1}`
+
+      const dayOrders = allOrders.value.filter((o) => {
+        if (!o.createdAt) return false
+        return o.createdAt.startsWith(dayStr)
+      })
+
+      const amount = dayOrders.reduce((sum, o) => {
+        if (o.status === 'DELIVERED' || o.paymentStatus === 'PAID') {
+          return sum + (o.totalAmount || 0)
+        }
+        return sum
+      }, 0)
+
+      points.push({ label, amount, count: dayOrders.length })
+    }
+  } else if (activeRange.value === '30d') {
+    // 6 intervals of 5 days
+    for (let i = 5; i >= 0; i--) {
+      const endD = new Date(now)
+      endD.setDate(endD.getDate() - i * 5)
+      const startD = new Date(endD)
+      startD.setDate(startD.getDate() - 4)
+
+      const label = `${startD.getDate()}-${endD.getDate()}/${endD.getMonth() + 1}`
+
+      const bucketOrders = allOrders.value.filter((o) => {
+        if (!o.createdAt) return false
+        const orderDate = new Date(o.createdAt)
+        return orderDate >= startD && orderDate <= endD
+      })
+
+      const amount = bucketOrders.reduce((sum, o) => {
+        if (o.status === 'DELIVERED' || o.paymentStatus === 'PAID') {
+          return sum + (o.totalAmount || 0)
+        }
+        return sum
+      }, 0)
+
+      points.push({ label, amount, count: bucketOrders.length })
+    }
+  } else {
+    // 12 months of current year
+    const currentYear = now.getFullYear()
+    for (let m = 0; m < 12; m++) {
+      const monthPrefix = `${currentYear}-${String(m + 1).padStart(2, '0')}`
+      const label = `T${m + 1}`
+
+      const monthOrders = allOrders.value.filter((o) => {
+        if (!o.createdAt) return false
+        return o.createdAt.startsWith(monthPrefix)
+      })
+
+      const amount = monthOrders.reduce((sum, o) => {
+        if (o.status === 'DELIVERED' || o.paymentStatus === 'PAID') {
+          return sum + (o.totalAmount || 0)
+        }
+        return sum
+      }, 0)
+
+      points.push({ label, amount, count: monthOrders.length })
+    }
+  }
+
+  // Calculate SVG coordinates
+  const svgWidth = 700
+  const svgHeight = 180
+  const padX = 35
+  const padYTop = 20
+  const padYBottom = 25
+
+  const maxVal = Math.max(...points.map((p) => p.amount), 5000000)
+
+  return points.map((p, index) => {
+    const x = padX + (index / (points.length - 1)) * (svgWidth - 2 * padX)
+    const yRatio = p.amount / maxVal
+    const y = svgHeight - padYBottom - yRatio * (svgHeight - padYTop - padYBottom)
+    return {
+      ...p,
+      x: Math.round(x),
+      y: Math.round(y)
+    }
+  })
+})
+
+const chartMax = computed(() => {
+  const max = Math.max(...chartPoints.value.map((p) => p.amount), 5000000)
+  return Math.ceil(max / 1000000) * 1000000
+})
+
+const linePath = computed(() => {
+  if (chartPoints.value.length === 0) return ''
+  return chartPoints.value.reduce((acc, pt, idx) => {
+    return idx === 0 ? `M ${pt.x} ${pt.y}` : `${acc} L ${pt.x} ${pt.y}`
+  }, '')
+})
+
+const areaPath = computed(() => {
+  if (chartPoints.value.length === 0) return ''
+  const first = chartPoints.value[0]
+  const last = chartPoints.value[chartPoints.value.length - 1]
+  const baseline = 180 - 25
+  return `${linePath.value} L ${last.x} ${baseline} L ${first.x} ${baseline} Z`
+})
 
 function formatCurrency(val: number): string {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val || 0)
 }
 
-onMounted(async () => {
+function formatCompactCurrency(val: number): string {
+  if (val >= 1000000) {
+    return `${(val / 1000000).toFixed(val % 1000000 === 0 ? 0 : 1)}M ₫`
+  }
+  if (val >= 1000) {
+    return `${(val / 1000).toFixed(0)}k ₫`
+  }
+  return `${val} ₫`
+}
+
+async function loadData() {
   isLoading.value = true
   try {
-    const [metricData, ordersData] = await Promise.all([
-      fetchDashboardMetrics(),
-      fetchRecentOrders()
-    ])
-    metrics.value = metricData
-    recentOrders.value = ordersData
+    const overview = await fetchDashboardOverview()
+    metrics.value = overview.metrics
+    recentOrders.value = overview.recentOrders
+    allOrders.value = overview.allOrders
   } finally {
     isLoading.value = false
   }
+}
+
+onMounted(() => {
+  loadData()
 })
 </script>

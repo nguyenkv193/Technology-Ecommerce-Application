@@ -5,6 +5,7 @@ import com.project.techstore.common.response.ApiResponse;
 import com.project.techstore.order.dto.CreateOrderFromCartRequest;
 import com.project.techstore.order.dto.OrderResponse;
 import com.project.techstore.order.dto.UpdateOrderStatusRequest;
+import com.project.techstore.order.entity.OrderStatus;
 import com.project.techstore.order.service.OrderService;
 import com.project.techstore.user.entity.Role;
 import com.project.techstore.user.entity.User;
@@ -39,13 +40,19 @@ public class OrderController {
     }
 
     @GetMapping
-    @Operation(summary = "Xem lịch sử đơn hàng của người dùng hiện tại (phân trang)")
-    public ResponseEntity<ApiResponse<PageResponse<OrderResponse>>> getMyOrders(
+    @Operation(summary = "Xem danh sách đơn hàng (Admin xem toàn bộ sàn, User xem đơn của mình)")
+    public ResponseEntity<ApiResponse<PageResponse<OrderResponse>>> getOrders(
             @AuthenticationPrincipal User currentUser,
+            @RequestParam(required = false) OrderStatus status,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        PageResponse<OrderResponse> orders = orderService.getUserOrders(currentUser.getId(), page, size);
+        PageResponse<OrderResponse> orders;
+        if (currentUser != null && currentUser.getRole() == Role.ADMIN) {
+            orders = orderService.getAllOrders(status, page, size);
+        } else {
+            orders = orderService.getUserOrders(currentUser.getId(), page, size);
+        }
         return ResponseEntity.ok(ApiResponse.success(orders));
     }
 

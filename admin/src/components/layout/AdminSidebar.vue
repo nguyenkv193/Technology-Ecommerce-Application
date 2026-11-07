@@ -2,15 +2,12 @@
   <aside class="w-64 bg-zinc-950 border-r border-zinc-800/80 flex flex-col shrink-0 select-none backdrop-blur-xl relative z-20">
     <!-- Brand / Workspace Header -->
     <div class="h-16 flex items-center px-5 gap-3 border-b border-zinc-800/70">
-      <div class="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-700/80 flex items-center justify-center text-white shadow-inner">
+      <div class="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-white shadow-inner">
         <Cpu class="w-4 h-4 text-zinc-100" />
       </div>
       <div class="flex-1 min-w-0">
-        <div class="flex items-center gap-1.5">
-          <span class="font-semibold text-zinc-100 text-sm tracking-tight truncate">TechStore</span>
-          <span class="px-1.5 py-0.5 rounded text-[9px] font-mono font-medium bg-zinc-800 text-zinc-400 border border-zinc-700/50">PRO</span>
-        </div>
-        <span class="block text-[11px] font-mono text-zinc-500 truncate">admin.techstore.vn</span>
+        <span class="font-semibold text-zinc-100 text-sm tracking-tight truncate block">TechStore Admin</span>
+        <span class="block text-[11px] text-zinc-500 truncate">Hệ thống quản trị bán hàng</span>
       </div>
     </div>
 
@@ -24,7 +21,7 @@
         <div class="space-y-1">
           <router-link
             to="/"
-            class="flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all group"
+            class="flex items-center px-3 py-2 rounded-lg text-xs font-medium transition-all group"
             :class="[
               isActive('/')
                 ? 'bg-zinc-800/90 text-white shadow-sm border border-zinc-700/60'
@@ -35,7 +32,6 @@
               <LayoutDashboard class="w-4 h-4 transition-colors" :class="isActive('/') ? 'text-white' : 'text-zinc-400 group-hover:text-zinc-200'" />
               <span>Dashboard</span>
             </div>
-            <kbd class="text-[10px] font-mono text-zinc-500 bg-zinc-900/80 px-1.5 py-0.5 rounded border border-zinc-800">⌘1</kbd>
           </router-link>
         </div>
       </div>
@@ -48,7 +44,7 @@
         <div class="space-y-1">
           <router-link
             to="/products"
-            class="flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all group"
+            class="flex items-center px-3 py-2 rounded-lg text-xs font-medium transition-all group"
             :class="[
               isActive('/products')
                 ? 'bg-zinc-800/90 text-white shadow-sm border border-zinc-700/60'
@@ -59,12 +55,11 @@
               <Package class="w-4 h-4 transition-colors" :class="isActive('/products') ? 'text-white' : 'text-zinc-400 group-hover:text-zinc-200'" />
               <span>Sản phẩm</span>
             </div>
-            <kbd class="text-[10px] font-mono text-zinc-500 bg-zinc-900/80 px-1.5 py-0.5 rounded border border-zinc-800">⌘2</kbd>
           </router-link>
 
           <router-link
             to="/categories"
-            class="flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all group"
+            class="flex items-center px-3 py-2 rounded-lg text-xs font-medium transition-all group"
             :class="[
               isActive('/categories')
                 ? 'bg-zinc-800/90 text-white shadow-sm border border-zinc-700/60'
@@ -79,7 +74,7 @@
 
           <router-link
             to="/brands"
-            class="flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all group"
+            class="flex items-center px-3 py-2 rounded-lg text-xs font-medium transition-all group"
             :class="[
               isActive('/brands')
                 ? 'bg-zinc-800/90 text-white shadow-sm border border-zinc-700/60'
@@ -94,7 +89,7 @@
 
           <router-link
             to="/orders"
-            class="flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all group"
+            class="flex items-center px-3 py-2 rounded-lg text-xs font-medium transition-all group"
             :class="[
               isActive('/orders')
                 ? 'bg-zinc-800/90 text-white shadow-sm border border-zinc-700/60'
@@ -105,7 +100,6 @@
               <ShoppingCart class="w-4 h-4 transition-colors" :class="isActive('/orders') ? 'text-white' : 'text-zinc-400 group-hover:text-zinc-200'" />
               <span>Đơn hàng</span>
             </div>
-            <span class="px-1.5 py-0.2 rounded-full text-[10px] font-mono bg-zinc-800 text-zinc-300 border border-zinc-700">Mới</span>
           </router-link>
         </div>
       </div>
@@ -118,7 +112,7 @@
         <div class="space-y-1">
           <router-link
             to="/system-ops"
-            class="flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all group"
+            class="flex items-center px-3 py-2 rounded-lg text-xs font-medium transition-all group"
             :class="[
               isActive('/system-ops')
                 ? 'bg-zinc-800/90 text-white shadow-sm border border-zinc-700/60'
@@ -129,15 +123,14 @@
               <Activity class="w-4 h-4 transition-colors" :class="isActive('/system-ops') ? 'text-white' : 'text-zinc-400 group-hover:text-zinc-200'" />
               <span>Vận hành</span>
             </div>
-            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
           </router-link>
         </div>
       </div>
     </nav>
 
-    <!-- Footer Profile & Logout (Linear Style) -->
+    <!-- Footer Profile & Logout -->
     <div class="p-3 border-t border-zinc-800/70">
-      <div class="p-2.5 rounded-xl bg-zinc-900/70 border border-zinc-800/90 flex items-center justify-between">
+      <div class="p-2.5 rounded-xl bg-zinc-900/50 border border-zinc-800/80 flex items-center justify-between">
         <div class="flex items-center gap-2.5 overflow-hidden">
           <div class="w-7 h-7 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-200 flex items-center justify-center text-xs font-semibold shrink-0">
             {{ userInitial }}

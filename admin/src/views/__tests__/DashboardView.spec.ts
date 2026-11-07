@@ -17,7 +17,8 @@ const router = createRouter({
 
 vi.mock('@/api/dashboard', () => ({
   fetchDashboardMetrics: vi.fn(),
-  fetchRecentOrders: vi.fn()
+  fetchRecentOrders: vi.fn(),
+  fetchDashboardOverview: vi.fn()
 }))
 
 describe('DashboardView', () => {
@@ -27,34 +28,36 @@ describe('DashboardView', () => {
   })
 
   it('renders dashboard metrics and quick action shortcuts', async () => {
-    vi.mocked(dashboardApi.fetchDashboardMetrics).mockResolvedValueOnce({
-      totalRevenue: 125000000,
-      totalOrders: 48,
-      pendingOrders: 5,
-      totalProducts: 120,
-      lowStockCount: 3
-    })
+    const mockOrder = {
+      id: 101,
+      orderCode: 'ORD-101',
+      userId: 1,
+      customerName: 'Le Minh',
+      customerEmail: 'leminh@example.com',
+      customerPhone: '0987654321',
+      shippingAddress: 'Hanoi',
+      paymentMethod: 'COD',
+      paymentStatus: 'PAID',
+      status: 'PENDING' as const,
+      subtotal: 25000000,
+      shippingFee: 0,
+      discountAmount: 0,
+      totalAmount: 25000000,
+      createdAt: '2026-10-27T10:00:00Z',
+      updatedAt: '2026-10-27T10:00:00Z'
+    }
 
-    vi.mocked(dashboardApi.fetchRecentOrders).mockResolvedValueOnce([
-      {
-        id: 101,
-        orderCode: 'ORD-101',
-        userId: 1,
-        customerName: 'Le Minh',
-        customerEmail: 'leminh@example.com',
-        customerPhone: '0987654321',
-        shippingAddress: 'Hanoi',
-        paymentMethod: 'COD',
-        paymentStatus: 'PAID',
-        status: 'PENDING',
-        subtotal: 25000000,
-        shippingFee: 0,
-        discountAmount: 0,
-        totalAmount: 25000000,
-        createdAt: '2026-10-27T10:00:00Z',
-        updatedAt: '2026-10-27T10:00:00Z'
-      }
-    ])
+    vi.mocked(dashboardApi.fetchDashboardOverview).mockResolvedValueOnce({
+      metrics: {
+        totalRevenue: 125000000,
+        totalOrders: 48,
+        pendingOrders: 5,
+        totalProducts: 120,
+        lowStockCount: 3
+      },
+      recentOrders: [mockOrder],
+      allOrders: [mockOrder]
+    })
 
     const wrapper = mount(DashboardView, {
       global: {

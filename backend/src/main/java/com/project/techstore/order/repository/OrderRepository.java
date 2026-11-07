@@ -22,6 +22,10 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @EntityGraph(attributePaths = {"items", "user"})
     Optional<Order> findWithDetailsByOrderCode(String orderCode);
 
+    @EntityGraph(attributePaths = {"items", "user"})
+    Page<Order> findAllByOrderByCreatedAtDesc(Pageable pageable);
+
+    @EntityGraph(attributePaths = {"items", "user"})
     Page<Order> findByOrderStatusOrderByCreatedAtDesc(OrderStatus orderStatus, Pageable pageable);
 
     boolean existsByOrderCode(String orderCode);

@@ -1,23 +1,30 @@
 import apiClient from './client'
 import type { ApiResponse, PageResponse, Order, Product, DashboardMetrics } from '@/types'
 
-export async function fetchDashboardMetrics(): Promise<DashboardMetrics> {
+export interface DashboardOverview {
+  metrics: DashboardMetrics
+  recentOrders: Order[]
+  allOrders: Order[]
+}
+
+export async function fetchDashboardOverview(): Promise<DashboardOverview> {
   try {
     const [productsRes, ordersRes] = await Promise.all([
       apiClient.get<ApiResponse<PageResponse<Product>>>('/products?page=0&size=1'),
-      apiClient.get<ApiResponse<PageResponse<Order>>>('/orders?page=0&size=50')
+      apiClient.get<ApiResponse<PageResponse<Order>>>('/orders?page=0&size=100')
     ])
 
-    const totalProducts = productsRes.data.data.totalElements || 0
-    const orders = ordersRes.data.data.content || []
-    const totalOrders = ordersRes.data.data.totalElements || orders.length
+    const totalProducts = productsRes.data?.data?.totalElements || 0
+    const orders = ordersRes.data?.data?.content || []
+    const totalOrders = ordersRes.data?.data?.totalElements || orders.length
 
     let totalRevenue = 0
     let pendingOrders = 0
     let lowStockCount = 0
 
     orders.forEach((ord) => {
-      if (ord.status === 'DELIVERED') {
+      // Calculate revenue from completed or paid orders
+      if (ord.status === 'DELIVERED' || ord.paymentStatus === 'PAID') {
         totalRevenue += ord.totalAmount
       }
       if (ord.status === 'PENDING') {
@@ -26,29 +33,37 @@ export async function fetchDashboardMetrics(): Promise<DashboardMetrics> {
     })
 
     return {
-      totalRevenue,
-      totalOrders,
-      pendingOrders,
-      totalProducts,
-      lowStockCount
+      metrics: {
+        totalRevenue,
+        totalOrders,
+        pendingOrders,
+        totalProducts,
+        lowStockCount
+      },
+      recentOrders: orders.slice(0, 5),
+      allOrders: orders
     }
   } catch (error) {
-    // Fallback default numbers if error
     return {
-      totalRevenue: 0,
-      totalOrders: 0,
-      pendingOrders: 0,
-      totalProducts: 0,
-      lowStockCount: 0
+      metrics: {
+        totalRevenue: 0,
+        totalOrders: 0,
+        pendingOrders: 0,
+        totalProducts: 0,
+        lowStockCount: 0
+      },
+      recentOrders: [],
+      allOrders: []
     }
   }
 }
 
+export async function fetchDashboardMetrics(): Promise<DashboardMetrics> {
+  const overview = await fetchDashboardOverview()
+  return overview.metrics
+}
+
 export async function fetchRecentOrders(): Promise<Order[]> {
-  try {
-    const res = await apiClient.get<ApiResponse<PageResponse<Order>>>('/orders?page=0&size=5')
-    return res.data.data.content || []
-  } catch (error) {
-    return []
-  }
+  const overview = await fetchDashboardOverview()
+  return overview.recentOrders
 }
