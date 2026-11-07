@@ -63,4 +63,4 @@ npm run build
    - Cập nhật trạng thái từng bước hoặc hủy đơn có cơ chế tự động hoàn lại tồn kho.
 6. **Vận hành Hệ thống (System Operations):**
    - Kích hoạt đồng bộ hóa chỉ mục toàn bộ sản phẩm sang **Elasticsearch** (`/api/v1/admin/search/reindex-products`).
-   - Giám sát trạng thái các dịch vụ nền tảng (Spring Boot, Elasticsearch, PostgreSQL, Redis, AI Service).
+   - Giám sát trạng thái các dịch vụ nền tảng (Spring Boot, PostgreSQL 17, AI Service).

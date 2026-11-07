@@ -9,69 +9,69 @@
             Hạ tầng ổn định
           </span>
         </div>
-        <p class="text-xs text-zinc-500 mt-1 font-mono">Quản lý đồng bộ chỉ mục Elasticsearch, bộ nhớ đệm và giám sát các microservices</p>
+        <p class="text-xs text-zinc-500 mt-1 font-mono">Giám sát hạ tầng PostgreSQL Database, Backend Core và dịch vụ AI</p>
       </div>
     </div>
 
     <!-- Operations Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <!-- Left 2 Cols: Elasticsearch Reindexing Engine -->
+      <!-- Left 2 Cols: PostgreSQL Engine & Health Check -->
       <div class="lg:col-span-2 space-y-6">
         <div class="bg-white border border-zinc-200 rounded-xl p-5 shadow-sm space-y-4">
           <div class="flex items-start justify-between pb-3 border-b border-zinc-100">
             <div class="flex items-center gap-3">
               <div class="w-8 h-8 rounded-lg bg-zinc-100 border border-zinc-200 text-zinc-700 flex items-center justify-center shrink-0">
-                <Search class="w-4 h-4" />
+                <Database class="w-4 h-4" />
               </div>
               <div>
-                <h2 class="text-sm font-semibold text-zinc-900">Elasticsearch Search Index</h2>
-                <p class="text-xs text-zinc-500 font-mono">Chỉ mục tìm kiếm toàn văn bản (Full-text & Autocomplete)</p>
+                <h2 class="text-sm font-semibold text-zinc-900">PostgreSQL 17 Database & Catalog Engine</h2>
+                <p class="text-xs text-zinc-500 font-mono">Tìm kiếm, lọc danh mục & lưu trữ dữ liệu tập trung (ACID)</p>
               </div>
             </div>
             <span class="px-2 py-0.5 rounded-md text-[11px] font-mono font-medium bg-emerald-50 border border-emerald-200 text-emerald-700">
-              Sẵn sàng
+              Hoạt động
             </span>
           </div>
 
           <p class="text-xs text-zinc-600 leading-relaxed font-sans">
-            Hệ thống sử dụng cụm Elasticsearch để phục vụ bộ lọc tìm kiếm và gợi ý từ khóa tức thì trên Storefront.
-            Khi có sự sai lệch dữ liệu giữa PostgreSQL và Elasticsearch, quản trị viên có thể kích hoạt quá trình quét và nạp lại toàn bộ dữ liệu.
+            Hệ thống sử dụng cơ sở dữ liệu quan hệ PostgreSQL 17 để phục vụ toàn bộ tác vụ lưu trữ, tìm kiếm từ khóa, lọc theo thương hiệu, khoảng giá và phân trang.
+            Mọi thay đổi dữ liệu sản phẩm đều có hiệu lực ngay lập tức, đảm bảo tính nhất quán cao (Strong Consistency) và tối ưu chi phí tài nguyên máy chủ.
           </p>
 
           <!-- Result banner if done -->
           <div
-            v-if="syncResult"
+            v-if="checkResult"
             class="p-3.5 rounded-lg border flex items-center gap-2.5 text-xs font-mono"
-            :class="syncResult.success ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-rose-50 border-rose-200 text-rose-800'"
+            :class="checkResult.success ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-rose-50 border-rose-200 text-rose-800'"
           >
-            <CheckCircle v-if="syncResult.success" class="w-4 h-4 shrink-0 text-emerald-600" />
+            <CheckCircle v-if="checkResult.success" class="w-4 h-4 shrink-0 text-emerald-600" />
             <AlertCircle v-else class="w-4 h-4 shrink-0 text-rose-600" />
             <div>
-              <p class="font-semibold">{{ syncResult.message }}</p>
-              <p v-if="syncResult.count !== undefined" class="text-[11px] opacity-90 mt-0.5">
-                Đã đánh chỉ mục thành công: <span class="font-bold tabular-nums">{{ syncResult.count }}</span> sản phẩm
+              <p class="font-semibold">{{ checkResult.message }}</p>
+              <p v-if="checkResult.details" class="text-[11px] opacity-90 mt-0.5">
+                Trạng thái: <span class="font-bold">{{ checkResult.details.status }}</span> | Dịch vụ: {{ checkResult.details.service }}
               </p>
             </div>
           </div>
 
           <div class="pt-2 flex flex-col sm:flex-row sm:items-center gap-3 font-mono">
             <button
-              data-test="reindex-btn"
+              data-test="health-check-btn"
               type="button"
-              @click="handleReindex"
-              :disabled="isReindexing"
+              @click="handleHealthCheck"
+              :disabled="isChecking"
               class="px-4 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-medium shadow-sm flex items-center gap-2 transition-all disabled:opacity-50 self-start"
             >
-              <RefreshCw class="w-3.5 h-3.5" :class="{ 'animate-spin': isReindexing }" />
-              <span>{{ isReindexing ? 'Đang tạo lại chỉ mục...' : 'Đồng bộ lại chỉ mục' }}</span>
+              <RefreshCw class="w-3.5 h-3.5" :class="{ 'animate-spin': isChecking }" />
+              <span>{{ isChecking ? 'Đang kiểm tra kết nối...' : 'Kiểm tra sức khỏe hệ thống' }}</span>
             </button>
             <span class="text-[11px] text-zinc-500">
-              API endpoint: <code class="text-zinc-700 font-mono font-medium">/admin/search/reindex-products</code>
+              API endpoint: <code class="text-zinc-700 font-mono font-medium">/api/v1/health</code>
             </span>
           </div>
         </div>
 
-        <!-- Sync Activity Log -->
+        <!-- Activity Log -->
         <div class="bg-white border border-zinc-200 rounded-xl p-5 shadow-sm space-y-3 font-mono">
           <div class="flex items-center justify-between pb-2 border-b border-zinc-100">
             <h3 class="text-xs font-semibold uppercase tracking-wider text-zinc-900">Lịch sử tác vụ</h3>
@@ -132,8 +132,8 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Search, RefreshCw, Server, CheckCircle, AlertCircle } from 'lucide-vue-next'
-import { reindexProducts } from '@/api/system'
+import { Database, RefreshCw, Server, CheckCircle, AlertCircle } from 'lucide-vue-next'
+import { checkSystemHealth, type SystemHealthData } from '@/api/system'
 
 interface ActivityLog {
   action: string
@@ -142,49 +142,47 @@ interface ActivityLog {
   success: boolean
 }
 
-const isReindexing = ref(false)
-const syncResult = ref<{ success: boolean; message: string; count?: number } | null>(null)
+const isChecking = ref(false)
+const checkResult = ref<{ success: boolean; message: string; details?: SystemHealthData } | null>(null)
 
 const activityLogs = ref<ActivityLog[]>([])
 
 const services = [
   { name: 'Spring Boot Backend', endpoint: 'localhost:8080/api/v1', status: 'Online' },
-  { name: 'Elasticsearch Engine', endpoint: 'localhost:9200', status: 'Ready' },
-  { name: 'PostgreSQL Database', endpoint: 'localhost:5432/techstore', status: 'Connected' },
-  { name: 'Redis Cache', endpoint: 'localhost:6379', status: 'Ready' },
-  { name: 'AI Recommendation Service', endpoint: 'localhost:8000', status: 'Online' }
+  { name: 'PostgreSQL 17 Database', endpoint: 'localhost:5433/techstore_db', status: 'Connected' },
+  { name: 'AI Recommendation Service', endpoint: 'localhost:8001/api/v1', status: 'Online' }
 ]
 
-async function handleReindex() {
-  isReindexing.value = true
-  syncResult.value = null
+async function handleHealthCheck() {
+  isChecking.value = true
+  checkResult.value = null
   try {
-    const res = await reindexProducts()
-    syncResult.value = {
+    const res = await checkSystemHealth()
+    checkResult.value = {
       success: true,
-      message: res.message || 'Đã đồng bộ lại toàn bộ sản phẩm',
-      count: res.data
+      message: res.message || 'Hệ thống TechStore đang hoạt động ổn định',
+      details: res.data
     }
     activityLogs.value.unshift({
-      action: 'Reindex Elasticsearch',
-      detail: `Đã nạp ${res.data ?? 0} sản phẩm`,
+      action: 'Kiểm tra sức khỏe hệ thống',
+      detail: `Trạng thái: ${res.data?.status ?? 'UP'}`,
       time: new Date().toLocaleTimeString('vi-VN'),
       success: true
     })
   } catch (err: any) {
-    const msg = err.response?.data?.message || err.message || 'Lỗi khi gọi reindex'
-    syncResult.value = {
+    const msg = err.response?.data?.message || err.message || 'Lỗi khi kiểm tra sức khỏe hệ thống'
+    checkResult.value = {
       success: false,
       message: msg
     }
     activityLogs.value.unshift({
-      action: 'Reindex Elasticsearch',
-      detail: 'Thất bại',
+      action: 'Kiểm tra sức khỏe hệ thống',
+      detail: 'Không thể kết nối đến máy chủ',
       time: new Date().toLocaleTimeString('vi-VN'),
       success: false
     })
   } finally {
-    isReindexing.value = false
+    isChecking.value = false
   }
 }
 </script>

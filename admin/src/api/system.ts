@@ -1,7 +1,15 @@
 import apiClient from './client'
 import type { ApiResponse } from '@/types'
 
-export async function reindexProducts(): Promise<ApiResponse<number>> {
-  const res = await apiClient.post<ApiResponse<number>>('/admin/search/reindex-products')
+export interface SystemHealthData {
+  status: string
+  service: string
+  version: string
+  environment: string
+  currentTime: string
+}
+
+export async function checkSystemHealth(): Promise<ApiResponse<SystemHealthData>> {
+  const res = await apiClient.get<ApiResponse<SystemHealthData>>('/health')
   return res.data
 }

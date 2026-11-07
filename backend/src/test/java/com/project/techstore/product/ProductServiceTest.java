@@ -4,36 +4,26 @@ import com.project.techstore.brand.entity.Brand;
 import com.project.techstore.brand.service.BrandService;
 import com.project.techstore.category.entity.Category;
 import com.project.techstore.category.service.CategoryService;
+import com.project.techstore.common.dto.PageResponse;
 import com.project.techstore.common.exception.AppException;
 import com.project.techstore.common.exception.ErrorCode;
-import com.project.techstore.product.dto.ProductAttributeDto;
-import com.project.techstore.product.dto.ProductCreateRequest;
-import com.project.techstore.product.dto.ProductDetailResponse;
-import com.project.techstore.product.dto.ProductVariantDto;
+import com.project.techstore.product.dto.*;
 import com.project.techstore.product.entity.Product;
 import com.project.techstore.product.entity.ProductStatus;
 import com.project.techstore.product.repository.ProductRepository;
 import com.project.techstore.product.repository.ProductVariantRepository;
-import com.project.techstore.product.search.ProductSearchOutboxRepository;
-import com.project.techstore.product.search.ProductSearchEventType;
-import com.project.techstore.product.search.ProductSearchService;
-import com.project.techstore.product.search.SearchUnavailableException;
 import com.project.techstore.product.service.ProductService;
-import com.project.techstore.common.dto.PageResponse;
-import com.project.techstore.product.dto.ProductFilterRequest;
-import com.project.techstore.product.dto.ProductResponse;
-import com.project.techstore.product.dto.ProductSuggestionResponse;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -52,12 +42,6 @@ class ProductServiceTest {
 
     @Mock
     private ProductVariantRepository productVariantRepository;
-
-    @Mock
-    private ProductSearchService productSearchService;
-
-    @Mock
-    private ProductSearchOutboxRepository searchOutboxRepository;
 
     @Mock
     private CategoryService categoryService;
@@ -116,49 +100,21 @@ class ProductServiceTest {
     }
 
     @Test
-    void testFilterProductsUsesElasticsearchForKeywordSearch() {
+    void testFilterProductsWithKeywordQuery() {
         ProductFilterRequest filter = ProductFilterRequest.builder()
                 .keyword("MacBook")
                 .page(0)
                 .size(9)
-                .sortBy("relevance")
+                .sortBy("name")
+                .sortDirection("ASC")
                 .build();
-        PageResponse<ProductResponse> expected = PageResponse.<ProductResponse>builder()
-                .content(List.of())
-                .page(0)
-                .size(9)
-                .totalElements(0)
-                .totalPages(0)
-                .last(true)
-                .build();
-        when(productSearchService.search(filter)).thenReturn(expected);
 
-        PageResponse<ProductResponse> actual = productService.filterProducts(filter);
-
-        assertSame(expected, actual);
-        verify(productSearchService).search(filter);
-        verify(productRepository, never()).findAll(
-                org.mockito.ArgumentMatchers.<Specification<Product>>any(),
-                any(Pageable.class)
-        );
-    }
-
-    @Test
-    void testFilterProductsFallsBackToPostgresWhenElasticsearchIsUnavailable() {
-        ProductFilterRequest filter = ProductFilterRequest.builder()
-                .keyword("MacBook")
-                .page(0)
-                .size(9)
-                .sortBy("relevance")
-                .build();
-        when(productSearchService.search(filter))
-                .thenThrow(new SearchUnavailableException("offline", new RuntimeException("offline")));
         when(productRepository.findAll(
                 org.mockito.ArgumentMatchers.<Specification<Product>>any(),
                 any(Pageable.class)
         )).thenReturn(new PageImpl<>(
                 List.of(sampleProduct),
-                PageRequest.of(0, 9, Sort.by(Sort.Direction.DESC, "createdAt")),
+                PageRequest.of(0, 9, Sort.by(Sort.Direction.ASC, "name")),
                 1
         ));
 
@@ -166,7 +122,6 @@ class ProductServiceTest {
 
         assertEquals(1, actual.getTotalElements());
         assertEquals("MacBook Pro M3", actual.getContent().get(0).getName());
-        verify(productSearchService).search(filter);
         verify(productRepository).findAll(
                 org.mockito.ArgumentMatchers.<Specification<Product>>any(),
                 any(Pageable.class)
@@ -174,50 +129,48 @@ class ProductServiceTest {
     }
 
     @Test
-    void getSearchSuggestionsUsesRelevantActiveProductResultsAndLimitsPayload() {
-        ProductResponse product = ProductResponse.builder()
-                .id(100L)
-                .name("MacBook Pro M3")
-                .slug("macbook-pro-m3")
-                .brandName("Apple")
-                .categoryName("Laptop")
-                .minPrice(new BigDecimal("39990000"))
-                .build();
-        when(productSearchService.search(any(ProductFilterRequest.class))).thenReturn(
-                PageResponse.<ProductResponse>builder()
-                        .content(List.of(product))
-                        .page(0)
-                        .size(4)
-                        .totalElements(1)
-                        .totalPages(1)
-                        .last(true)
-                        .build()
-        );
+    void getSearchSuggestionsReturnsMatchingProducts() {
+        when(productRepository.findAll(
+                org.mockito.ArgumentMatchers.<Specification<Product>>any(),
+                any(Pageable.class)
+        )).thenReturn(new PageImpl<>(
+                List.of(sampleProduct),
+                PageRequest.of(0, 4, Sort.by(Sort.Direction.ASC, "name")),
+                1
+        ));
 
         List<ProductSuggestionResponse> suggestions = productService.getSearchSuggestions("  MacBook  ", 4);
 
         assertEquals(1, suggestions.size());
         assertEquals("MacBook Pro M3", suggestions.get(0).getName());
         assertEquals("Apple", suggestions.get(0).getBrandName());
-        var filterCaptor = org.mockito.ArgumentCaptor.forClass(ProductFilterRequest.class);
-        verify(productSearchService).search(filterCaptor.capture());
-        assertEquals("MacBook", filterCaptor.getValue().getKeyword());
-        assertEquals("ACTIVE", filterCaptor.getValue().getStatus());
-        assertEquals(4, filterCaptor.getValue().getSize());
-        assertEquals("relevance", filterCaptor.getValue().getSortBy());
+        verify(productRepository).findAll(
+                org.mockito.ArgumentMatchers.<Specification<Product>>any(),
+                any(Pageable.class)
+        );
     }
 
     @Test
     void getSearchSuggestionsCapsRequestedLimit() {
-        when(productSearchService.search(any(ProductFilterRequest.class))).thenReturn(
-                PageResponse.<ProductResponse>builder().content(List.of()).build()
+        when(productRepository.findAll(
+                org.mockito.ArgumentMatchers.<Specification<Product>>any(),
+                any(Pageable.class)
+        )).thenReturn(new PageImpl<>(
+                List.of(),
+                PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "name")),
+                0
+        ));
+
+        List<ProductSuggestionResponse> suggestions = productService.getSearchSuggestions("phone", 100);
+
+        assertNotNull(suggestions);
+        assertTrue(suggestions.isEmpty());
+        var pageableCaptor = org.mockito.ArgumentCaptor.forClass(Pageable.class);
+        verify(productRepository).findAll(
+                org.mockito.ArgumentMatchers.<Specification<Product>>any(),
+                pageableCaptor.capture()
         );
-
-        productService.getSearchSuggestions("phone", 100);
-
-        var filterCaptor = org.mockito.ArgumentCaptor.forClass(ProductFilterRequest.class);
-        verify(productSearchService).search(filterCaptor.capture());
-        assertEquals(10, filterCaptor.getValue().getSize());
+        assertEquals(10, pageableCaptor.getValue().getPageSize());
     }
 
     @Test
@@ -265,10 +218,6 @@ class ProductServiceTest {
         assertEquals(1, res.getVariants().size());
         assertEquals(2, res.getAttributes().size());
         verify(productRepository, times(1)).save(any(Product.class));
-        verify(searchOutboxRepository).save(org.mockito.ArgumentMatchers.argThat(event ->
-                event.getProductId().equals(100L)
-                        && event.getEventType() == ProductSearchEventType.UPSERT
-        ));
     }
 
     @Test

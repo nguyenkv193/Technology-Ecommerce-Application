@@ -11,11 +11,6 @@ import com.project.techstore.product.dto.*;
 import com.project.techstore.product.entity.*;
 import com.project.techstore.product.repository.ProductRepository;
 import com.project.techstore.product.repository.ProductVariantRepository;
-import com.project.techstore.product.search.ProductSearchEventType;
-import com.project.techstore.product.search.ProductSearchOutboxEvent;
-import com.project.techstore.product.search.ProductSearchOutboxRepository;
-import com.project.techstore.product.search.ProductSearchService;
-import com.project.techstore.product.search.SearchUnavailableException;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Subquery;
@@ -40,8 +35,6 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final ProductVariantRepository productVariantRepository;
-    private final ProductSearchService productSearchService;
-    private final ProductSearchOutboxRepository searchOutboxRepository;
     private final CategoryService categoryService;
     private final BrandService brandService;
 
@@ -53,14 +46,6 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public PageResponse<ProductResponse> filterProducts(ProductFilterRequest filter) {
-        if (StringUtils.hasText(filter.getKeyword())) {
-            try {
-                return productSearchService.search(filter);
-            } catch (SearchUnavailableException exception) {
-                log.warn("Elasticsearch search failed; falling back to PostgreSQL: {}", exception.getMessage());
-            }
-        }
-
         Specification<Product> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
@@ -74,12 +59,14 @@ public class ProductService {
                 predicates.add(cb.equal(root.get("status"), ProductStatus.ACTIVE));
             }
 
-            // 2. Tìm kiếm từ khóa theo tên hoặc mô tả
+            // 2. Tìm kiếm từ khóa theo tên, mô tả, danh mục hoặc thương hiệu
             if (StringUtils.hasText(filter.getKeyword())) {
                 String kw = "%" + filter.getKeyword().trim().toLowerCase() + "%";
                 Predicate nameLike = cb.like(cb.lower(root.get("name")), kw);
                 Predicate descLike = cb.like(cb.lower(root.get("description")), kw);
-                predicates.add(cb.or(nameLike, descLike));
+                Predicate brandLike = cb.like(cb.lower(root.get("brand").get("name")), kw);
+                Predicate categoryLike = cb.like(cb.lower(root.get("category").get("name")), kw);
+                predicates.add(cb.or(nameLike, descLike, brandLike, categoryLike));
             }
 
             // 3. Lọc theo Category ID
@@ -139,8 +126,8 @@ public class ProductService {
                 .status(ProductStatus.ACTIVE.name())
                 .page(0)
                 .size(Math.min(10, Math.max(1, limit)))
-                .sortBy("relevance")
-                .sortDirection("DESC")
+                .sortBy("name")
+                .sortDirection("ASC")
                 .build();
 
         return filterProducts(filter).getContent().stream()
@@ -237,7 +224,6 @@ public class ProductService {
         }
 
         Product saved = productRepository.save(product);
-        enqueueSearchEvent(saved.getId(), ProductSearchEventType.UPSERT);
         log.info("Đã tạo mới sản phẩm công nghệ: {} (id={}, variants={})", saved.getName(), saved.getId(), saved.getVariants().size());
         return ProductDetailResponse.from(saved);
     }
@@ -312,7 +298,6 @@ public class ProductService {
         }
 
         Product updated = productRepository.save(product);
-        enqueueSearchEvent(updated.getId(), ProductSearchEventType.UPSERT);
         log.info("Đã cập nhật sản phẩm công nghệ id={}", id);
         return ProductDetailResponse.from(updated);
     }
@@ -322,12 +307,7 @@ public class ProductService {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND, "Không tìm thấy sản phẩm với ID: " + id));
         productRepository.delete(product);
-        enqueueSearchEvent(id, ProductSearchEventType.DELETE);
         log.info("Đã xóa sản phẩm id={}", id);
-    }
-
-    private void enqueueSearchEvent(Long productId, ProductSearchEventType eventType) {
-        searchOutboxRepository.save(ProductSearchOutboxEvent.pending(productId, eventType));
     }
 
     @Transactional(readOnly = true)
