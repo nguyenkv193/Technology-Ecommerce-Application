@@ -7,6 +7,8 @@ import com.project.techstore.auth.dto.RefreshTokenRequest;
 import com.project.techstore.auth.dto.RegisterRequest;
 import com.project.techstore.auth.oauth2.OAuthLoginCodeService;
 import com.project.techstore.auth.service.AuthService;
+import com.project.techstore.common.exception.AppException;
+import com.project.techstore.common.exception.ErrorCode;
 import com.project.techstore.common.response.ApiResponse;
 import com.project.techstore.user.dto.UserResponse;
 import com.project.techstore.user.entity.User;
@@ -23,21 +25,21 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
-@Tag(name = "Authentication", description = "Các API Đăng ký, Đăng nhập, Làm mới Token và Xem thông tin tài khoản hiện tại")
+@Tag(name = "Authentication & Authorization", description = "Các API phục vụ xác thực người dùng (JWT)")
 public class AuthController {
 
     private final AuthService authService;
     private final OAuthLoginCodeService oauthLoginCodeService;
 
     @PostMapping("/register")
-    @Operation(summary = "1. Đăng ký tài khoản mới", description = "Tạo tài khoản mới với vai trò USER, mật khẩu được mã hóa an toàn bằng BCrypt")
+    @Operation(summary = "1. Đăng ký tài khoản người dùng mới (ROLE_CUSTOMER)")
     public ResponseEntity<ApiResponse<AuthResponse>> register(@Valid @RequestBody RegisterRequest request) {
         AuthResponse response = authService.register(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success("Đăng ký tài khoản thành công", response));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success("Đăng ký thành công", response));
     }
 
     @PostMapping("/login")
-    @Operation(summary = "2. Đăng nhập hệ thống", description = "Xác thực email và mật khẩu, trả về cặp JWT Access Token (30 phút) và Refresh Token (30 ngày)")
+    @Operation(summary = "2. Đăng nhập hệ thống (Email & Password)")
     public ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @RequestBody LoginRequest request) {
         AuthResponse response = authService.login(request);
         return ResponseEntity.ok(ApiResponse.success("Đăng nhập thành công", response));
@@ -67,6 +69,9 @@ public class AuthController {
     @SecurityRequirement(name = "BearerAuth")
     @Operation(summary = "5. Lấy thông tin tài khoản đang đăng nhập", description = "Yêu cầu gắn Bearer JWT Token ở Header")
     public ResponseEntity<ApiResponse<UserResponse>> getCurrentUser(@AuthenticationPrincipal User currentUser) {
+        if (currentUser == null) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
         return ResponseEntity.ok(ApiResponse.success(authService.getCurrentUser(currentUser)));
     }
 }

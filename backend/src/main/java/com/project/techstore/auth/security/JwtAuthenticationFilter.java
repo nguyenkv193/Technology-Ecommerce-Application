@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -38,6 +39,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         final String authHeader = request.getHeader("Authorization");
 
+        // Nếu request đến API và existing authentication không phải là User entity (ví dụ OAuth2 session còn đọng)
+        // thì xóa bỏ để bảo đảm API luôn dùng chuẩn User principal từ JWT Bearer
+        Authentication existingAuth = SecurityContextHolder.getContext().getAuthentication();
+        if (request.getRequestURI().startsWith("/api/v1/") && existingAuth != null && !(existingAuth.getPrincipal() instanceof User)) {
+            SecurityContextHolder.clearContext();
+            existingAuth = null;
+        }
+
         if (!StringUtils.hasText(authHeader) || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
@@ -50,17 +59,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             final String tokenType = jwtService.extractTokenType(jwt);
 
             // Chỉ chấp nhận Access Token để gọi API thông thường
-            if ("ACCESS".equalsIgnoreCase(tokenType) && StringUtils.hasText(userEmail) && SecurityContextHolder.getContext().getAuthentication() == null) {
-                User user = (User) this.userDetailsService.loadUserByUsername(userEmail);
+            if ("ACCESS".equalsIgnoreCase(tokenType) && StringUtils.hasText(userEmail)) {
+                boolean needsAuth = existingAuth == null
+                        || !(existingAuth.getPrincipal() instanceof User userPrincipal)
+                        || !userEmail.equalsIgnoreCase(userPrincipal.getUsername());
 
-                if (jwtService.isTokenValid(jwt, user)) {
-                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                            user,
-                            null,
-                            user.getAuthorities()
-                    );
-                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                if (needsAuth) {
+                    User user = (User) this.userDetailsService.loadUserByUsername(userEmail);
+
+                    if (jwtService.isTokenValid(jwt, user)) {
+                        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                                user,
+                                null,
+                                user.getAuthorities()
+                        );
+                        authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                        SecurityContextHolder.getContext().setAuthentication(authToken);
+                    }
                 }
             }
         } catch (Exception e) {

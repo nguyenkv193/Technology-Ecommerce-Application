@@ -1,5 +1,7 @@
 package com.project.techstore.user.controller;
 
+import com.project.techstore.common.exception.AppException;
+import com.project.techstore.common.exception.ErrorCode;
 import com.project.techstore.common.response.ApiResponse;
 import com.project.techstore.user.dto.*;
 import com.project.techstore.user.entity.User;
@@ -27,6 +29,13 @@ public class UserController {
     private final UserService userService;
     private final AddressService addressService;
 
+    private User ensureAuthenticated(User currentUser) {
+        if (currentUser == null) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+        return currentUser;
+    }
+
     // ==========================================
     // USER PROFILE
     // ==========================================
@@ -34,7 +43,7 @@ public class UserController {
     @GetMapping("/profile")
     @Operation(summary = "Xem thông tin cá nhân của người dùng hiện tại")
     public ResponseEntity<ApiResponse<UserResponse>> getProfile(@AuthenticationPrincipal User currentUser) {
-        return ResponseEntity.ok(ApiResponse.success(userService.getProfile(currentUser.getId())));
+        return ResponseEntity.ok(ApiResponse.success(userService.getProfile(ensureAuthenticated(currentUser).getId())));
     }
 
     @PutMapping("/profile")
@@ -43,7 +52,7 @@ public class UserController {
             @AuthenticationPrincipal User currentUser,
             @Valid @RequestBody UserProfileUpdateRequest request
     ) {
-        return ResponseEntity.ok(ApiResponse.success("Cập nhật thông tin thành công", userService.updateProfile(currentUser.getId(), request)));
+        return ResponseEntity.ok(ApiResponse.success("Cập nhật thông tin thành công", userService.updateProfile(ensureAuthenticated(currentUser).getId(), request)));
     }
 
     @PostMapping("/change-password")
@@ -52,7 +61,7 @@ public class UserController {
             @AuthenticationPrincipal User currentUser,
             @Valid @RequestBody ChangePasswordRequest request
     ) {
-        userService.changePassword(currentUser.getId(), request);
+        userService.changePassword(ensureAuthenticated(currentUser).getId(), request);
         return ResponseEntity.ok(ApiResponse.success("Đổi mật khẩu thành công", null));
     }
 
@@ -63,7 +72,7 @@ public class UserController {
     @GetMapping("/addresses")
     @Operation(summary = "Lấy danh sách sổ địa chỉ của người dùng")
     public ResponseEntity<ApiResponse<List<AddressResponse>>> getAddresses(@AuthenticationPrincipal User currentUser) {
-        return ResponseEntity.ok(ApiResponse.success(addressService.getUserAddresses(currentUser.getId())));
+        return ResponseEntity.ok(ApiResponse.success(addressService.getUserAddresses(ensureAuthenticated(currentUser).getId())));
     }
 
     @PostMapping("/addresses")
@@ -72,7 +81,7 @@ public class UserController {
             @AuthenticationPrincipal User currentUser,
             @Valid @RequestBody AddressRequest request
     ) {
-        AddressResponse created = addressService.createAddress(currentUser.getId(), request);
+        AddressResponse created = addressService.createAddress(ensureAuthenticated(currentUser).getId(), request);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success("Đã thêm địa chỉ mới", created));
     }
 
@@ -83,7 +92,7 @@ public class UserController {
             @PathVariable Long id,
             @Valid @RequestBody AddressRequest request
     ) {
-        AddressResponse updated = addressService.updateAddress(currentUser.getId(), id, request);
+        AddressResponse updated = addressService.updateAddress(ensureAuthenticated(currentUser).getId(), id, request);
         return ResponseEntity.ok(ApiResponse.success("Đã cập nhật địa chỉ", updated));
     }
 
@@ -93,7 +102,7 @@ public class UserController {
             @AuthenticationPrincipal User currentUser,
             @PathVariable Long id
     ) {
-        addressService.deleteAddress(currentUser.getId(), id);
+        addressService.deleteAddress(ensureAuthenticated(currentUser).getId(), id);
         return ResponseEntity.ok(ApiResponse.success("Đã xóa địa chỉ thành công", null));
     }
 
@@ -103,7 +112,7 @@ public class UserController {
             @AuthenticationPrincipal User currentUser,
             @PathVariable Long id
     ) {
-        AddressResponse defaultAddress = addressService.setDefaultAddress(currentUser.getId(), id);
+        AddressResponse defaultAddress = addressService.setDefaultAddress(ensureAuthenticated(currentUser).getId(), id);
         return ResponseEntity.ok(ApiResponse.success("Đã đặt làm địa chỉ mặc định", defaultAddress));
     }
 }

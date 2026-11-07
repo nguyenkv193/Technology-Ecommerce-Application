@@ -964,7 +964,7 @@
 
     <!-- 1. Video Review Modal -->
     <Teleport to="body">
-      <div v-if="showVideoModal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
+      <div v-if="showVideoModal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4" @click.self="showVideoModal = false">
         <div class="bg-white rounded-xl max-w-2xl w-full overflow-hidden shadow-2xl space-y-3 p-4">
           <div class="flex items-center justify-between px-2">
             <h4 class="text-sm font-bold text-zinc-900">Video giới thiệu & Trải nghiệm thực tế</h4>
@@ -974,10 +974,12 @@
           </div>
           <div class="aspect-video w-full rounded-lg overflow-hidden bg-black flex items-center justify-center">
             <iframe 
+              v-if="showVideoModal"
               class="w-full h-full"
-              :src="storefront.media.reviewVideoUrl"
+              :src="toEmbedVideoUrl(storefront.media.reviewVideoUrl)"
               title="Product Video Review"
               frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowfullscreen
             ></iframe>
           </div>
@@ -992,7 +994,7 @@
             <h4 class="text-sm font-bold text-zinc-900">Nội dung mở hộp</h4>
             <button @click="showUnboxModal = false" class="p-1 rounded-full hover:bg-zinc-100 text-zinc-500 cursor-pointer">✕</button>
           </div>
-          <iframe v-if="storefront.media.unboxingVideoUrl" :src="storefront.media.unboxingVideoUrl" title="Video mở hộp sản phẩm" class="aspect-video w-full rounded-lg bg-black" allowfullscreen></iframe>
+          <iframe v-if="showUnboxModal && storefront.media.unboxingVideoUrl" :src="toEmbedVideoUrl(storefront.media.unboxingVideoUrl)" title="Video mở hộp sản phẩm" class="aspect-video w-full rounded-lg bg-black" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
           <p v-if="storefront.media.unboxingDescription" class="px-2 text-xs text-zinc-600">{{ storefront.media.unboxingDescription }}</p>
         </div>
       </div>
@@ -1389,6 +1391,22 @@ const formatReviewDate = (value: string) => {
   const date = new Date(value)
   return Number.isNaN(date.getTime()) ? 'Không rõ ngày' : new Intl.DateTimeFormat('vi-VN', { dateStyle: 'medium' }).format(date)
 }
+
+const toEmbedVideoUrl = (url?: string | null): string => {
+  if (!url) return ''
+  const trimmed = url.trim()
+  if (!trimmed) return ''
+  if (trimmed.includes('youtube.com/embed/') || trimmed.includes('youtube-nocookie.com/embed/')) {
+    return trimmed
+  }
+  const regExp = /(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
+  const match = trimmed.match(regExp)
+  if (match && match[1]) {
+    return `https://www.youtube.com/embed/${match[1]}?autoplay=1&rel=0`
+  }
+  return trimmed
+}
+
 
 // Methods & Actions
 const selectImage = (idx: number) => {

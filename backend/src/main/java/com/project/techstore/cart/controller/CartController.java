@@ -4,6 +4,8 @@ import com.project.techstore.cart.dto.AddToCartRequest;
 import com.project.techstore.cart.dto.CartResponse;
 import com.project.techstore.cart.dto.UpdateCartItemRequest;
 import com.project.techstore.cart.service.CartService;
+import com.project.techstore.common.exception.AppException;
+import com.project.techstore.common.exception.ErrorCode;
 import com.project.techstore.common.response.ApiResponse;
 import com.project.techstore.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,6 +29,9 @@ public class CartController {
     @GetMapping
     @Operation(summary = "Xem giỏ hàng của người dùng hiện tại")
     public ResponseEntity<ApiResponse<CartResponse>> getCart(@AuthenticationPrincipal User currentUser) {
+        if (currentUser == null) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
         return ResponseEntity.ok(ApiResponse.success(cartService.getCart(currentUser.getId())));
     }
 
@@ -36,6 +41,9 @@ public class CartController {
             @AuthenticationPrincipal User currentUser,
             @Valid @RequestBody AddToCartRequest request
     ) {
+        if (currentUser == null) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
         CartResponse cart = cartService.addToCart(currentUser.getId(), request);
         return ResponseEntity.ok(ApiResponse.success("Thêm vào giỏ hàng thành công", cart));
     }
@@ -47,6 +55,9 @@ public class CartController {
             @PathVariable Long itemId,
             @Valid @RequestBody UpdateCartItemRequest request
     ) {
+        if (currentUser == null) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
         CartResponse cart = cartService.updateQuantity(currentUser.getId(), itemId, request.getQuantity());
         return ResponseEntity.ok(ApiResponse.success("Cập nhật số lượng thành công", cart));
     }
@@ -57,6 +68,9 @@ public class CartController {
             @AuthenticationPrincipal User currentUser,
             @PathVariable Long itemId
     ) {
+        if (currentUser == null) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
         CartResponse cart = cartService.removeItem(currentUser.getId(), itemId);
         return ResponseEntity.ok(ApiResponse.success("Đã xóa sản phẩm khỏi giỏ hàng", cart));
     }
@@ -64,6 +78,9 @@ public class CartController {
     @DeleteMapping
     @Operation(summary = "Làm trống toàn bộ giỏ hàng")
     public ResponseEntity<ApiResponse<CartResponse>> clearCart(@AuthenticationPrincipal User currentUser) {
+        if (currentUser == null) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
         CartResponse cart = cartService.clearCart(currentUser.getId());
         return ResponseEntity.ok(ApiResponse.success("Đã làm trống giỏ hàng", cart));
     }
