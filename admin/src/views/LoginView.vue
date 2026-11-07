@@ -10,8 +10,8 @@
         <div class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 text-white mb-3 shadow-xs">
           <ShieldAlert class="w-5 h-5 text-white" />
         </div>
-        <h1 class="text-lg font-semibold text-zinc-900 tracking-tight">TechStore Backoffice</h1>
-        <p class="text-xs text-zinc-500 mt-0.5 font-mono">Cổng điều hành & quản trị hệ thống</p>
+        <h1 class="text-lg font-semibold text-zinc-900 tracking-tight">Hệ thống TechStore</h1>
+        <p class="text-xs text-zinc-500 mt-0.5 font-mono">Đăng nhập vào trang quản lý hệ thống</p>
         <div class="mt-2.5 inline-block px-2.5 py-0.5 bg-zinc-100 border border-zinc-200 text-zinc-700 text-[10px] font-mono font-medium rounded-full">
           Quản trị viên (ADMIN)
         </div>
@@ -29,7 +29,7 @@
       <!-- Form -->
       <form @submit.prevent="handleLogin" class="space-y-4">
         <div>
-          <label class="block text-[11px] font-mono font-medium text-zinc-600 mb-1.5">EMAIL QUẢN TRỊ</label>
+          <label class="block text-[11px] font-mono font-medium text-zinc-600 mb-1.5">EMAIL</label>
           <div class="relative">
             <Mail class="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
@@ -74,7 +74,7 @@
           class="w-full py-2.5 px-4 bg-zinc-900 hover:bg-zinc-800 active:bg-zinc-950 text-white font-medium rounded-lg text-xs transition-all shadow-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed font-mono mt-2"
         >
           <Loader2 v-if="isLoading" class="w-3.5 h-3.5 animate-spin" />
-          <span>{{ isLoading ? 'Đang xác thực...' : 'Truy cập Hệ thống' }}</span>
+          <span>{{ isLoading ? 'Đang xác thực...' : 'Đăng nhập' }}</span>
         </button>
       </form>
 
