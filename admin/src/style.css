@@ -3,10 +3,10 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
-/* Linear/Vercel Minimalist Scrollbar */
+/* Linear/Vercel Light Minimalist Scrollbar */
 ::-webkit-scrollbar {
   width: 5px;
   height: 5px;
@@ -17,25 +17,25 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #27272a;
+  background: #d4d4d8;
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #3f3f46;
+  background: #a1a1aa;
 }
 
-/* Subtle glow and utility effects */
+/* Subtle border and surface utility classes */
 .border-subtle {
-  border-color: rgba(255, 255, 255, 0.08);
+  border-color: rgba(0, 0, 0, 0.08);
 }
 
 .bg-surface {
-  background-color: #121215;
+  background-color: #ffffff;
 }
 
 .bg-surface-elevated {
-  background-color: #18181b;
+  background-color: #f4f4f5;
 }
 
 /* Tabular figures for money, quantities, codes */
