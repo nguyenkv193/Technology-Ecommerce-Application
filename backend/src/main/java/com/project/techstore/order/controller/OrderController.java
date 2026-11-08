@@ -1,6 +1,8 @@
 package com.project.techstore.order.controller;
 
 import com.project.techstore.common.dto.PageResponse;
+import com.project.techstore.common.exception.AppException;
+import com.project.techstore.common.exception.ErrorCode;
 import com.project.techstore.common.response.ApiResponse;
 import com.project.techstore.order.dto.CreateOrderFromCartRequest;
 import com.project.techstore.order.dto.OrderResponse;
@@ -35,6 +37,9 @@ public class OrderController {
             @AuthenticationPrincipal User currentUser,
             @Valid @RequestBody CreateOrderFromCartRequest request
     ) {
+        if (currentUser == null) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
         OrderResponse order = orderService.createOrderFromCart(currentUser.getId(), request);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success("Đặt hàng thành công", order));
     }
@@ -47,8 +52,11 @@ public class OrderController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
+        if (currentUser == null) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
         PageResponse<OrderResponse> orders;
-        if (currentUser != null && currentUser.getRole() == Role.ADMIN) {
+        if (currentUser.getRole() == Role.ADMIN) {
             orders = orderService.getAllOrders(status, page, size);
         } else {
             orders = orderService.getUserOrders(currentUser.getId(), page, size);
@@ -62,6 +70,9 @@ public class OrderController {
             @AuthenticationPrincipal User currentUser,
             @PathVariable Long id
     ) {
+        if (currentUser == null) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
         boolean isAdmin = currentUser.getRole() == Role.ADMIN;
         OrderResponse order = orderService.getOrderDetails(currentUser.getId(), id, isAdmin);
         return ResponseEntity.ok(ApiResponse.success(order));
@@ -73,6 +84,9 @@ public class OrderController {
             @AuthenticationPrincipal User currentUser,
             @PathVariable Long id
     ) {
+        if (currentUser == null) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
         boolean isAdmin = currentUser.getRole() == Role.ADMIN;
         OrderResponse order = orderService.cancelOrder(currentUser.getId(), id, isAdmin);
         return ResponseEntity.ok(ApiResponse.success("Đã hủy đơn hàng thành công", order));

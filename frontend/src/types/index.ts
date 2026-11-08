@@ -299,3 +299,27 @@ export interface RecommendationResponse {
   fallbackReason: 'no_history' | 'ai_unavailable' | 'insufficient_matches' | null
   recommendations: RecommendationItem[]
 }
+
+
+export interface UserAddress {
+  id: number
+  recipientName: string
+  phone: string
+  province: string
+  district: string
+  ward: string
+  addressDetail: string
+  fullAddress: string
+  isDefault: boolean
+  createdAt?: string
+}
+
+export interface CreateAddressRequest {
+  recipientName: string
+  phone: string
+  province: string
+  district: string
+  ward: string
+  addressDetail: string
+  isDefault?: boolean
+}
