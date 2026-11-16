@@ -23,18 +23,6 @@
         </div>
       </div>
 
-      <!-- Quick Category Pills Bar (Lướt ngang nhanh các danh mục) -->
-      <div class="flex items-center gap-2 overflow-x-auto scrollbar-none py-1 pb-1.5">
-        <router-link
-          v-for="cat in sidebarCategories"
-          :key="cat.name"
-          :to="cat.link"
-          class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-white border border-zinc-200 shadow-2xs whitespace-nowrap text-zinc-700 hover:text-red-600 shrink-0"
-        >
-          <span class="w-4 h-4 flex items-center justify-center shrink-0" v-html="cat.iconSvg"></span>
-          <span>{{ cat.name }}</span>
-        </router-link>
-      </div>
 
       <!-- 2. Main Full-Width Hero Banner Slider (Apple / Flagship Cinema Style) -->
       <div 
