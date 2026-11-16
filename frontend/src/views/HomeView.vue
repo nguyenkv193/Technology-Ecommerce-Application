@@ -23,8 +23,8 @@
         </div>
       </div>
 
-      <!-- Mobile Horizontal Category Pills (Hiển thị khi màn hình nhỏ < lg) -->
-      <div class="flex lg:hidden items-center gap-2 overflow-x-auto scrollbar-none py-1 pb-2">
+      <!-- Quick Category Pills Bar (Lướt ngang nhanh các danh mục) -->
+      <div class="flex items-center gap-2 overflow-x-auto scrollbar-none py-1 pb-1.5">
         <router-link
           v-for="cat in sidebarCategories"
           :key="cat.name"
@@ -36,149 +36,68 @@
         </router-link>
       </div>
 
-      <!-- 2. Main 3-Column Hero Grid: Left Menu (3 cols) + Center Slider (6 cols) + Right Banners (3 cols) -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-3.5 sm:gap-4 items-stretch">
-        
-        <!-- COLUMN 1: Vertical Category Navigation Sidebar (lg:col-span-3) -->
-        <div class="hidden lg:flex lg:col-span-3 rounded-xl border border-zinc-200/90 bg-white p-3 shadow-xs flex-col justify-between select-none">
-          <div>
-            <div class="px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-wider text-zinc-400 flex items-center justify-between">
-              <span>Danh mục sản phẩm</span>
-              <span class="text-[10px] text-red-600 font-semibold lowercase">chính hãng</span>
-            </div>
-
-            <div class="space-y-0.5 mt-1">
-              <router-link
-                v-for="cat in sidebarCategories"
-                :key="cat.name"
-                :to="cat.link"
-                class="flex items-center justify-between px-2.5 py-2 rounded-lg text-xs font-medium text-zinc-700 hover:text-red-600 hover:bg-red-50/60 transition-all duration-150 group cursor-pointer"
-              >
-                <div class="flex items-center gap-2.5 truncate">
-                  <span 
-                    class="w-7 h-7 rounded-lg bg-zinc-100 group-hover:bg-red-100/70 text-zinc-600 group-hover:text-red-600 flex items-center justify-center shrink-0 transition-colors"
-                    v-html="cat.iconSvg"
-                  ></span>
-                  <span class="truncate font-semibold">{{ cat.name }}</span>
-                </div>
-                <svg class="w-3.5 h-3.5 text-zinc-300 group-hover:text-red-500 group-hover:translate-x-0.5 transition-all shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-              </router-link>
-            </div>
-          </div>
-
-          <!-- Bottom Banner in Sidebar -->
-          <div class="pt-2 border-t border-zinc-100 px-1">
+      <!-- 2. Main Full-Width Hero Banner Slider (Apple / Flagship Cinema Style) -->
+      <div 
+        class="w-full relative overflow-hidden rounded-2xl border border-zinc-200/80 bg-zinc-950 shadow-sm flex flex-col justify-between h-[320px] sm:h-[400px] lg:h-[450px] group select-none"
+        @mouseenter="stopSlideTimer"
+        @mouseleave="startSlideTimer"
+      >
+        <!-- Full-bleed Image Banner Slide with Smooth Cross-Fade Transition -->
+        <div class="relative w-full h-full flex-1 overflow-hidden">
+          <Transition name="hero-slide-fade" mode="out-in">
             <router-link
-              to="/products"
-              class="flex items-center justify-between text-xs font-bold text-red-600 hover:text-red-700 py-1.5 px-2 rounded-lg hover:bg-red-50/50 transition-colors"
+              :key="currentSlide.id"
+              :to="currentSlide.link"
+              class="absolute inset-0 block w-full h-full cursor-pointer group/slide"
             >
-              <span class="flex items-center gap-1.5">
-                <svg class="w-3.5 h-3.5 text-red-600 fill-current" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                <span>Xem tất cả sản phẩm</span>
-              </span>
-              <span>→</span>
-            </router-link>
-          </div>
-        </div>
+              <img 
+                :src="currentSlide.image" 
+                :alt="currentSlide.title"
+                class="w-full h-full object-cover object-center group-hover/slide:scale-[1.02] transition-transform duration-700 ease-out"
+                loading="eager"
+              />
+              
+              <!-- Bottom subtle gradient overlay for readability -->
+              <div class="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/80 via-black/25 to-transparent pointer-events-none"></div>
 
-        <!-- COLUMN 2: Center Main Carousel Banner (lg:col-span-6) -->
-        <div 
-          class="lg:col-span-6 relative overflow-hidden rounded-xl border border-zinc-200/80 bg-zinc-950 shadow-xs flex flex-col justify-between min-h-[420px] sm:min-h-[440px] group select-none"
-          @mouseenter="stopSlideTimer"
-          @mouseleave="startSlideTimer"
-        >
-          <!-- Full-bleed Image Banner Slide with Smooth Cross-Fade Transition -->
-          <div class="relative w-full h-full flex-1 overflow-hidden">
-            <Transition name="hero-slide-fade" mode="out-in">
-              <router-link
-                :key="currentSlide.id"
-                :to="currentSlide.link"
-                class="absolute inset-0 block w-full h-full cursor-pointer group/slide"
-              >
-                <img 
-                  :src="currentSlide.image" 
-                  :alt="currentSlide.title"
-                  class="w-full h-full object-cover object-center group-hover/slide:scale-[1.03] transition-transform duration-700 ease-out"
-                  loading="eager"
-                />
-                
-                <!-- Bottom subtle gradient overlay for readability -->
-                <div class="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/80 via-black/25 to-transparent pointer-events-none"></div>
-
-                <!-- Minimalist Caption Pill (Tiêu đề tinh tế góc dưới) -->
-                <div class="absolute bottom-4 left-4 right-24 sm:right-32 z-10 pointer-events-none">
-                  <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/20 text-white text-[11px] font-semibold max-w-full shadow-sm">
-                    <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse shrink-0"></span>
-                    <span class="truncate font-sans">{{ currentSlide.title }}</span>
-                  </div>
+              <!-- Minimalist Caption Pill (Tiêu đề tinh tế góc dưới) -->
+              <div class="absolute bottom-5 left-5 sm:left-7 right-28 sm:right-36 z-10 pointer-events-none">
+                <div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/20 text-white text-xs font-semibold max-w-full shadow-md">
+                  <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse shrink-0"></span>
+                  <span class="truncate font-sans">{{ currentSlide.title }}</span>
                 </div>
-              </router-link>
-            </Transition>
-          </div>
-
-          <!-- Prev / Next Navigation Arrows (Hover reveal) -->
-          <button 
-            @click.stop="prevSlide"
-            class="absolute left-2.5 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-full bg-black/40 hover:bg-black/75 backdrop-blur-md text-white border border-white/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 active:scale-95 shadow-lg cursor-pointer"
-            aria-label="Slide trước"
-          >
-            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
-          </button>
-          <button 
-            @click.stop="nextSlide"
-            class="absolute right-2.5 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-full bg-black/40 hover:bg-black/75 backdrop-blur-md text-white border border-white/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 active:scale-95 shadow-lg cursor-pointer"
-            aria-label="Slide tiếp theo"
-          >
-            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-          </button>
-
-          <!-- Bottom Navigation Indicators (Dots & Active Pill) -->
-          <div class="absolute bottom-4 right-4 z-20 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/20 shadow-sm">
-            <button
-              v-for="(slide, sIdx) in featuredSlides"
-              :key="slide.id"
-              @click.stop="goToSlide(sIdx)"
-              class="h-1.5 rounded-full transition-all duration-300 cursor-pointer"
-              :class="currentSlideIndex === sIdx ? 'w-6 bg-red-500' : 'w-1.5 bg-white/40 hover:bg-white/70'"
-              :title="slide.title"
-            ></button>
-          </div>
+              </div>
+            </router-link>
+          </Transition>
         </div>
 
-        <!-- COLUMN 3: Right Side Banners (lg:col-span-3 - 2 Stacked Cards) -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3.5 lg:col-span-3">
-          <router-link
-            v-for="b in sidePromoBanners"
-            :key="b.id"
-            :to="b.link"
-            class="relative rounded-xl overflow-hidden p-4 sm:p-5 flex flex-col justify-between group shadow-xs transition-all duration-300 hover:shadow-md cursor-pointer border border-zinc-200/80"
-            :class="b.bgClass"
-          >
-            <!-- Background Image overlay with blend -->
-            <div class="absolute inset-0 opacity-15 group-hover:opacity-25 transition-opacity pointer-events-none bg-cover bg-center" :style="{ backgroundImage: `url(${b.image})` }"></div>
-            
-            <div class="relative z-10 space-y-1">
-              <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider" :class="b.badgeClass">
-                {{ b.badge }}
-              </span>
-              <h3 class="text-base sm:text-lg font-black tracking-tight leading-tight pt-1" :class="b.titleClass">
-                {{ b.title }}
-              </h3>
-              <p class="text-xs font-semibold" :class="b.subtitleClass">
-                {{ b.subtitle }}
-              </p>
-            </div>
+        <!-- Prev / Next Navigation Arrows (Smooth hover reveal) -->
+        <button 
+          @click.stop="prevSlide"
+          class="absolute left-3.5 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-black/40 hover:bg-black/75 backdrop-blur-md text-white border border-white/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 active:scale-95 shadow-xl cursor-pointer"
+          aria-label="Slide trước"
+        >
+          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <button 
+          @click.stop="nextSlide"
+          class="absolute right-3.5 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-black/40 hover:bg-black/75 backdrop-blur-md text-white border border-white/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 active:scale-95 shadow-xl cursor-pointer"
+          aria-label="Slide tiếp theo"
+        >
+          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
 
-            <div class="relative z-10 pt-4 flex items-center justify-between">
-              <span class="text-xs font-bold underline decoration-2 underline-offset-4 flex items-center gap-1" :class="b.ctaClass">
-                <span>{{ b.ctaText }}</span>
-                <span class="group-hover:translate-x-1 transition-transform">›</span>
-              </span>
-              <div class="w-9 h-9 rounded-lg bg-white/90 shadow-2xs border border-zinc-200/80 flex items-center justify-center shrink-0" v-html="b.iconSvg"></div>
-            </div>
-          </router-link>
+        <!-- Bottom Navigation Indicators (Dots & Active Pill) -->
+        <div class="absolute bottom-5 right-5 sm:right-7 z-20 flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/20 shadow-md">
+          <button
+            v-for="(slide, sIdx) in featuredSlides"
+            :key="slide.id"
+            @click.stop="goToSlide(sIdx)"
+            class="h-2 rounded-full transition-all duration-300 cursor-pointer"
+            :class="currentSlideIndex === sIdx ? 'w-7 bg-red-500' : 'w-2 bg-white/40 hover:bg-white/75'"
+            :title="slide.title"
+          ></button>
         </div>
-
       </div>
 
       <!-- 3. Bottom Row: 4 Mini Promo Cards (Phong Vũ Style) -->
