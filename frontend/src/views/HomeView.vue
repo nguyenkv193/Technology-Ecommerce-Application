@@ -254,7 +254,7 @@ const loadCatalogShelf = async (shelf: CatalogShelf) => {
   shelf.error = ''
   try {
     const res = await catalogApi.getProducts({
-      page: 0, size: 8, status: 'ACTIVE', sortBy: 'createdAt', sortDirection: 'DESC',
+      page: 0, size: 10, status: 'ACTIVE', sortBy: 'createdAt', sortDirection: 'DESC',
       ...(shelf.categoryId !== undefined ? { categoryId: shelf.categoryId } : {})
     })
     if (!res.success) throw new Error('Catalog request failed')
@@ -537,7 +537,7 @@ const loadBestSellers = async () => {
   loadingBestSellers.value = true
   bestSellerError.value = ''
   try {
-    const res = await catalogApi.getBestSellers(4)
+    const res = await catalogApi.getBestSellers(10)
     bestSellerProducts.value = res.data
   } catch (error) {
     bestSellerProducts.value = []
@@ -554,7 +554,7 @@ const loadPersonalized = async () => {
   loadingPersonalized.value = true
   personalizedProducts.value = []
   try {
-    const res = await recommendationApi.getPersonalized(4)
+    const res = await recommendationApi.getPersonalized(10)
     if (requestId !== personalizedRequestId) return
     personalizedProducts.value = res.data.recommendations.map(item => ({
       ...item.product,
