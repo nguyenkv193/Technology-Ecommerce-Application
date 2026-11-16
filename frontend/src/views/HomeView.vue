@@ -88,70 +88,63 @@
         </div>
       </div>
 
-      <!-- 3. Bottom Row: 4 Mini Promo Cards (Phong Vũ Style) -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <router-link
-          v-for="card in bottomMiniCards"
-          :key="card.id"
-          :to="card.link"
-          class="rounded-xl border border-zinc-200/90 bg-white p-3.5 sm:p-4 hover:border-zinc-300 hover:shadow-xs transition-all flex items-center justify-between gap-3 group cursor-pointer"
-        >
-          <div class="space-y-1 min-w-0">
-            <span class="inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md" :class="card.badgeClass">
-              {{ card.badge }}
-            </span>
-            <div class="text-xs sm:text-sm font-extrabold text-zinc-900 truncate group-hover:text-red-600 transition-colors">
-              {{ card.title }}
+      <!-- 3. Minimalist Brand Trust & Service Guarantee Bar (Apple / High-End Tech Style) -->
+      <div class="rounded-2xl border border-zinc-200/80 bg-white/95 backdrop-blur-xs p-3.5 sm:p-4 shadow-xs">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 divide-y sm:divide-y-0 divide-zinc-100">
+          <!-- Item 1: 100% Chính Hãng -->
+          <div class="flex items-center gap-3 p-2 rounded-xl transition-all duration-200 hover:bg-zinc-50 group">
+            <div class="w-10 h-10 rounded-xl bg-zinc-100 text-zinc-800 border border-zinc-200/60 flex items-center justify-center shrink-0 group-hover:bg-red-50 group-hover:text-red-600 group-hover:border-red-200 transition-all duration-200">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                <polyline points="9 12 11 14 15 10"/>
+              </svg>
             </div>
-            <div class="text-[11px] font-semibold text-red-600">
-              {{ card.highlight }}
+            <div class="min-w-0">
+              <div class="text-xs sm:text-sm font-bold text-zinc-900 tracking-tight group-hover:text-red-600 transition-colors">100% Chính Hãng</div>
+              <div class="text-[11px] text-zinc-500 truncate">Ủy quyền & bảo đảm nguồn gốc</div>
             </div>
           </div>
-          <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-lg bg-zinc-50 border border-zinc-100 flex items-center justify-center p-1 shrink-0 group-hover:scale-105 transition-transform">
-            <img :src="card.image" :alt="card.title" class="max-h-full max-w-full object-contain" />
-          </div>
-        </router-link>
-      </div>
 
-      <!-- 4. Trust Badges Row (Enterprise Brand Guarantees) -->
-      <div class="grid grid-cols-2 sm:grid-cols-4 p-4 rounded-xl bg-white border border-zinc-200/80 text-xs shadow-2xs">
-        <div class="flex items-center justify-center gap-2.5 px-3 border-r border-b sm:border-b-0 border-zinc-200/80 pb-3 sm:pb-0">
-          <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+          <!-- Item 2: Giao Hỏa Tốc 2H -->
+          <div class="flex items-center gap-3 p-2 rounded-xl transition-all duration-200 hover:bg-zinc-50 group pt-3 sm:pt-2">
+            <div class="w-10 h-10 rounded-xl bg-zinc-100 text-zinc-800 border border-zinc-200/60 flex items-center justify-center shrink-0 group-hover:bg-red-50 group-hover:text-red-600 group-hover:border-red-200 transition-all duration-200">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+              </svg>
+            </div>
+            <div class="min-w-0">
+              <div class="text-xs sm:text-sm font-bold text-zinc-900 tracking-tight group-hover:text-red-600 transition-colors">Giao Hỏa Tốc 2H</div>
+              <div class="text-[11px] text-zinc-500 truncate">Nội thành miễn phí từ 500K</div>
+            </div>
           </div>
-          <div>
-            <div class="font-bold text-zinc-900">100% Chính hãng</div>
-            <div class="text-[10px] text-zinc-500">Bảo đảm nguồn gốc</div>
-          </div>
-        </div>
 
-        <div class="flex items-center justify-center gap-2.5 px-3 border-b sm:border-b-0 sm:border-r border-zinc-200/80 pb-3 sm:pb-0">
-          <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          <!-- Item 3: Bảo Hành 12 Tháng -->
+          <div class="flex items-center gap-3 p-2 rounded-xl transition-all duration-200 hover:bg-zinc-50 group pt-3 sm:pt-2">
+            <div class="w-10 h-10 rounded-xl bg-zinc-100 text-zinc-800 border border-zinc-200/60 flex items-center justify-center shrink-0 group-hover:bg-red-50 group-hover:text-red-600 group-hover:border-red-200 transition-all duration-200">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+            </div>
+            <div class="min-w-0">
+              <div class="text-xs sm:text-sm font-bold text-zinc-900 tracking-tight group-hover:text-red-600 transition-colors">Bảo Hành 12 Tháng</div>
+              <div class="text-[11px] text-zinc-500 truncate">Toàn diện tại TTBH ủy quyền</div>
+            </div>
           </div>
-          <div>
-            <div class="font-bold text-zinc-900">Giao hỏa tốc 2H</div>
-            <div class="text-[10px] text-zinc-500">Nội thành miễn phí</div>
-          </div>
-        </div>
 
-        <div class="flex items-center justify-center gap-2.5 px-3 border-r border-zinc-200/80 pt-3 sm:pt-0">
-          <div class="w-8 h-8 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center shrink-0">
-            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          </div>
-          <div>
-            <div class="font-bold text-zinc-900">Bảo hành 12 tháng</div>
-            <div class="text-[10px] text-zinc-500">Toàn diện chính hãng</div>
-          </div>
-        </div>
-
-        <div class="flex items-center justify-center gap-2.5 px-3 pt-3 sm:pt-0">
-          <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
-            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-          </div>
-          <div>
-            <div class="font-bold text-zinc-900">Đổi mới 30 ngày</div>
-            <div class="text-[10px] text-zinc-500">Lỗi 1-đổi-1 an tâm</div>
+          <!-- Item 4: Đổi Mới 30 Ngày -->
+          <div class="flex items-center gap-3 p-2 rounded-xl transition-all duration-200 hover:bg-zinc-50 group pt-3 sm:pt-2">
+            <div class="w-10 h-10 rounded-xl bg-zinc-100 text-zinc-800 border border-zinc-200/60 flex items-center justify-center shrink-0 group-hover:bg-red-50 group-hover:text-red-600 group-hover:border-red-200 transition-all duration-200">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="23 4 23 10 17 10"/>
+                <polyline points="1 20 1 14 7 14"/>
+                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+              </svg>
+            </div>
+            <div class="min-w-0">
+              <div class="text-xs sm:text-sm font-bold text-zinc-900 tracking-tight group-hover:text-red-600 transition-colors">Đổi Mới 30 Ngày</div>
+              <div class="text-[11px] text-zinc-500 truncate">Lỗi phần cứng 1-đổi-1 an tâm</div>
+            </div>
           </div>
         </div>
       </div>
@@ -336,46 +329,6 @@ const loadTrendingKeywords = async () => {
     // Keep defaults on network/api error
   }
 }
-
-// Bottom 4 Mini Promo Cards (Phong Vũ Style)
-const bottomMiniCards = [
-  {
-    id: 1,
-    badge: 'FLASH SALE',
-    badgeClass: 'bg-amber-100 text-amber-800 border border-amber-200',
-    title: 'Laptop Gaming & AI',
-    highlight: 'Giảm đến 7 Triệu',
-    image: 'https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=300&auto=format&fit=crop&q=80',
-    link: '/products?category=Laptop'
-  },
-  {
-    id: 2,
-    badge: 'APPLE STORE',
-    badgeClass: 'bg-zinc-100 text-zinc-800 border border-zinc-200',
-    title: 'Mac mini M4 & Studio',
-    highlight: 'Trả góp 0% duyệt 5P',
-    image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=300&auto=format&fit=crop&q=80',
-    link: '/products?brandId=1'
-  },
-  {
-    id: 3,
-    badge: 'BẢO HÀNH VÀNG',
-    badgeClass: 'bg-blue-100 text-blue-800 border border-blue-200',
-    title: 'Gói Bảo Hành 1 Đổi 1',
-    highlight: 'Giá chỉ từ 199K',
-    image: 'https://images.unsplash.com/photo-1563770660941-20978e870e26?w=300&auto=format&fit=crop&q=80',
-    link: '/products'
-  },
-  {
-    id: 4,
-    badge: 'BUILD PC',
-    badgeClass: 'bg-emerald-100 text-emerald-800 border border-emerald-200',
-    title: 'Tự Ráp PC Theo Ý',
-    highlight: 'Tặng tản nước 3 Triệu',
-    image: 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=300&auto=format&fit=crop&q=80',
-    link: '/products?keyword=PC'
-  }
-]
 
 // Flagship Showcase Slides
 interface HudSpec {
