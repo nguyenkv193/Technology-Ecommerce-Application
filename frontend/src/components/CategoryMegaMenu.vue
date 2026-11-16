@@ -1,5 +1,10 @@
 <template>
-  <div class="relative" ref="menuContainerRef">
+  <div 
+    class="relative" 
+    ref="menuContainerRef"
+    @mouseenter="handleMouseEnter"
+    @mouseleave="handleMouseLeave"
+  >
     <!-- Trigger Button in Navbar -->
     <button
       type="button"
@@ -45,7 +50,7 @@
     <Transition name="mega-dropdown">
       <div 
         v-if="isOpen"
-        class="fixed left-4 right-4 sm:left-6 sm:right-6 lg:left-auto lg:right-auto lg:absolute lg:top-full lg:mt-2.5 lg:left-0 w-auto lg:w-[980px] xl:w-[1120px] max-w-[calc(100vw-2rem)] bg-white rounded-2xl border border-zinc-200 shadow-2xl z-50 overflow-hidden"
+        class="fixed left-4 right-4 sm:left-6 sm:right-6 lg:left-auto lg:right-auto lg:absolute lg:top-full lg:mt-2.5 lg:left-0 w-auto lg:w-[980px] xl:w-[1120px] max-w-[calc(100vw-2rem)] bg-white rounded-2xl border border-zinc-200 shadow-2xl z-50 overflow-hidden before:absolute before:-top-3 before:inset-x-0 before:h-4 before:content-['']"
       >
         <div class="grid grid-cols-1 lg:grid-cols-12 min-h-[500px] max-h-[calc(100vh-6rem)] overflow-y-auto lg:overflow-hidden">
           
@@ -288,19 +293,52 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import { useRoute } from 'vue-router'
 
+const route = useRoute()
 const isOpen = ref<boolean>(false)
 const menuContainerRef = ref<HTMLElement | null>(null)
 const activeCatId = ref<number>(2) // Mặc định mở "Điện thoại"
+let closeTimer: ReturnType<typeof setTimeout> | null = null
+
+const handleMouseEnter = () => {
+  if (closeTimer) {
+    clearTimeout(closeTimer)
+    closeTimer = null
+  }
+  isOpen.value = true
+}
+
+const handleMouseLeave = () => {
+  if (closeTimer) {
+    clearTimeout(closeTimer)
+  }
+  closeTimer = setTimeout(() => {
+    isOpen.value = false
+  }, 200)
+}
 
 const toggleMenu = () => {
+  if (closeTimer) {
+    clearTimeout(closeTimer)
+    closeTimer = null
+  }
   isOpen.value = !isOpen.value
 }
 
 const closeMenu = () => {
+  if (closeTimer) {
+    clearTimeout(closeTimer)
+    closeTimer = null
+  }
   isOpen.value = false
 }
+
+// Close menu on route navigation
+watch(() => route.fullPath, () => {
+  closeMenu()
+})
 
 // Click outside handler & Escape key listener
 const handleClickOutside = (event: MouseEvent) => {
@@ -321,6 +359,10 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  if (closeTimer) {
+    clearTimeout(closeTimer)
+    closeTimer = null
+  }
   document.removeEventListener('click', handleClickOutside)
   document.removeEventListener('keydown', handleKeydown)
 })
