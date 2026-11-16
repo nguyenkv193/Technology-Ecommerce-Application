@@ -129,7 +129,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import ProductCard from './ProductCard.vue'
 import { PackagePlus, Sparkles, Flame, Zap, TrendingUp, ChevronLeft, ChevronRight } from 'lucide-vue-next'
 import type { Product } from '@/types'
@@ -202,10 +202,11 @@ const scrollNext = () => {
   if (!sliderRef.value) return
   const { scrollLeft, scrollWidth, clientWidth } = sliderRef.value
   const maxScroll = scrollWidth - clientWidth
-  const step = getScrollStep()
+  if (maxScroll <= 5) return
 
+  const step = getScrollStep()
   // Loop back smoothly if reached end
-  if (scrollLeft >= maxScroll - 10) {
+  if (scrollLeft >= maxScroll - 15) {
     sliderRef.value.scrollTo({ left: 0, behavior: 'smooth' })
   } else {
     sliderRef.value.scrollBy({ left: step, behavior: 'smooth' })
@@ -216,9 +217,10 @@ const scrollPrev = () => {
   if (!sliderRef.value) return
   const { scrollLeft, scrollWidth, clientWidth } = sliderRef.value
   const maxScroll = scrollWidth - clientWidth
-  const step = getScrollStep()
+  if (maxScroll <= 5) return
 
-  if (scrollLeft <= 10) {
+  const step = getScrollStep()
+  if (scrollLeft <= 15) {
     sliderRef.value.scrollTo({ left: maxScroll, behavior: 'smooth' })
   } else {
     sliderRef.value.scrollBy({ left: -step, behavior: 'smooth' })
@@ -227,10 +229,10 @@ const scrollPrev = () => {
 
 const startAutoSlide = () => {
   stopAutoSlide()
-  if (props.items && props.items.length > 5) {
+  if (props.items && props.items.length > 4) {
     autoSlideTimer = setInterval(() => {
       scrollNext()
-    }, 4000)
+    }, 3500)
   }
 }
 
@@ -240,6 +242,17 @@ const stopAutoSlide = () => {
     autoSlideTimer = null
   }
 }
+
+watch(
+  [() => props.loading, () => props.items],
+  async ([isLoading, items]) => {
+    if (!isLoading && items && items.length > 4) {
+      await nextTick()
+      startAutoSlide()
+    }
+  },
+  { immediate: true, deep: true }
+)
 
 onMounted(() => {
   startAutoSlide()
