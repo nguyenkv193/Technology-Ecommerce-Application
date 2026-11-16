@@ -1,12 +1,16 @@
 <template>
   <section :aria-label="title" :aria-busy="loading" class="py-6 sm:py-8">
-    <div :class="featuredHeader ? 'collection-header' : 'flex flex-col sm:flex-row sm:items-end justify-between mb-6 gap-3 pb-3 border-b border-zinc-200/60'">
+    <div :class="featuredHeader ? 'collection-header' : 'flex flex-col sm:flex-row sm:items-end justify-between mb-6 gap-3 pb-3 sm:pb-4 border-b border-zinc-200/60'">
       <div class="min-w-0">
-        <div v-if="badge" :class="featuredHeader ? 'mb-3' : 'flex items-center gap-2 mb-1.5'">
-          <span :class="featuredHeader ? 'collection-kicker' : 'inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider bg-zinc-100 text-zinc-600 border border-zinc-200'">
+        <div v-if="badge" :class="featuredHeader ? 'mb-3' : 'flex items-center gap-2 mb-2'">
+          <span
+            :class="featuredHeader 
+              ? 'collection-kicker' 
+              : ['inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold tracking-wide border shadow-sm transition-colors', badgeTheme.badgeClass]"
+          >
             <PackagePlus v-if="featuredHeader" class="h-3.5 w-3.5" :stroke-width="1.8" aria-hidden="true" />
-            <svg v-else aria-hidden="true" class="w-3 h-3 text-zinc-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-            {{ badge }}
+            <component :is="badgeTheme.icon" v-else :class="badgeTheme.iconClass" :stroke-width="2" aria-hidden="true" />
+            <span>{{ badge }}</span>
           </span>
         </div>
         <h2 :class="featuredHeader ? 'text-2xl sm:text-3xl font-bold tracking-tight leading-tight text-zinc-950' : 'text-xl sm:text-2xl font-bold tracking-tight text-zinc-900'">
@@ -54,13 +58,14 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import ProductCard from './ProductCard.vue'
-import { PackagePlus } from 'lucide-vue-next'
+import { PackagePlus, Sparkles, Flame, Zap, TrendingUp } from 'lucide-vue-next'
 import type { Product } from '@/types'
 
 defineEmits<{ retry: [] }>()
 
-withDefaults(defineProps<{
+const props = withDefaults(defineProps<{
   title: string
   subtitle?: string
   badge?: string
@@ -77,6 +82,36 @@ withDefaults(defineProps<{
   loading: false,
   emptyMessage: 'Đang cập nhật các gợi ý sản phẩm công nghệ phù hợp...',
   errorMessage: ''
+})
+
+const badgeTheme = computed(() => {
+  const text = (props.badge || '').toLowerCase().trim()
+  if (text.includes('dành cho bạn') || text.includes('ai') || text.includes('gợi ý')) {
+    return {
+      icon: Sparkles,
+      iconClass: 'w-3.5 h-3.5 text-violet-600',
+      badgeClass: 'bg-violet-50 text-violet-700 border-violet-200/80 hover:bg-violet-100/60'
+    }
+  }
+  if (text.includes('nổi bật') || text.includes('bán chạy') || text.includes('hot')) {
+    return {
+      icon: Flame,
+      iconClass: 'w-3.5 h-3.5 text-red-500 fill-red-500/20',
+      badgeClass: 'bg-red-50 text-red-600 border-red-200/80 hover:bg-red-100/60'
+    }
+  }
+  if (text.includes('mới') || text.includes('new')) {
+    return {
+      icon: Zap,
+      iconClass: 'w-3.5 h-3.5 text-amber-600 fill-amber-500/20',
+      badgeClass: 'bg-amber-50 text-amber-700 border-amber-200/80 hover:bg-amber-100/60'
+    }
+  }
+  return {
+    icon: TrendingUp,
+    iconClass: 'w-3.5 h-3.5 text-zinc-600',
+    badgeClass: 'bg-zinc-100 text-zinc-700 border-zinc-200/80 hover:bg-zinc-200/60'
+  }
 })
 </script>
 
