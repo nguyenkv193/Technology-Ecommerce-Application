@@ -2,6 +2,7 @@ package com.project.techstore.behavior.controller;
 
 import com.project.techstore.behavior.dto.TrackBehaviorRequest;
 import com.project.techstore.behavior.dto.RecommendationTrainingDataPage;
+import com.project.techstore.behavior.dto.TrendingKeywordResponse;
 import com.project.techstore.behavior.dto.UserBehaviorResponse;
 import com.project.techstore.behavior.service.AiServiceKeyValidator;
 import com.project.techstore.behavior.service.BehaviorService;
@@ -46,6 +47,16 @@ public class BehaviorController {
         Long userId = (currentUser != null) ? currentUser.getId() : null;
         UserBehaviorResponse response = behaviorService.track(userId, request);
         return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @GetMapping("/trending-keywords")
+    @Operation(summary = "Lấy top các từ khóa tìm kiếm thịnh hành (Trending Keywords) dựa trên dữ liệu người dùng thực tế")
+    public ResponseEntity<ApiResponse<List<TrendingKeywordResponse>>> getTrendingKeywords(
+            @RequestParam(defaultValue = "8") @Min(1) @Max(20) int limit,
+            @RequestParam(defaultValue = "7") @Min(1) @Max(30) int days
+    ) {
+        List<TrendingKeywordResponse> trendingKeywords = behaviorService.getTrendingKeywords(limit, days);
+        return ResponseEntity.ok(ApiResponse.success(trendingKeywords));
     }
 
     @GetMapping("/my")

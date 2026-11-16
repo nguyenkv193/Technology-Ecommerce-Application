@@ -214,6 +214,7 @@ import FeaturedCategoriesGrid from '@/components/FeaturedCategoriesGrid.vue'
 import { recommendationApi } from '@/api/recommendationApi'
 import { catalogApi } from '@/api/catalogApi'
 import { bannerApi } from '@/api/bannerApi'
+import { behaviorApi } from '@/api/behaviorApi'
 import { useAuthStore } from '@/stores/auth'
 import type { Product, Category } from '@/types'
 
@@ -303,8 +304,14 @@ const retryCatalogShelf = (shelf: CatalogShelf) => {
 }
 
 // ================= E-COMMERCE HERO GRID DATA (ADMIN-READY) =================
-// Top Trending Keyword Tags
-const trendingTags = [
+// Top Trending Keyword Tags (Tự động tải từ hành vi người dùng)
+interface TrendingTag {
+  label: string
+  link: string
+  count?: number
+}
+
+const trendingTags = ref<TrendingTag[]>([
   { label: 'iPhone 16 Pro Max', link: '/products?keyword=iPhone+16' },
   { label: 'Laptop AI 2026', link: '/products?keyword=AI' },
   { label: 'MacBook Air M3', link: '/products?keyword=MacBook' },
@@ -313,95 +320,22 @@ const trendingTags = [
   { label: 'Bàn Phím Cơ', link: '/products?keyword=Bàn+phím' },
   { label: 'Tai Nghe ANC', link: '/products?keyword=Tai+nghe' },
   { label: 'Back to School 50%', link: '/products?keyword=Khuyen+mai' }
-]
+])
 
-// Sidebar Categories
-const sidebarCategories = [
-  {
-    name: 'Laptop & MacBook',
-    link: '/products?category=Laptop',
-    iconSvg: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M2 20h20"/></svg>'
-  },
-  {
-    name: 'Apple Authorised',
-    link: '/products?brandId=1',
-    iconSvg: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.37c.61-.75 1.04-1.8 1.01-2.87-.92.04-2.02.62-2.67 1.37-.58.65-1.09 1.71-1.03 2.74 1.03.08 2.07-.5 2.69-1.24z"/></svg>'
-  },
-  {
-    name: 'PC & Máy tính bàn',
-    link: '/products?keyword=PC',
-    iconSvg: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>'
-  },
-  {
-    name: 'Linh kiện máy tính',
-    link: '/products?keyword=Linh+kiện',
-    iconSvg: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3"/></svg>'
-  },
-  {
-    name: 'Màn hình máy tính',
-    link: '/products?keyword=Màn+hình',
-    iconSvg: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="12" y1="17" x2="12" y2="21"/></svg>'
-  },
-  {
-    name: 'Điện thoại & Tablet',
-    link: '/products?category=Điện+thoại',
-    iconSvg: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>'
-  },
-  {
-    name: 'Bàn phím & Chuột',
-    link: '/products?keyword=Bàn+phím',
-    iconSvg: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="6" y1="8" x2="6" y2="8"/><line x1="10" y1="8" x2="10" y2="8"/><line x1="14" y1="8" x2="14" y2="8"/><line x1="18" y1="8" x2="18" y2="8"/></svg>'
-  },
-  {
-    name: 'Tai nghe & Âm thanh',
-    link: '/products?category=Âm+thanh',
-    iconSvg: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>'
-  },
-  {
-    name: 'Phụ kiện công nghệ',
-    link: '/products?keyword=Phụ+kiện',
-    iconSvg: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v6M12 18v4M4.93 4.93l4.24 4.24M14.83 14.83l4.24 4.24M2 12h6M18 12h4M4.93 19.07l4.24-4.24M14.83 9.17l4.24-4.24"/></svg>'
-  },
-  {
-    name: 'TechNews & Tin tức',
-    link: '/products',
-    iconSvg: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8M15 18h-5M10 6h8v4h-8V6Z"/></svg>'
+const loadTrendingKeywords = async () => {
+  try {
+    const res = await behaviorApi.getTrendingKeywords(8, 7)
+    if (res.success && res.data && res.data.length > 0) {
+      trendingTags.value = res.data.map(item => ({
+        label: item.keyword,
+        link: item.link,
+        count: item.searchCount
+      }))
+    }
+  } catch (err) {
+    // Keep defaults on network/api error
   }
-]
-
-// Right Side Promotional Banners (Stacked)
-const sidePromoBanners = [
-  {
-    id: 1,
-    badge: 'ƯU ĐÃI ĐỘC QUYỀN',
-    badgeClass: 'bg-blue-600 text-white',
-    title: 'HỌC SINH - SINH VIÊN',
-    titleClass: 'text-zinc-900',
-    subtitle: 'Giảm thêm 5% + Quà tặng balo TechStore',
-    subtitleClass: 'text-blue-600',
-    ctaText: 'Đăng ký ngay',
-    ctaClass: 'text-blue-700',
-    iconSvg: '<svg class="w-5 h-5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>',
-    bgClass: 'bg-gradient-to-br from-blue-50/90 via-indigo-50/60 to-white',
-    image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=500&auto=format&fit=crop&q=80',
-    link: '/products?keyword=Hoc+sinh+sinh+vien'
-  },
-  {
-    id: 2,
-    badge: 'KHUYẾN MÃI THÁNG',
-    badgeClass: 'bg-red-600 text-white',
-    title: 'GIẢM ĐẾN 50%',
-    titleClass: 'text-zinc-900',
-    subtitle: 'Xả kho thiết bị công nghệ & Phụ kiện',
-    subtitleClass: 'text-red-600',
-    ctaText: 'Săn deal ngay',
-    ctaClass: 'text-red-700',
-    iconSvg: '<svg class="w-5 h-5 text-red-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>',
-    bgClass: 'bg-gradient-to-br from-red-50/90 via-rose-50/60 to-white',
-    image: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=500&auto=format&fit=crop&q=80',
-    link: '/products?keyword=Khuyen+mai'
-  }
-]
+}
 
 // Bottom 4 Mini Promo Cards (Phong Vũ Style)
 const bottomMiniCards = [
@@ -681,6 +615,7 @@ watch(() => authStore.token, loadPersonalized, { immediate: true })
 
 onMounted(() => {
   void loadHeroBanners()
+  void loadTrendingKeywords()
   loadBestSellers()
   const newest = catalogShelves.value.find(shelf => shelf.key === 'newest')
   if (newest) void loadCatalogShelf(newest)

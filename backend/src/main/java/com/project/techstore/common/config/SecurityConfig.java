@@ -104,6 +104,7 @@ public class SecurityConfig {
                                 "/api/v1/reviews/**",
                                 "/api/v1/recommendations/**",
                                 "/api/v1/behaviors/recommendation-training-data",
+                                "/api/v1/behaviors/trending-keywords",
                                 "/api/v1/banners",
                                 "/api/v1/banners/*"
                         ).permitAll()

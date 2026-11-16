@@ -2,6 +2,7 @@ package com.project.techstore.behavior.service;
 
 import com.project.techstore.behavior.dto.TrackBehaviorRequest;
 import com.project.techstore.behavior.dto.RecommendationTrainingDataPage;
+import com.project.techstore.behavior.dto.TrendingKeywordResponse;
 import com.project.techstore.behavior.dto.UserBehaviorResponse;
 import com.project.techstore.behavior.dto.UserInteractionExportDto;
 import com.project.techstore.behavior.entity.UserBehavior;
@@ -16,9 +17,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.PageRequest;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -60,6 +66,65 @@ public class BehaviorService {
                 .stream()
                 .map(UserBehaviorResponse::from)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<TrendingKeywordResponse> getTrendingKeywords(int limit, int days) {
+        Instant since = Instant.now().minus(Duration.ofDays(Math.max(1, days)));
+        List<Object[]> rows = new ArrayList<>(userBehaviorRepository.findTopSearchKeywordsSince(since, PageRequest.of(0, limit)));
+
+        // Nếu trong khoảng N ngày chưa đủ từ khóa, bổ sung từ khóa tìm kiếm all-time
+        if (rows.size() < limit) {
+            List<Object[]> allTimeRows = userBehaviorRepository.findAllTimeTopSearchKeywords(PageRequest.of(0, limit));
+            Set<String> seen = new HashSet<>();
+            for (Object[] r : rows) {
+                seen.add(r[0].toString().trim().toLowerCase());
+            }
+            for (Object[] r : allTimeRows) {
+                if (!seen.contains(r[0].toString().trim().toLowerCase())) {
+                    rows.add(r);
+                    seen.add(r[0].toString().trim().toLowerCase());
+                    if (rows.size() >= limit) break;
+                }
+            }
+        }
+
+        List<TrendingKeywordResponse> result = new ArrayList<>();
+        Set<String> addedKeywords = new HashSet<>();
+
+        for (Object[] r : rows) {
+            String kw = r[0].toString().trim();
+            long count = ((Number) r[1]).longValue();
+            if (!kw.isEmpty() && addedKeywords.add(kw.toLowerCase())) {
+                String encodedKw = URLEncoder.encode(kw, StandardCharsets.UTF_8);
+                result.add(TrendingKeywordResponse.builder()
+                        .keyword(kw)
+                        .link("/products?keyword=" + encodedKw)
+                        .searchCount(count)
+                        .build());
+            }
+        }
+
+        // Fallback thêm các từ khóa mặc định nếu hệ thống còn ít dữ liệu tìm kiếm
+        List<String> defaultKeywords = List.of(
+                "iPhone 16 Pro Max", "Laptop AI 2026", "MacBook Air M3",
+                "Màn Hình 144Hz", "PC Gaming ROG", "Bàn Phím Cơ",
+                "Tai Nghe ANC", "Back to School 50%"
+        );
+
+        for (String defKw : defaultKeywords) {
+            if (result.size() >= limit) break;
+            if (addedKeywords.add(defKw.toLowerCase())) {
+                String encodedKw = URLEncoder.encode(defKw, StandardCharsets.UTF_8);
+                result.add(TrendingKeywordResponse.builder()
+                        .keyword(defKw)
+                        .link("/products?keyword=" + encodedKw)
+                        .searchCount(0L)
+                        .build());
+            }
+        }
+
+        return result;
     }
 
     @Transactional(readOnly = true)
