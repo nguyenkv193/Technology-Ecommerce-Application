@@ -83,118 +83,65 @@
 
         <!-- COLUMN 2: Center Main Carousel Banner (lg:col-span-6) -->
         <div 
-          class="lg:col-span-6 relative isolate overflow-hidden rounded-xl border border-zinc-900 bg-[#07090e] shadow-md flex flex-col justify-between min-h-[420px] sm:min-h-[440px]"
+          class="lg:col-span-6 relative overflow-hidden rounded-xl border border-zinc-200/80 bg-zinc-950 shadow-xs flex flex-col justify-between min-h-[420px] sm:min-h-[440px] group select-none"
           @mouseenter="stopSlideTimer"
           @mouseleave="startSlideTimer"
         >
-          <!-- Dynamic Ambient Glow behind product in slider -->
-          <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-            <div class="absolute inset-0 bg-[radial-gradient(#ffffff0a_1px,transparent_1px)] [background-size:20px_20px] opacity-40"></div>
-            <div 
-              class="absolute -top-16 -right-16 w-80 h-80 rounded-full blur-[90px] opacity-40 transition-all duration-700 pointer-events-none"
-              :class="currentSlide.themeGlow"
-            ></div>
-            <div class="absolute inset-0 bg-gradient-to-t from-[#07090e] via-transparent to-transparent opacity-50"></div>
+          <!-- Full-bleed Image Banner Slide with Smooth Cross-Fade Transition -->
+          <div class="relative w-full h-full flex-1 overflow-hidden">
+            <Transition name="hero-slide-fade" mode="out-in">
+              <router-link
+                :key="currentSlide.id"
+                :to="currentSlide.link"
+                class="absolute inset-0 block w-full h-full cursor-pointer group/slide"
+              >
+                <img 
+                  :src="currentSlide.image" 
+                  :alt="currentSlide.title"
+                  class="w-full h-full object-cover object-center group-hover/slide:scale-[1.03] transition-transform duration-700 ease-out"
+                  loading="eager"
+                />
+                
+                <!-- Bottom subtle gradient overlay for readability -->
+                <div class="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/80 via-black/25 to-transparent pointer-events-none"></div>
+
+                <!-- Minimalist Caption Pill (Tiêu đề tinh tế góc dưới) -->
+                <div class="absolute bottom-4 left-4 right-24 sm:right-32 z-10 pointer-events-none">
+                  <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/20 text-white text-[11px] font-semibold max-w-full shadow-sm">
+                    <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse shrink-0"></span>
+                    <span class="truncate font-sans">{{ currentSlide.title }}</span>
+                  </div>
+                </div>
+              </router-link>
+            </Transition>
           </div>
 
-          <!-- Slider Content Body -->
-          <div class="relative z-10 p-6 sm:p-7 flex flex-col justify-between flex-1">
-            <Transition name="hero-text-fade" mode="out-in">
-              <div :key="currentSlide.id" class="grid grid-cols-1 sm:grid-cols-12 gap-5 items-center flex-1">
-                <!-- Text Left (7 cols) -->
-                <div class="sm:col-span-7 space-y-3.5">
-                  <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-white text-[11px] font-semibold">
-                    <span class="w-1.5 h-1.5 rounded-full animate-ping" :class="currentSlide.accentDot"></span>
-                    <span>{{ currentSlide.kicker }}</span>
-                  </div>
+          <!-- Prev / Next Navigation Arrows (Hover reveal) -->
+          <button 
+            @click.stop="prevSlide"
+            class="absolute left-2.5 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-full bg-black/40 hover:bg-black/75 backdrop-blur-md text-white border border-white/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 active:scale-95 shadow-lg cursor-pointer"
+            aria-label="Slide trước"
+          >
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <button 
+            @click.stop="nextSlide"
+            class="absolute right-2.5 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-full bg-black/40 hover:bg-black/75 backdrop-blur-md text-white border border-white/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 active:scale-95 shadow-lg cursor-pointer"
+            aria-label="Slide tiếp theo"
+          >
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
 
-                  <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight leading-snug">
-                    <span>{{ currentSlide.headingLine1 }}</span> <br/>
-                    <span class="bg-clip-text text-transparent bg-gradient-to-r from-zinc-100 via-zinc-200 to-zinc-400 font-extrabold">
-                      {{ currentSlide.headingLine2 }}
-                    </span>
-                  </h1>
-
-                  <p class="text-zinc-300 text-xs sm:text-sm line-clamp-2 leading-relaxed">
-                    {{ currentSlide.description }}
-                  </p>
-
-                  <div class="flex items-center gap-2 pt-1">
-                    <div class="text-xl sm:text-2xl font-black text-white tracking-tight">
-                      {{ formatCurrency(currentSlide.price) }}
-                    </div>
-                    <span class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase bg-red-600 text-white shadow-2xs">
-                      Trả góp 0%
-                    </span>
-                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-white/10 text-amber-300">
-                      <svg class="w-3.5 h-3.5 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
-                      <span>Giảm sốc</span>
-                    </span>
-                  </div>
-
-                  <div class="flex items-center gap-2.5 pt-2">
-                    <router-link
-                      :to="currentSlide.link"
-                      class="px-4 py-2.5 rounded-xl font-bold text-xs bg-white hover:bg-zinc-100 text-zinc-950 transition-all active:scale-95 flex items-center gap-1.5 shadow-sm cursor-pointer group/cta"
-                    >
-                      <span>{{ currentSlide.primaryCtaText }}</span>
-                      <svg class="w-3.5 h-3.5 group-hover/cta:translate-x-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                    </router-link>
-
-                    <router-link
-                      :to="currentSlide.secondaryCtaLink"
-                      class="px-3.5 py-2.5 rounded-xl font-semibold text-xs bg-white/10 hover:bg-white/15 text-zinc-200 border border-white/15 transition-all active:scale-95 cursor-pointer"
-                    >
-                      <span>{{ currentSlide.secondaryCtaText }}</span>
-                    </router-link>
-                  </div>
-                </div>
-
-                <!-- Product Floating Image Right (5 cols) -->
-                <div class="sm:col-span-5 relative flex items-center justify-center min-h-[190px] sm:min-h-[220px]">
-                  <router-link :to="currentSlide.link" class="block group cursor-pointer">
-                    <img 
-                      :src="currentSlide.image" 
-                      :alt="currentSlide.headingLine1"
-                      class="w-52 sm:w-60 max-h-[210px] object-contain drop-shadow-[0_16px_30px_rgba(0,0,0,0.85)] group-hover:scale-105 transition-transform duration-500 animate-float-slow"
-                    />
-                  </router-link>
-                </div>
-              </div>
-            </Transition>
-
-            <!-- Bottom Progress Indicators & Arrows -->
-            <div class="pt-4 border-t border-white/10 flex items-center justify-between">
-              <!-- Dots / Progress Tabs -->
-              <div class="flex items-center gap-2">
-                <button
-                  v-for="(slide, sIdx) in featuredSlides"
-                  :key="slide.id"
-                  @click="goToSlide(sIdx)"
-                  class="h-2 rounded-full transition-all cursor-pointer"
-                  :class="currentSlideIndex === sIdx ? 'w-8 bg-red-500' : 'w-2 bg-white/20 hover:bg-white/40'"
-                  :title="slide.shortName || slide.headingLine1"
-                ></button>
-              </div>
-
-              <!-- Arrows -->
-              <div class="flex items-center gap-1.5">
-                <button 
-                  @click="prevSlide"
-                  class="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition active:scale-95 cursor-pointer"
-                  title="Slide trước"
-                >
-                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
-                </button>
-                <button 
-                  @click="nextSlide"
-                  class="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition active:scale-95 cursor-pointer"
-                  title="Slide tiếp theo"
-                >
-                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
-                </button>
-              </div>
-            </div>
+          <!-- Bottom Navigation Indicators (Dots & Active Pill) -->
+          <div class="absolute bottom-4 right-4 z-20 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/20 shadow-sm">
+            <button
+              v-for="(slide, sIdx) in featuredSlides"
+              :key="slide.id"
+              @click.stop="goToSlide(sIdx)"
+              class="h-1.5 rounded-full transition-all duration-300 cursor-pointer"
+              :class="currentSlideIndex === sIdx ? 'w-6 bg-red-500' : 'w-1.5 bg-white/40 hover:bg-white/70'"
+              :title="slide.title"
+            ></button>
           </div>
         </div>
 
@@ -359,6 +306,7 @@ import RecommendationCarousel from '@/components/RecommendationCarousel.vue'
 import FeaturedCategoriesGrid from '@/components/FeaturedCategoriesGrid.vue'
 import { recommendationApi } from '@/api/recommendationApi'
 import { catalogApi } from '@/api/catalogApi'
+import { bannerApi } from '@/api/bannerApi'
 import { useAuthStore } from '@/stores/auth'
 import type { Product, Category } from '@/types'
 
@@ -770,6 +718,23 @@ const formatCurrency = (value?: number | null): string => {
 }
 
 
+
+const loadHeroBanners = async () => {
+  try {
+    const res = await bannerApi.getActiveBanners('HERO_SLIDER')
+    if (res.success && res.data && res.data.length > 0) {
+      featuredSlides.value = res.data.map(b => ({
+        id: b.id,
+        title: b.title,
+        image: b.imageUrl,
+        link: b.linkUrl
+      }))
+    }
+  } catch (err) {
+    // Keep fallback featuredSlides
+  }
+}
+
 const loadBestSellers = async () => {
   loadingBestSellers.value = true
   bestSellerError.value = ''
@@ -808,6 +773,7 @@ const loadPersonalized = async () => {
 watch(() => authStore.token, loadPersonalized, { immediate: true })
 
 onMounted(() => {
+  void loadHeroBanners()
   loadBestSellers()
   const newest = catalogShelves.value.find(shelf => shelf.key === 'newest')
   if (newest) void loadCatalogShelf(newest)
@@ -915,4 +881,15 @@ onUnmounted(() => {
   opacity: 0;
   transform: scale(0.96) translateY(-12px);
 }
+
+/* Hero Image Slide Fade Transition */
+.hero-slide-fade-enter-active,
+.hero-slide-fade-leave-active {
+  transition: opacity 0.4s ease;
+}
+.hero-slide-fade-enter-from,
+.hero-slide-fade-leave-to {
+  opacity: 0;
+}
+
 </style>

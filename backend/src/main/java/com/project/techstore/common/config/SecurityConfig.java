@@ -103,10 +103,13 @@ public class SecurityConfig {
                                 "/api/v1/products/**",
                                 "/api/v1/reviews/**",
                                 "/api/v1/recommendations/**",
-                                "/api/v1/behaviors/recommendation-training-data"
+                                "/api/v1/behaviors/recommendation-training-data",
+                                "/api/v1/banners",
+                                "/api/v1/banners/*"
                         ).permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.POST,
-                                "/api/v1/behaviors/track"
+                                "/api/v1/behaviors/track",
+                                "/api/v1/banners/*/click"
                         ).permitAll()
 
                         // 4. Protected Endpoints (Yêu cầu JWT Token hợp lệ)

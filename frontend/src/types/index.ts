@@ -323,3 +323,20 @@ export interface CreateAddressRequest {
   addressDetail: string
   isDefault?: boolean
 }
+
+
+export interface Banner {
+  id: number
+  title: string
+  imageUrl: string
+  mobileImageUrl?: string
+  linkUrl: string
+  targetType?: string
+  position?: string
+  displayOrder?: number
+  status?: string
+  startDate?: string
+  endDate?: string
+  clickCount?: number
+  createdAt?: string
+}
