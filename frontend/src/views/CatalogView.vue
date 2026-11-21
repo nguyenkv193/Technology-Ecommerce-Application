@@ -1,10 +1,10 @@
 <template>
   <div class="space-y-8">
     <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-5 border-b border-zinc-200/80 gap-4">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-zinc-200/80 gap-4">
       <div>
-        <h1 class="text-2xl sm:text-3xl font-bold text-zinc-900 tracking-tight">Danh Mục Sản Phẩm Công Nghệ</h1>
-        <p class="text-xs sm:text-sm text-zinc-500 mt-1">Lọc sản phẩm theo cấu hình phần cứng, thương hiệu và mức giá đầu tư</p>
+        <h1 class="text-lg sm:text-xl font-bold text-zinc-900 tracking-tight">Danh Mục Sản Phẩm Công Nghệ</h1>
+        <p class="text-xs text-zinc-500 mt-1">Lọc sản phẩm theo cấu hình phần cứng, thương hiệu và mức giá đầu tư</p>
       </div>
 
       <!-- Sort Selection -->

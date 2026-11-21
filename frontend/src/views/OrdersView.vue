@@ -1,8 +1,8 @@
 <template>
   <div class="space-y-8">
-    <div class="pb-5 border-b border-zinc-200/80">
-      <h1 class="text-2xl sm:text-3xl font-bold text-zinc-900 tracking-tight">Lịch Sử Đơn Hàng</h1>
-      <p class="text-xs sm:text-sm text-zinc-500 mt-1">Theo dõi tiến độ vận chuyển và thông tin chi tiết các đơn hàng đã đặt</p>
+    <div class="pb-4 border-b border-zinc-200/80">
+      <h1 class="text-lg sm:text-xl font-bold text-zinc-900 tracking-tight">Lịch Sử Đơn Hàng</h1>
+      <p class="text-xs text-zinc-500 mt-1">Theo dõi tiến độ vận chuyển và thông tin chi tiết các đơn hàng đã đặt</p>
     </div>
 
     <div v-if="loading" class="text-center py-16 text-zinc-400 text-xs animate-pulse">

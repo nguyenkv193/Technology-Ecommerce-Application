@@ -40,7 +40,7 @@
 
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
-          <h1 class="text-xl sm:text-2xl lg:text-3xl font-extrabold text-zinc-900 leading-tight">
+          <h1 class="text-lg sm:text-xl font-bold text-zinc-900 leading-tight">
             {{ product.name }}
           </h1>
 

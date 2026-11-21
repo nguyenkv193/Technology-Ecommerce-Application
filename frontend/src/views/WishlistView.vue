@@ -1,8 +1,8 @@
 <template>
   <div class="space-y-8">
-    <div class="pb-5 border-b border-zinc-200/80">
-      <h1 class="text-2xl sm:text-3xl font-bold text-zinc-900 tracking-tight">Danh Sách Yêu Thích</h1>
-      <p class="text-xs sm:text-sm text-zinc-500 mt-1">Các thiết bị công nghệ bạn quan tâm (đóng góp trọng số cao vào mô hình gợi ý AI)</p>
+    <div class="pb-4 border-b border-zinc-200/80">
+      <h1 class="text-lg sm:text-xl font-bold text-zinc-900 tracking-tight">Danh Sách Yêu Thích</h1>
+      <p class="text-xs text-zinc-500 mt-1">Các thiết bị công nghệ bạn quan tâm (đóng góp trọng số cao vào mô hình gợi ý AI)</p>
     </div>
 
     <div v-if="wishlistStore.items.length === 0" class="text-center py-16 bg-white rounded-2xl border border-zinc-200/80 p-8 space-y-4 shadow-xs">

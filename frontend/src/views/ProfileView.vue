@@ -1,8 +1,8 @@
 <template>
   <div class="space-y-8">
-    <div class="pb-5 border-b border-zinc-200/80">
-      <h1 class="text-2xl sm:text-3xl font-bold text-zinc-900 tracking-tight">Thông Tin Cá Nhân</h1>
-      <p class="text-xs sm:text-sm text-zinc-500 mt-1">Quản lý hồ sơ, mật khẩu và sổ địa chỉ giao hàng của bạn</p>
+    <div class="pb-4 border-b border-zinc-200/80">
+      <h1 class="text-lg sm:text-xl font-bold text-zinc-900 tracking-tight">Thông Tin Cá Nhân</h1>
+      <p class="text-xs text-zinc-500 mt-1">Quản lý hồ sơ, mật khẩu và sổ địa chỉ giao hàng của bạn</p>
     </div>
 
     <div v-if="!authStore.isAuthenticated" class="text-center py-16 bg-white rounded-2xl border border-zinc-200/80 p-8 space-y-4">

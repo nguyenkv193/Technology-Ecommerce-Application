@@ -17,12 +17,12 @@
         </div>
 
         <!-- Section Title -->
-        <h2 :class="featuredHeader ? 'text-2xl sm:text-3xl font-bold tracking-tight leading-tight text-zinc-950' : 'text-xl sm:text-2xl font-bold tracking-tight text-zinc-900'">
+        <h2 :class="featuredHeader ? 'text-lg sm:text-xl font-bold tracking-tight leading-tight text-zinc-950' : 'text-base sm:text-lg font-bold tracking-tight text-zinc-900'">
           {{ title }}
         </h2>
 
         <!-- Subtitle -->
-        <p v-if="subtitle" :class="featuredHeader ? 'mt-2 max-w-xl text-sm leading-relaxed text-zinc-600' : 'text-xs sm:text-sm text-zinc-500 mt-0.5'">
+        <p v-if="subtitle" :class="featuredHeader ? 'mt-1.5 max-w-xl text-xs leading-relaxed text-zinc-600' : 'text-xs text-zinc-500 mt-0.5'">
           {{ subtitle }}
         </p>
       </div>

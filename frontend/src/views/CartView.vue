@@ -1,8 +1,8 @@
 <template>
   <div class="space-y-8 sm:space-y-10">
-    <div class="pb-5 border-b border-zinc-200/80">
-      <h1 class="text-2xl sm:text-3xl font-bold text-zinc-900 tracking-tight">Giỏ Hàng Thiết Bị</h1>
-      <p class="text-xs sm:text-sm text-zinc-500 mt-1">Xác nhận các phiên bản cấu hình đã chọn và tiến hành đặt hàng</p>
+    <div class="pb-4 border-b border-zinc-200/80">
+      <h1 class="text-lg sm:text-xl font-bold text-zinc-900 tracking-tight">Giỏ Hàng Thiết Bị</h1>
+      <p class="text-xs text-zinc-500 mt-1">Xác nhận các phiên bản cấu hình đã chọn và tiến hành đặt hàng</p>
     </div>
 
     <!-- Empty Cart -->
