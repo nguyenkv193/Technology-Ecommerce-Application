@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime, timezone
 from threading import Event, Thread
 from time import monotonic
 from unittest.mock import Mock
@@ -6,10 +7,11 @@ import pytest
 import requests
 from fastapi.testclient import TestClient
 from app import main
-from app.models.schemas import ProductFeatureItem, UserInteractionItem
+from app.models.schemas import ProductFeatureItem, TrainingInteractionItem, UserInteractionItem
 from app.routers import recommendations
 from app.services import data_loader
 from app.services.content_based_recommender import ContentBasedRecommender
+from app.services.offline_evaluation import evaluate_recommenders
 
 
 @pytest.fixture
@@ -202,3 +204,28 @@ def test_background_refresh_recovers_after_backend_startup_failure(state, monkey
             with pytest.raises(asyncio.CancelledError):
                 await task
     asyncio.run(run())
+
+
+def test_offline_evaluation_includes_all_four_models(products):
+    t1 = datetime(2026, 1, 1, tzinfo=timezone.utc)
+    t2 = datetime(2026, 1, 2, tzinfo=timezone.utc)
+    train_interactions = [
+        TrainingInteractionItem(userId=1, productId=1, score=5.0, lastInteractedAt=t1),
+        TrainingInteractionItem(userId=1, productId=2, score=4.0, lastInteractedAt=t1),
+        TrainingInteractionItem(userId=2, productId=1, score=4.0, lastInteractedAt=t1),
+        TrainingInteractionItem(userId=2, productId=3, score=5.0, lastInteractedAt=t1),
+    ]
+    test_interactions = [
+        TrainingInteractionItem(userId=1, productId=3, score=5.0, lastInteractedAt=t2),
+        TrainingInteractionItem(userId=2, productId=2, score=4.0, lastInteractedAt=t2),
+    ]
+    report = evaluate_recommenders(products, train_interactions, test_interactions, k=2)
+    metrics = report["metrics"]
+    expected_models = {"popularity", "content_based", "collaborative", "hybrid"}
+    assert set(metrics.keys()) == expected_models
+    for m in expected_models:
+        assert f"precision@2" in metrics[m]
+        assert f"recall@2" in metrics[m]
+        assert f"ndcg@2" in metrics[m]
+
+

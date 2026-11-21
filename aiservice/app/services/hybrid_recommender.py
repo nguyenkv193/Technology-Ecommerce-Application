@@ -23,14 +23,18 @@ class HybridRecommender:
         if strategy == "content_based":
             return "content_based", self.content_model.recommend_for_user(interactions, limit)
         if strategy == "collaborative":
-            return "collaborative", self.collaborative_model.recommend_for_user(interactions, limit)
+            collab_results = self.collaborative_model.recommend_for_user(interactions, limit)
+            if collab_results:
+                return "collaborative", collab_results
+            return "content_based", self.content_model.recommend_for_user(interactions, limit)
 
-        content_results = self.content_model.recommend_for_user(interactions, limit)
-        collaborative_results = self.collaborative_model.recommend_for_user(interactions, limit)
+        candidate_limit = max(limit * 3, 20)
+        content_results = self.content_model.recommend_for_user(interactions, candidate_limit)
+        collaborative_results = self.collaborative_model.recommend_for_user(interactions, candidate_limit)
         if not collaborative_results:
-            return "content_based", content_results
+            return "content_based", content_results[:limit]
         if not content_results:
-            return "collaborative", collaborative_results
+            return "collaborative", collaborative_results[:limit]
 
         supported_history = len({
             interaction.product_id for interaction in interactions
