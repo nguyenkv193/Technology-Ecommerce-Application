@@ -58,7 +58,14 @@
               @click="userMenuOpen = !userMenuOpen"
               class="flex items-center gap-2 p-1 pl-2 pr-2.5 rounded-lg bg-zinc-100 hover:bg-zinc-200/80 border border-zinc-200/60 transition cursor-pointer"
             >
-              <div class="w-6 h-6 rounded-md bg-zinc-900 text-white font-bold text-[11px] flex items-center justify-center">
+              <img
+                v-if="authStore.user?.avatarUrl"
+                :src="authStore.user.avatarUrl"
+                alt="Avatar"
+                data-testid="navbar-avatar"
+                class="w-6 h-6 rounded-md object-cover"
+              />
+              <div v-else class="w-6 h-6 rounded-md bg-zinc-900 text-white font-bold text-[11px] flex items-center justify-center">
                 {{ authStore.user?.fullName?.charAt(0) || 'U' }}
               </div>
               <span class="text-xs font-medium text-zinc-800 hidden md:inline-block max-w-[90px] truncate">
@@ -76,6 +83,10 @@
                 <div class="font-semibold text-zinc-900">{{ authStore.user?.fullName }}</div>
                 <div class="text-zinc-400 truncate text-[11px]">{{ authStore.user?.email }}</div>
               </div>
+              <router-link to="/profile" @click="userMenuOpen = false" class="flex items-center gap-2 px-3 py-2 text-xs font-medium text-zinc-700 hover:bg-zinc-100 rounded-lg transition">
+                <svg class="w-3.5 h-3.5 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                Thông tin cá nhân
+              </router-link>
               <router-link to="/orders" @click="userMenuOpen = false" class="flex items-center gap-2 px-3 py-2 text-xs font-medium text-zinc-700 hover:bg-zinc-100 rounded-lg transition">
                 <svg class="w-3.5 h-3.5 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/></svg>
                 Lịch sử đơn hàng
@@ -153,7 +164,7 @@ const handleLogout = () => {
   wishlistStore.items = []
   toast.success('Đã đăng xuất')
 
-  if (router.currentRoute.value.path === '/orders') {
+  if (['/orders', '/profile'].includes(router.currentRoute.value.path)) {
     router.push('/')
   }
 }

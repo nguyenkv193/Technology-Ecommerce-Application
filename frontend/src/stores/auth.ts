@@ -101,7 +101,17 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  const updateProfile = async (data: { fullName: string; phone?: string; avatarUrl?: string }) => {
+    const res = await authApi.updateProfile(data)
+    if (res.success && res.data) {
+      user.value = res.data
+      localStorage.setItem('techstore_user', JSON.stringify(res.data))
+    }
+    return res
+  }
+
   return {
+    updateProfile,
     token,
     refreshToken,
     user,

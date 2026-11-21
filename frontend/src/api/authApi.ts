@@ -25,15 +25,24 @@ export const authApi = {
   getProfile: (): Promise<ApiResponse<User>> => 
     apiClient.get('/auth/me'),
     
-  updateProfile: (data: { fullName: string; phoneNumber?: string }): Promise<ApiResponse<User>> => 
+  updateProfile: (data: { fullName: string; phone?: string; avatarUrl?: string }): Promise<ApiResponse<User>> => 
     apiClient.put('/users/profile', data),
     
-  changePassword: (data: { oldPassword: string; newPassword: string }): Promise<ApiResponse<void>> => 
+  changePassword: (data: { currentPassword: string; newPassword: string }): Promise<ApiResponse<void>> => 
     apiClient.post('/users/change-password', data),
     
   getAddresses: (): Promise<ApiResponse<UserAddress[]>> => 
     apiClient.get('/users/addresses'),
     
-  addAddress: (data: CreateAddressRequest): Promise<ApiResponse<UserAddress>> => 
-    apiClient.post('/users/addresses', data)
+  addAddress: (data: CreateAddressRequest): Promise<ApiResponse<UserAddress>> =>
+    apiClient.post('/users/addresses', data),
+
+  updateAddress: (id: number, data: CreateAddressRequest): Promise<ApiResponse<UserAddress>> =>
+    apiClient.put(`/users/addresses/${id}`, data),
+
+  deleteAddress: (id: number): Promise<ApiResponse<void>> =>
+    apiClient.delete(`/users/addresses/${id}`),
+
+  setDefaultAddress: (id: number): Promise<ApiResponse<UserAddress>> =>
+    apiClient.patch(`/users/addresses/${id}/default`)
 }

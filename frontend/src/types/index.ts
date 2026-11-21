@@ -25,6 +25,8 @@ export interface User {
   email: string
   fullName: string
   phoneNumber?: string
+  phone?: string
+  avatarUrl?: string | null
   role: 'USER' | 'ADMIN' | 'STAFF'
   status: 'ACTIVE' | 'INACTIVE' | 'BLOCKED'
   createdAt?: string
