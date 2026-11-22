@@ -40,3 +40,11 @@ oauth2:
     client-secret: ${GOOGLE_CLIENT_SECRET:}
     redirect-uri: ${OAUTH2_GOOGLE_REDIRECT_URI:http://localhost:8080/login/oauth2/code/google}
     frontend-success-url: ${OAUTH2_FRONTEND_SUCCESS_URL:http://localhost:5173/oauth2/callback}
+
+# Cấu hình thanh toán VietQR & SePay Webhook
+payment:
+  sepay:
+    webhook-api-key: ${SEPAY_WEBHOOK_API_KEY:}
+  vietqr:
+    expire-minutes: ${VIETQR_EXPIRE_MINUTES:15}
+    expiration-check-ms: ${VIETQR_EXPIRATION_CHECK_MS:60000}

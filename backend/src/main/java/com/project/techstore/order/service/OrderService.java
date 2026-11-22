@@ -12,6 +12,7 @@ import com.project.techstore.order.dto.UpdateOrderStatusRequest;
 import com.project.techstore.order.entity.Order;
 import com.project.techstore.order.entity.OrderItem;
 import com.project.techstore.order.entity.OrderStatus;
+import com.project.techstore.order.entity.PaymentMethod;
 import com.project.techstore.order.entity.PaymentStatus;
 import com.project.techstore.order.repository.OrderRepository;
 import com.project.techstore.product.entity.Product;
@@ -22,6 +23,7 @@ import com.project.techstore.user.entity.User;
 import com.project.techstore.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,9 +31,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -43,6 +48,9 @@ public class OrderService {
     private final CartRepository cartRepository;
     private final ProductVariantRepository productVariantRepository;
     private final UserRepository userRepository;
+
+    @Value("${payment.vietqr.expire-minutes:15}")
+    private long vietQrExpireMinutes = 15;
 
     @Transactional
     public OrderResponse createOrderFromCart(Long userId, CreateOrderFromCartRequest request) {
@@ -73,10 +81,16 @@ public class OrderService {
             totalAmount = totalAmount.add(lineTotal);
         }
 
-        // 2. Tạo mã đơn hàng duy nhất
+        // 2. Tạo mã đơn hàng duy nhất (chỉ gồm chữ và số để ngân hàng không lọc ký tự '-')
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
-        String shortId = UUID.randomUUID().toString().substring(0, 6).toUpperCase();
-        String orderCode = "ORD-" + timestamp + "-" + shortId;
+        String shortId = UUID.randomUUID().toString().replace("-", "").substring(0, 6).toUpperCase();
+        String orderCode = "ORD" + timestamp + shortId;
+
+        boolean isQrPayment = request.getPaymentMethod() == PaymentMethod.BANK_TRANSFER
+                || request.getPaymentMethod() == PaymentMethod.VNPAY;
+        Instant paymentExpiresAt = isQrPayment
+                ? Instant.now().plus(Math.max(1, vietQrExpireMinutes), ChronoUnit.MINUTES)
+                : null;
 
         // 3. Khởi tạo thực thể Order
         Order order = Order.builder()
@@ -93,6 +107,7 @@ public class OrderService {
                 .orderStatus(OrderStatus.PENDING)
                 .paymentMethod(request.getPaymentMethod())
                 .paymentStatus(PaymentStatus.PENDING)
+                .paymentExpiresAt(paymentExpiresAt)
                 .items(new ArrayList<>())
                 .build();
 
@@ -229,5 +244,62 @@ public class OrderService {
         Order saved = orderRepository.save(order);
         log.info("Admin đã cập nhật trạng thái đơn hàng mã={} từ {} sang {}", order.getOrderCode(), oldStatus, newStatus);
         return OrderResponse.from(saved);
+    }
+
+    @Transactional
+    public OrderResponse confirmPayment(Long userId, Long orderId, boolean isAdmin) {
+        Order order = orderRepository.findWithDetailsById(orderId)
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND, "Không tìm thấy đơn hàng với ID: " + orderId));
+
+        if (!isAdmin && !order.getUser().getId().equals(userId)) {
+            throw new AppException(ErrorCode.ACCESS_DENIED, "Bạn không có quyền xác nhận thanh toán cho đơn hàng này");
+        }
+
+        if (order.getOrderStatus() == OrderStatus.CANCELLED) {
+            throw new AppException(ErrorCode.INVALID_REQUEST, "Không thể xác nhận thanh toán cho đơn hàng đã hủy");
+        }
+
+        if (order.getPaymentMethod() != PaymentMethod.BANK_TRANSFER && order.getPaymentMethod() != PaymentMethod.VNPAY) {
+            throw new AppException(ErrorCode.INVALID_REQUEST, "Chỉ hỗ trợ xác nhận thanh toán chuyển khoản cho đơn VietQR");
+        }
+
+        order.setPaymentStatus(PaymentStatus.PAID);
+        if (order.getPaidAt() == null) {
+            order.setPaidAt(Instant.now());
+        }
+        if (order.getOrderStatus() == OrderStatus.PENDING) {
+            order.setOrderStatus(OrderStatus.CONFIRMED);
+        }
+
+        Order saved = orderRepository.save(order);
+        log.info("Đã xác nhận thanh toán VietQR cho đơn hàng mã={}", order.getOrderCode());
+        return OrderResponse.from(saved);
+    }
+
+    @Transactional
+    public int expireOverdueQrOrders() {
+        List<Order> expiredOrders = orderRepository
+                .findByOrderStatusAndPaymentStatusAndPaymentMethodInAndPaymentExpiresAtBefore(
+                        OrderStatus.PENDING,
+                        PaymentStatus.PENDING,
+                        List.of(PaymentMethod.BANK_TRANSFER, PaymentMethod.VNPAY),
+                        Instant.now()
+                );
+
+        for (Order order : expiredOrders) {
+            for (OrderItem item : order.getItems()) {
+                ProductVariant variant = item.getVariant();
+                if (variant != null) {
+                    variant.setStock(variant.getStock() + item.getQuantity());
+                    productVariantRepository.save(variant);
+                }
+            }
+            order.setOrderStatus(OrderStatus.CANCELLED);
+            order.setPaymentStatus(PaymentStatus.FAILED);
+            orderRepository.save(order);
+            log.info("Tự động hủy đơn VietQR quá hạn thanh toán: mã={}", order.getOrderCode());
+        }
+
+        return expiredOrders.size();
     }
 }

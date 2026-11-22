@@ -6,7 +6,9 @@ import { orderApi } from '@/api/orderApi'
 vi.mock('@/api/orderApi', () => ({
   orderApi: {
     getMyOrders: vi.fn(),
-    cancelOrder: vi.fn()
+    getOrderById: vi.fn(),
+    cancelOrder: vi.fn(),
+    confirmPayment: vi.fn()
   }
 }))
 
@@ -109,5 +111,43 @@ describe('OrdersView.vue', () => {
 
     expect(confirmSpy).toHaveBeenCalled()
     expect(orderApi.cancelOrder).toHaveBeenCalledWith(10)
+  })
+
+  it('shows VietQR button for pending BANK_TRANSFER order and opens VietQR modal', async () => {
+    vi.mocked(orderApi.getMyOrders).mockResolvedValueOnce({
+      success: true,
+      message: 'OK',
+      data: {
+        content: [
+          {
+            id: 22,
+            orderCode: 'ORD-2026-QR01',
+            createdAt: '2026-03-01T10:00:00Z',
+            orderStatus: 'PENDING',
+            paymentMethod: 'BANK_TRANSFER',
+            paymentStatus: 'PENDING',
+            recipientName: 'Le Van B',
+            phoneNumber: '0912345678',
+            shippingAddress: 'Ha Noi',
+            finalAmount: 19990000,
+            items: []
+          }
+        ],
+        totalElements: 1
+      } as any
+    })
+
+    const wrapper = mount(OrdersView, {
+      global: { stubs: { routerLink: { template: '<a><slot /></a>' } } }
+    })
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('VietQR • Chờ thanh toán')
+    const qrBtn = wrapper.find('[data-testid="open-vietqr-btn"]')
+    expect(qrBtn.exists()).toBe(true)
+
+    await qrBtn.trigger('click')
+    expect(wrapper.find('[data-testid="vietqr-modal"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="vietqr-check-btn"]').exists()).toBe(true)
   })
 })

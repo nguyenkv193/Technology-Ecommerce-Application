@@ -263,6 +263,8 @@ export interface Order {
   orderStatus: 'PENDING' | 'CONFIRMED' | 'SHIPPING' | 'DELIVERED' | 'CANCELLED'
   paymentMethod: 'COD' | 'VNPAY' | 'MOMO' | 'BANK_TRANSFER'
   paymentStatus: 'PENDING' | 'PAID' | 'FAILED' | 'REFUNDED'
+  paymentExpiresAt?: string | null
+  paidAt?: string | null
   items: OrderItem[]
   createdAt: string
   updatedAt?: string

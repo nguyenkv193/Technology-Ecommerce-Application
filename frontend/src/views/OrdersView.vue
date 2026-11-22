@@ -38,7 +38,14 @@
             <div class="text-[11px] text-zinc-400 mt-0.5">Thời gian: {{ formatDate(order.createdAt) }}</div>
           </div>
 
-          <div class="flex items-center gap-3">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-2.5">
+            <span
+              class="px-2.5 py-1 rounded-full text-[11px] font-medium"
+              :class="getPaymentBadgeClass(order)"
+            >
+              {{ getPaymentLabel(order) }}
+            </span>
+
             <span 
               class="px-2.5 py-1 rounded-full text-[11px] font-medium tracking-wide"
               :class="getStatusBadgeClass(order.orderStatus)"
@@ -46,10 +53,20 @@
               {{ getStatusLabel(order.orderStatus) }}
             </span>
 
+            <button
+              v-if="canPayWithVietQr(order)"
+              type="button"
+              data-testid="open-vietqr-btn"
+              @click="qrOrder = order"
+              class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-zinc-900 text-white hover:bg-zinc-800 transition cursor-pointer"
+            >
+              Mã VietQR
+            </button>
+
             <button 
               v-if="order.orderStatus === 'PENDING' || order.orderStatus === 'CONFIRMED'"
               @click="handleCancelOrder(order.id)"
-              class="px-2.5 py-1 rounded-lg text-xs font-medium text-red-600 hover:bg-red-50 border border-red-200 transition"
+              class="px-2.5 py-1 rounded-lg text-xs font-medium text-red-600 hover:bg-red-50 border border-red-200 transition cursor-pointer"
             >
               Hủy đơn
             </button>
@@ -91,16 +108,25 @@
         </div>
       </div>
     </div>
+
+    <VietQrPaymentModal
+      :order="qrOrder"
+      :show-orders-link="false"
+      @close="qrOrder = null"
+      @confirmed="handleQrConfirmed"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { orderApi } from '@/api/orderApi'
+import VietQrPaymentModal from '@/components/VietQrPaymentModal.vue'
 import type { Order } from '@/types'
 
 const orders = ref<Order[]>([])
 const loading = ref<boolean>(true)
+const qrOrder = ref<Order | null>(null)
 const defaultImage = 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500&auto=format&fit=crop&q=60'
 
 const formatPrice = (value?: number | null): string => {
@@ -133,6 +159,35 @@ const getStatusBadgeClass = (status: string): string => {
     CANCELLED: 'bg-zinc-100 text-zinc-600 border border-zinc-200'
   }
   return map[status] || 'bg-zinc-100 text-zinc-700'
+}
+
+const isQrPaymentMethod = (method?: string) => method === 'BANK_TRANSFER' || method === 'VNPAY'
+
+const canPayWithVietQr = (order: Order): boolean =>
+  isQrPaymentMethod(order.paymentMethod) &&
+  order.paymentStatus === 'PENDING' &&
+  order.orderStatus !== 'CANCELLED'
+
+const getPaymentLabel = (order: Order): string => {
+  const methodLabel = isQrPaymentMethod(order.paymentMethod) ? 'VietQR' : order.paymentMethod || 'COD'
+  if (order.paymentStatus === 'PAID') return `${methodLabel} • Đã thanh toán`
+  if (order.paymentStatus === 'REFUNDED') return `${methodLabel} • Đã hoàn tiền`
+  if (isQrPaymentMethod(order.paymentMethod)) return `${methodLabel} • Chờ thanh toán`
+  return `${methodLabel} • Khi nhận hàng`
+}
+
+const getPaymentBadgeClass = (order: Order): string => {
+  if (order.paymentStatus === 'PAID') return 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+  if (isQrPaymentMethod(order.paymentMethod) && order.paymentStatus === 'PENDING') {
+    return 'bg-amber-50 text-amber-700 border border-amber-200'
+  }
+  return 'bg-zinc-100 text-zinc-700 border border-zinc-200'
+}
+
+const handleQrConfirmed = (updated: Order) => {
+  qrOrder.value = updated
+  const idx = orders.value.findIndex(o => o.id === updated.id)
+  if (idx !== -1) orders.value[idx] = updated
 }
 
 const fetchOrders = async () => {

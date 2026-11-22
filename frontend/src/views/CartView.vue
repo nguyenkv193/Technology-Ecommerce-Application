@@ -261,8 +261,8 @@
                 <span class="text-zinc-800">COD (Tiền mặt)</span>
               </label>
               <label class="flex items-center gap-2 p-2.5 rounded-xl border border-zinc-200 bg-zinc-50 cursor-pointer hover:border-zinc-400 transition">
-                <input type="radio" value="VNPAY" v-model="checkoutForm.paymentMethod" class="accent-zinc-900" />
-                <span class="text-zinc-800">VNPAY QR</span>
+                <input type="radio" value="BANK_TRANSFER" v-model="checkoutForm.paymentMethod" class="accent-zinc-900" />
+                <span class="text-zinc-800">VietQR (Chuyển khoản)</span>
               </label>
             </div>
           </div>
@@ -296,8 +296,17 @@
       </div>
     </div>
 
-    <!-- Success Modal -->
-    <div v-if="placedOrder" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs">
+    <!-- VietQR Payment Modal (for BANK_TRANSFER / VNPAY) -->
+    <VietQrPaymentModal
+      v-if="placedOrder && (placedOrder.paymentMethod === 'BANK_TRANSFER' || placedOrder.paymentMethod === 'VNPAY')"
+      :order="placedOrder"
+      :show-orders-link="true"
+      @close="placedOrder = null"
+      @confirmed="placedOrder = $event"
+    />
+
+    <!-- COD Success Modal -->
+    <div v-else-if="placedOrder" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs">
       <div class="bg-white border border-zinc-200 rounded-xl p-8 max-w-md w-full text-center space-y-4 shadow-2xl">
         <div class="w-14 h-14 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 mx-auto flex items-center justify-center text-xl font-bold">
           ✓
@@ -346,6 +355,7 @@ import { orderApi } from '@/api/orderApi'
 import { authApi } from '@/api/authApi'
 import { behaviorApi } from '@/api/behaviorApi'
 import CustomSearchSelect from '@/components/CustomSearchSelect.vue'
+import VietQrPaymentModal from '@/components/VietQrPaymentModal.vue'
 import { 
   vietnamAddressApi, 
   type VietnamProvince, 

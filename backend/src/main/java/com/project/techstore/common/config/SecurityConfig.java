@@ -110,7 +110,8 @@ public class SecurityConfig {
                         ).permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.POST,
                                 "/api/v1/behaviors/track",
-                                "/api/v1/banners/*/click"
+                                "/api/v1/banners/*/click",
+                                "/api/v1/payments/vietqr/webhook"
                         ).permitAll()
 
                         // 4. Protected Endpoints (Yêu cầu JWT Token hợp lệ)

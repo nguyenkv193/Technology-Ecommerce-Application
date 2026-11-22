@@ -92,6 +92,20 @@ public class OrderController {
         return ResponseEntity.ok(ApiResponse.success("Đã hủy đơn hàng thành công", order));
     }
 
+    @PutMapping("/{id}/confirm-payment")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Xác nhận thủ công đã thanh toán chuyển khoản VietQR cho đơn hàng (Admin)")
+    public ResponseEntity<ApiResponse<OrderResponse>> confirmPayment(
+            @AuthenticationPrincipal User currentUser,
+            @PathVariable Long id
+    ) {
+        if (currentUser == null) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+        OrderResponse updated = orderService.confirmPayment(currentUser.getId(), id, true);
+        return ResponseEntity.ok(ApiResponse.success("Đã xác nhận thanh toán đơn hàng", updated));
+    }
+
     @PutMapping("/{id}/status")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Cập nhật trạng thái đơn hàng (Admin)")

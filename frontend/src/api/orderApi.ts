@@ -21,6 +21,9 @@ export const orderApi = {
     
   cancelOrder: (id: number): Promise<ApiResponse<Order>> => 
     apiClient.put(`/orders/${id}/cancel`),
+
+  confirmPayment: (id: number): Promise<ApiResponse<Order>> =>
+    apiClient.put(`/orders/${id}/confirm-payment`),
     
   updateStatus: (id: number, data: { orderStatus: string; paymentStatus?: string }): Promise<ApiResponse<Order>> => 
     apiClient.put(`/orders/${id}/status`, data)
