@@ -149,3 +149,20 @@ export interface DashboardMetrics {
   totalProducts: number
   lowStockCount: number
 }
+
+
+export interface Banner {
+  id: number
+  title: string
+  imageUrl: string
+  mobileImageUrl?: string
+  linkUrl: string
+  targetType: string
+  position: string
+  displayOrder: number
+  status: string
+  startDate?: string
+  endDate?: string
+  clickCount?: number
+  createdAt?: string
+}

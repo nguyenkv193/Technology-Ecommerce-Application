@@ -61,6 +61,12 @@ public class OrderResponse {
     @Schema(description = "Trạng thái thanh toán (PENDING, PAID, FAILED, REFUNDED)", example = "PENDING")
     private String paymentStatus;
 
+    @Schema(description = "Thời hạn thanh toán VietQR")
+    private Instant paymentExpiresAt;
+
+    @Schema(description = "Thời điểm xác nhận đã thanh toán")
+    private Instant paidAt;
+
     @Schema(description = "Danh sách sản phẩm trong đơn")
     private List<OrderItemResponse> items;
 
@@ -92,6 +98,8 @@ public class OrderResponse {
                 .orderStatus(order.getOrderStatus() != null ? order.getOrderStatus().name() : null)
                 .paymentMethod(order.getPaymentMethod() != null ? order.getPaymentMethod().name() : null)
                 .paymentStatus(order.getPaymentStatus() != null ? order.getPaymentStatus().name() : null)
+                .paymentExpiresAt(order.getPaymentExpiresAt())
+                .paidAt(order.getPaidAt())
                 .items(itemDtos)
                 .createdAt(order.getCreatedAt())
                 .updatedAt(order.getUpdatedAt())

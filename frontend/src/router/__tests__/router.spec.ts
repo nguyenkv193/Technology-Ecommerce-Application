@@ -16,6 +16,7 @@ describe('Router Configuration & Navigation Guards', () => {
     expect(routeNames).toContain('product-detail')
     expect(routeNames).toContain('cart')
     expect(routeNames).toContain('orders')
+    expect(routeNames).toContain('profile')
     expect(routeNames).toContain('wishlist')
     expect(routeNames).toContain('login')
     expect(routeNames).toContain('register')

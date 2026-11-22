@@ -45,7 +45,7 @@ describe('HomeView.vue', () => {
     })
   })
 
-  it('renders hero flagship banner with headline and CTA buttons', () => {
+  it('renders hero image banner slider with navigation controls', () => {
     const wrapper = mount(HomeView, {
       global: {
         stubs: {
@@ -57,9 +57,9 @@ describe('HomeView.vue', () => {
       }
     })
 
-    expect(wrapper.text()).toContain('Thiết Kế Đỉnh Cao.')
-    expect(wrapper.text()).toContain('Hiệu Năng Vượt Bậc.')
-    expect(wrapper.text()).toContain('Khám phá MacBook Pro')
+    expect(wrapper.text()).toContain('MacBook Pro')
+    expect(wrapper.find('button[aria-label="Slide trước"]').exists()).toBe(true)
+    expect(wrapper.find('button[aria-label="Slide tiếp theo"]').exists()).toBe(true)
   })
 
   it('fetches best sellers and personalized products on mount', async () => {

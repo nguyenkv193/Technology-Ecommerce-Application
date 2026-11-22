@@ -88,6 +88,21 @@
           </router-link>
 
           <router-link
+            to="/banners"
+            class="flex items-center px-3 py-2 rounded-lg text-xs font-medium transition-all group"
+            :class="[
+              isActive('/banners')
+                ? 'bg-zinc-100 text-zinc-900 font-semibold border border-zinc-200/80 shadow-xs'
+                : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50'
+            ]"
+          >
+            <div class="flex items-center gap-2.5">
+              <ImageIcon class="w-4 h-4 transition-colors" :class="isActive('/banners') ? 'text-zinc-900' : 'text-zinc-400 group-hover:text-zinc-700'" />
+              <span>Banner & Slider</span>
+            </div>
+          </router-link>
+
+          <router-link
             to="/orders"
             class="flex items-center px-3 py-2 rounded-lg text-xs font-medium transition-all group"
             :class="[
@@ -160,6 +175,7 @@ import {
   Package,
   Layers,
   Award,
+  Image as ImageIcon,
   ShoppingCart,
   Activity,
   Cpu,

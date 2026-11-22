@@ -29,7 +29,7 @@ public class AiRecommendationClient {
     public List<AiItem> forUser(List<UserInteractionExportDto> interactions, int limit) {
         var body = new UserRequest(interactions.stream()
                 .map(i -> new Interaction(i.getProductId(), i.getScore())).toList(), limit);
-        return requireItems(client.post().uri("/recommend/user").body(body).retrieve().body(AiResult.class));
+        return requireItems(client.post().uri("/recommend/user?strategy=collaborative").body(body).retrieve().body(AiResult.class));
     }
 
     public List<AiItem> similar(Long productId, int limit) {

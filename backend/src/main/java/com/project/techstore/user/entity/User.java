@@ -44,6 +44,9 @@ public class User extends BaseEntity implements UserDetails {
     @Column(name = "phone", length = 20)
     private String phone;
 
+    @Column(name = "avatar_url", columnDefinition = "TEXT")
+    private String avatarUrl;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false, length = 50)
     @Builder.Default

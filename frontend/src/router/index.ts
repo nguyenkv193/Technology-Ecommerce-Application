@@ -5,6 +5,7 @@ import ProductDetailView from '@/views/ProductDetailView.vue'
 import CartView from '@/views/CartView.vue'
 import OrdersView from '@/views/OrdersView.vue'
 import WishlistView from '@/views/WishlistView.vue'
+import ProfileView from '@/views/ProfileView.vue'
 import OAuthCallbackView from '@/views/OAuthCallbackView.vue'
 import { useAuthStore } from '@/stores/auth'
 
@@ -33,6 +34,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/orders',
     name: 'orders',
     component: OrdersView
+  },
+  {
+    path: '/profile',
+    name: 'profile',
+    component: ProfileView
   },
   {
     path: '/wishlist',

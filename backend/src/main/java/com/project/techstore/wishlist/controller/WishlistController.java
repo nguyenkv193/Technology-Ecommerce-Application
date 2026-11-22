@@ -1,5 +1,7 @@
 package com.project.techstore.wishlist.controller;
 
+import com.project.techstore.common.exception.AppException;
+import com.project.techstore.common.exception.ErrorCode;
 import com.project.techstore.common.response.ApiResponse;
 import com.project.techstore.user.entity.User;
 import com.project.techstore.wishlist.dto.WishlistResponse;
@@ -27,6 +29,9 @@ public class WishlistController {
     @GetMapping
     @Operation(summary = "Lấy danh sách sản phẩm yêu thích của người dùng hiện tại")
     public ResponseEntity<ApiResponse<List<WishlistResponse>>> getWishlist(@AuthenticationPrincipal User currentUser) {
+        if (currentUser == null) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
         return ResponseEntity.ok(ApiResponse.success(wishlistService.getUserWishlist(currentUser.getId())));
     }
 
@@ -36,6 +41,9 @@ public class WishlistController {
             @AuthenticationPrincipal User currentUser,
             @PathVariable Long productId
     ) {
+        if (currentUser == null) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
         WishlistResponse response = wishlistService.addToWishlist(currentUser.getId(), productId);
         return ResponseEntity.ok(ApiResponse.success("Đã thêm vào danh sách yêu thích", response));
     }
@@ -46,6 +54,9 @@ public class WishlistController {
             @AuthenticationPrincipal User currentUser,
             @PathVariable Long productId
     ) {
+        if (currentUser == null) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
         wishlistService.removeFromWishlist(currentUser.getId(), productId);
         return ResponseEntity.ok(ApiResponse.success("Đã xóa khỏi danh sách yêu thích", null));
     }
@@ -56,6 +67,9 @@ public class WishlistController {
             @AuthenticationPrincipal User currentUser,
             @PathVariable Long productId
     ) {
+        if (currentUser == null) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
         boolean isFav = wishlistService.isWishlisted(currentUser.getId(), productId);
         return ResponseEntity.ok(ApiResponse.success(Map.of("isWishlisted", isFav)));
     }

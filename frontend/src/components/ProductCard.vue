@@ -19,7 +19,7 @@
         <img 
           :src="productThumbnail" 
           :alt="product.name"
-          class="product-zoom-image block h-full w-full object-contain pointer-events-none select-none"
+          class="product-zoom-image block h-full w-full object-contain pointer-events-none select-none text-[10px] text-zinc-400 text-center"
           :draggable="false"
           loading="lazy"
         />

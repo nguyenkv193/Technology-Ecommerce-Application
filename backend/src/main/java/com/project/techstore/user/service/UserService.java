@@ -34,6 +34,10 @@ public class UserService {
         if (request.getPhone() != null) {
             user.setPhone(request.getPhone().trim());
         }
+        if (request.getAvatarUrl() != null) {
+            String avatar = request.getAvatarUrl().trim();
+            user.setAvatarUrl(avatar.isEmpty() ? null : avatar);
+        }
 
         User updatedUser = userRepository.save(user);
         log.info("Đã cập nhật thông tin hồ sơ cho user id={}", userId);

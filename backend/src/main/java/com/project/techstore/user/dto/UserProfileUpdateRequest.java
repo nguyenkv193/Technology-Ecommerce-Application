@@ -24,4 +24,8 @@ public class UserProfileUpdateRequest {
     @Pattern(regexp = "^(0|\\+84)[3|5|7|8|9][0-9]{8}$", message = "Số điện thoại không đúng định dạng Việt Nam")
     @Schema(description = "Số điện thoại", example = "0912345678")
     private String phone;
+
+    @Size(max = 500000, message = "Ảnh đại diện quá lớn")
+    @Schema(description = "Ảnh đại diện (URL hoặc Data URL). Gửi chuỗi rỗng để xóa ảnh")
+    private String avatarUrl;
 }

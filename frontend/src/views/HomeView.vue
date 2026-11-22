@@ -23,281 +23,128 @@
         </div>
       </div>
 
-      <!-- Mobile Horizontal Category Pills (Hiển thị khi màn hình nhỏ < lg) -->
-      <div class="flex lg:hidden items-center gap-2 overflow-x-auto scrollbar-none py-1 pb-2">
-        <router-link
-          v-for="cat in sidebarCategories"
-          :key="cat.name"
-          :to="cat.link"
-          class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-white border border-zinc-200 shadow-2xs whitespace-nowrap text-zinc-700 hover:text-red-600 shrink-0"
-        >
-          <span class="w-4 h-4 flex items-center justify-center shrink-0" v-html="cat.iconSvg"></span>
-          <span>{{ cat.name }}</span>
-        </router-link>
-      </div>
 
-      <!-- 2. Main 3-Column Hero Grid: Left Menu (3 cols) + Center Slider (6 cols) + Right Banners (3 cols) -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-3.5 sm:gap-4 items-stretch">
-        
-        <!-- COLUMN 1: Vertical Category Navigation Sidebar (lg:col-span-3) -->
-        <div class="hidden lg:flex lg:col-span-3 rounded-xl border border-zinc-200/90 bg-white p-3 shadow-xs flex-col justify-between select-none">
-          <div>
-            <div class="px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-wider text-zinc-400 flex items-center justify-between">
-              <span>Danh mục sản phẩm</span>
-              <span class="text-[10px] text-red-600 font-semibold lowercase">chính hãng</span>
-            </div>
-
-            <div class="space-y-0.5 mt-1">
-              <router-link
-                v-for="cat in sidebarCategories"
-                :key="cat.name"
-                :to="cat.link"
-                class="flex items-center justify-between px-2.5 py-2 rounded-lg text-xs font-medium text-zinc-700 hover:text-red-600 hover:bg-red-50/60 transition-all duration-150 group cursor-pointer"
-              >
-                <div class="flex items-center gap-2.5 truncate">
-                  <span 
-                    class="w-7 h-7 rounded-lg bg-zinc-100 group-hover:bg-red-100/70 text-zinc-600 group-hover:text-red-600 flex items-center justify-center shrink-0 transition-colors"
-                    v-html="cat.iconSvg"
-                  ></span>
-                  <span class="truncate font-semibold">{{ cat.name }}</span>
-                </div>
-                <svg class="w-3.5 h-3.5 text-zinc-300 group-hover:text-red-500 group-hover:translate-x-0.5 transition-all shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-              </router-link>
-            </div>
-          </div>
-
-          <!-- Bottom Banner in Sidebar -->
-          <div class="pt-2 border-t border-zinc-100 px-1">
+      <!-- 2. Main Full-Width Hero Banner Slider (Apple / Flagship Cinema Style) -->
+      <div 
+        class="w-full relative overflow-hidden rounded-2xl border border-zinc-200/80 bg-zinc-950 shadow-sm flex flex-col justify-between h-[320px] sm:h-[400px] lg:h-[450px] group select-none"
+        @mouseenter="stopSlideTimer"
+        @mouseleave="startSlideTimer"
+      >
+        <!-- Full-bleed Image Banner Slide with Smooth Cross-Fade Transition -->
+        <div class="relative w-full h-full flex-1 overflow-hidden">
+          <Transition name="hero-slide-fade" mode="out-in">
             <router-link
-              to="/products"
-              class="flex items-center justify-between text-xs font-bold text-red-600 hover:text-red-700 py-1.5 px-2 rounded-lg hover:bg-red-50/50 transition-colors"
+              :key="currentSlide.id"
+              :to="currentSlide.link"
+              class="absolute inset-0 block w-full h-full cursor-pointer group/slide"
             >
-              <span class="flex items-center gap-1.5">
-                <svg class="w-3.5 h-3.5 text-red-600 fill-current" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                <span>Xem tất cả sản phẩm</span>
-              </span>
-              <span>→</span>
+              <img 
+                :src="currentSlide.image" 
+                :alt="currentSlide.title"
+                class="w-full h-full object-cover object-center group-hover/slide:scale-[1.02] transition-transform duration-700 ease-out"
+                loading="eager"
+              />
+              
+              <!-- Bottom subtle gradient overlay for readability -->
+              <div class="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/80 via-black/25 to-transparent pointer-events-none"></div>
+
+              <!-- Minimalist Caption Pill (Tiêu đề tinh tế góc dưới) -->
+              <div class="absolute bottom-5 left-5 sm:left-7 right-28 sm:right-36 z-10 pointer-events-none">
+                <div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/20 text-white text-xs font-semibold max-w-full shadow-md">
+                  <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse shrink-0"></span>
+                  <span class="truncate font-sans">{{ currentSlide.title }}</span>
+                </div>
+              </div>
             </router-link>
-          </div>
+          </Transition>
         </div>
 
-        <!-- COLUMN 2: Center Main Carousel Banner (lg:col-span-6) -->
-        <div 
-          class="lg:col-span-6 relative isolate overflow-hidden rounded-xl border border-zinc-900 bg-[#07090e] shadow-md flex flex-col justify-between min-h-[420px] sm:min-h-[440px]"
-          @mouseenter="stopSlideTimer"
-          @mouseleave="startSlideTimer"
+        <!-- Prev / Next Navigation Arrows (Smooth hover reveal) -->
+        <button 
+          @click.stop="prevSlide"
+          class="absolute left-3.5 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-black/40 hover:bg-black/75 backdrop-blur-md text-white border border-white/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 active:scale-95 shadow-xl cursor-pointer"
+          aria-label="Slide trước"
         >
-          <!-- Dynamic Ambient Glow behind product in slider -->
-          <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-            <div class="absolute inset-0 bg-[radial-gradient(#ffffff0a_1px,transparent_1px)] [background-size:20px_20px] opacity-40"></div>
-            <div 
-              class="absolute -top-16 -right-16 w-80 h-80 rounded-full blur-[90px] opacity-40 transition-all duration-700 pointer-events-none"
-              :class="currentSlide.themeGlow"
-            ></div>
-            <div class="absolute inset-0 bg-gradient-to-t from-[#07090e] via-transparent to-transparent opacity-50"></div>
-          </div>
+          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <button 
+          @click.stop="nextSlide"
+          class="absolute right-3.5 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-black/40 hover:bg-black/75 backdrop-blur-md text-white border border-white/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 active:scale-95 shadow-xl cursor-pointer"
+          aria-label="Slide tiếp theo"
+        >
+          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
 
-          <!-- Slider Content Body -->
-          <div class="relative z-10 p-6 sm:p-7 flex flex-col justify-between flex-1">
-            <Transition name="hero-text-fade" mode="out-in">
-              <div :key="currentSlide.id" class="grid grid-cols-1 sm:grid-cols-12 gap-5 items-center flex-1">
-                <!-- Text Left (7 cols) -->
-                <div class="sm:col-span-7 space-y-3.5">
-                  <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-white text-[11px] font-semibold">
-                    <span class="w-1.5 h-1.5 rounded-full animate-ping" :class="currentSlide.accentDot"></span>
-                    <span>{{ currentSlide.kicker }}</span>
-                  </div>
-
-                  <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight leading-snug">
-                    <span>{{ currentSlide.headingLine1 }}</span> <br/>
-                    <span class="bg-clip-text text-transparent bg-gradient-to-r from-zinc-100 via-zinc-200 to-zinc-400 font-extrabold">
-                      {{ currentSlide.headingLine2 }}
-                    </span>
-                  </h1>
-
-                  <p class="text-zinc-300 text-xs sm:text-sm line-clamp-2 leading-relaxed">
-                    {{ currentSlide.description }}
-                  </p>
-
-                  <div class="flex items-center gap-2 pt-1">
-                    <div class="text-xl sm:text-2xl font-black text-white tracking-tight">
-                      {{ formatCurrency(currentSlide.price) }}
-                    </div>
-                    <span class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase bg-red-600 text-white shadow-2xs">
-                      Trả góp 0%
-                    </span>
-                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-white/10 text-amber-300">
-                      <svg class="w-3.5 h-3.5 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
-                      <span>Giảm sốc</span>
-                    </span>
-                  </div>
-
-                  <div class="flex items-center gap-2.5 pt-2">
-                    <router-link
-                      :to="currentSlide.link"
-                      class="px-4 py-2.5 rounded-xl font-bold text-xs bg-white hover:bg-zinc-100 text-zinc-950 transition-all active:scale-95 flex items-center gap-1.5 shadow-sm cursor-pointer group/cta"
-                    >
-                      <span>{{ currentSlide.primaryCtaText }}</span>
-                      <svg class="w-3.5 h-3.5 group-hover/cta:translate-x-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                    </router-link>
-
-                    <router-link
-                      :to="currentSlide.secondaryCtaLink"
-                      class="px-3.5 py-2.5 rounded-xl font-semibold text-xs bg-white/10 hover:bg-white/15 text-zinc-200 border border-white/15 transition-all active:scale-95 cursor-pointer"
-                    >
-                      <span>{{ currentSlide.secondaryCtaText }}</span>
-                    </router-link>
-                  </div>
-                </div>
-
-                <!-- Product Floating Image Right (5 cols) -->
-                <div class="sm:col-span-5 relative flex items-center justify-center min-h-[190px] sm:min-h-[220px]">
-                  <router-link :to="currentSlide.link" class="block group cursor-pointer">
-                    <img 
-                      :src="currentSlide.image" 
-                      :alt="currentSlide.headingLine1"
-                      class="w-52 sm:w-60 max-h-[210px] object-contain drop-shadow-[0_16px_30px_rgba(0,0,0,0.85)] group-hover:scale-105 transition-transform duration-500 animate-float-slow"
-                    />
-                  </router-link>
-                </div>
-              </div>
-            </Transition>
-
-            <!-- Bottom Progress Indicators & Arrows -->
-            <div class="pt-4 border-t border-white/10 flex items-center justify-between">
-              <!-- Dots / Progress Tabs -->
-              <div class="flex items-center gap-2">
-                <button
-                  v-for="(slide, sIdx) in featuredSlides"
-                  :key="slide.id"
-                  @click="goToSlide(sIdx)"
-                  class="h-2 rounded-full transition-all cursor-pointer"
-                  :class="currentSlideIndex === sIdx ? 'w-8 bg-red-500' : 'w-2 bg-white/20 hover:bg-white/40'"
-                  :title="slide.shortName || slide.headingLine1"
-                ></button>
-              </div>
-
-              <!-- Arrows -->
-              <div class="flex items-center gap-1.5">
-                <button 
-                  @click="prevSlide"
-                  class="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition active:scale-95 cursor-pointer"
-                  title="Slide trước"
-                >
-                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
-                </button>
-                <button 
-                  @click="nextSlide"
-                  class="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition active:scale-95 cursor-pointer"
-                  title="Slide tiếp theo"
-                >
-                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
-                </button>
-              </div>
-            </div>
-          </div>
+        <!-- Bottom Navigation Indicators (Dots & Active Pill) -->
+        <div class="absolute bottom-5 right-5 sm:right-7 z-20 flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/20 shadow-md">
+          <button
+            v-for="(slide, sIdx) in featuredSlides"
+            :key="slide.id"
+            @click.stop="goToSlide(sIdx)"
+            class="h-2 rounded-full transition-all duration-300 cursor-pointer"
+            :class="currentSlideIndex === sIdx ? 'w-7 bg-red-500' : 'w-2 bg-white/40 hover:bg-white/75'"
+            :title="slide.title"
+          ></button>
         </div>
-
-        <!-- COLUMN 3: Right Side Banners (lg:col-span-3 - 2 Stacked Cards) -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3.5 lg:col-span-3">
-          <router-link
-            v-for="b in sidePromoBanners"
-            :key="b.id"
-            :to="b.link"
-            class="relative rounded-xl overflow-hidden p-4 sm:p-5 flex flex-col justify-between group shadow-xs transition-all duration-300 hover:shadow-md cursor-pointer border border-zinc-200/80"
-            :class="b.bgClass"
-          >
-            <!-- Background Image overlay with blend -->
-            <div class="absolute inset-0 opacity-15 group-hover:opacity-25 transition-opacity pointer-events-none bg-cover bg-center" :style="{ backgroundImage: `url(${b.image})` }"></div>
-            
-            <div class="relative z-10 space-y-1">
-              <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider" :class="b.badgeClass">
-                {{ b.badge }}
-              </span>
-              <h3 class="text-base sm:text-lg font-black tracking-tight leading-tight pt-1" :class="b.titleClass">
-                {{ b.title }}
-              </h3>
-              <p class="text-xs font-semibold" :class="b.subtitleClass">
-                {{ b.subtitle }}
-              </p>
-            </div>
-
-            <div class="relative z-10 pt-4 flex items-center justify-between">
-              <span class="text-xs font-bold underline decoration-2 underline-offset-4 flex items-center gap-1" :class="b.ctaClass">
-                <span>{{ b.ctaText }}</span>
-                <span class="group-hover:translate-x-1 transition-transform">›</span>
-              </span>
-              <div class="w-9 h-9 rounded-lg bg-white/90 shadow-2xs border border-zinc-200/80 flex items-center justify-center shrink-0" v-html="b.iconSvg"></div>
-            </div>
-          </router-link>
-        </div>
-
       </div>
 
-      <!-- 3. Bottom Row: 4 Mini Promo Cards (Phong Vũ Style) -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <router-link
-          v-for="card in bottomMiniCards"
-          :key="card.id"
-          :to="card.link"
-          class="rounded-xl border border-zinc-200/90 bg-white p-3.5 sm:p-4 hover:border-zinc-300 hover:shadow-xs transition-all flex items-center justify-between gap-3 group cursor-pointer"
-        >
-          <div class="space-y-1 min-w-0">
-            <span class="inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md" :class="card.badgeClass">
-              {{ card.badge }}
-            </span>
-            <div class="text-xs sm:text-sm font-extrabold text-zinc-900 truncate group-hover:text-red-600 transition-colors">
-              {{ card.title }}
+      <!-- 3. Minimalist Brand Trust & Service Guarantee Bar (Apple / High-End Tech Style) -->
+      <div class="rounded-2xl border border-zinc-200/80 bg-white/95 backdrop-blur-xs p-3.5 sm:p-4 shadow-sm">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 divide-y sm:divide-y-0 divide-zinc-100">
+          <!-- Item 1: 100% Chính Hãng -->
+          <div class="flex items-center gap-3 p-2 rounded-xl transition-all duration-200 hover:bg-zinc-50 group">
+            <div class="w-10 h-10 rounded-xl bg-zinc-100 text-zinc-800 border border-zinc-200/60 flex items-center justify-center shrink-0 group-hover:bg-red-50 group-hover:text-red-600 group-hover:border-red-200 transition-all duration-200">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                <polyline points="9 12 11 14 15 10"/>
+              </svg>
             </div>
-            <div class="text-[11px] font-semibold text-red-600">
-              {{ card.highlight }}
+            <div class="min-w-0">
+              <div class="text-xs sm:text-sm font-bold text-zinc-900 tracking-tight group-hover:text-red-600 transition-colors">100% Chính Hãng</div>
+              <div class="text-[11px] text-zinc-500 truncate">Ủy quyền & bảo đảm nguồn gốc</div>
             </div>
           </div>
-          <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-lg bg-zinc-50 border border-zinc-100 flex items-center justify-center p-1 shrink-0 group-hover:scale-105 transition-transform">
-            <img :src="card.image" :alt="card.title" class="max-h-full max-w-full object-contain" />
-          </div>
-        </router-link>
-      </div>
 
-      <!-- 4. Trust Badges Row (Enterprise Brand Guarantees) -->
-      <div class="grid grid-cols-2 sm:grid-cols-4 p-4 rounded-xl bg-white border border-zinc-200/80 text-xs shadow-2xs">
-        <div class="flex items-center justify-center gap-2.5 px-3 border-r border-b sm:border-b-0 border-zinc-200/80 pb-3 sm:pb-0">
-          <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+          <!-- Item 2: Giao Hỏa Tốc 2H -->
+          <div class="flex items-center gap-3 p-2 rounded-xl transition-all duration-200 hover:bg-zinc-50 group pt-3 sm:pt-2">
+            <div class="w-10 h-10 rounded-xl bg-zinc-100 text-zinc-800 border border-zinc-200/60 flex items-center justify-center shrink-0 group-hover:bg-red-50 group-hover:text-red-600 group-hover:border-red-200 transition-all duration-200">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+              </svg>
+            </div>
+            <div class="min-w-0">
+              <div class="text-xs sm:text-sm font-bold text-zinc-900 tracking-tight group-hover:text-red-600 transition-colors">Giao Hỏa Tốc 2H</div>
+              <div class="text-[11px] text-zinc-500 truncate">Nội thành miễn phí từ 500K</div>
+            </div>
           </div>
-          <div>
-            <div class="font-bold text-zinc-900">100% Chính hãng</div>
-            <div class="text-[10px] text-zinc-500">Bảo đảm nguồn gốc</div>
-          </div>
-        </div>
 
-        <div class="flex items-center justify-center gap-2.5 px-3 border-b sm:border-b-0 sm:border-r border-zinc-200/80 pb-3 sm:pb-0">
-          <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          <!-- Item 3: Bảo Hành 12 Tháng -->
+          <div class="flex items-center gap-3 p-2 rounded-xl transition-all duration-200 hover:bg-zinc-50 group pt-3 sm:pt-2">
+            <div class="w-10 h-10 rounded-xl bg-zinc-100 text-zinc-800 border border-zinc-200/60 flex items-center justify-center shrink-0 group-hover:bg-red-50 group-hover:text-red-600 group-hover:border-red-200 transition-all duration-200">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+            </div>
+            <div class="min-w-0">
+              <div class="text-xs sm:text-sm font-bold text-zinc-900 tracking-tight group-hover:text-red-600 transition-colors">Bảo Hành 12 Tháng</div>
+              <div class="text-[11px] text-zinc-500 truncate">Toàn diện tại TTBH ủy quyền</div>
+            </div>
           </div>
-          <div>
-            <div class="font-bold text-zinc-900">Giao hỏa tốc 2H</div>
-            <div class="text-[10px] text-zinc-500">Nội thành miễn phí</div>
-          </div>
-        </div>
 
-        <div class="flex items-center justify-center gap-2.5 px-3 border-r border-zinc-200/80 pt-3 sm:pt-0">
-          <div class="w-8 h-8 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center shrink-0">
-            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          </div>
-          <div>
-            <div class="font-bold text-zinc-900">Bảo hành 12 tháng</div>
-            <div class="text-[10px] text-zinc-500">Toàn diện chính hãng</div>
-          </div>
-        </div>
-
-        <div class="flex items-center justify-center gap-2.5 px-3 pt-3 sm:pt-0">
-          <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
-            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-          </div>
-          <div>
-            <div class="font-bold text-zinc-900">Đổi mới 30 ngày</div>
-            <div class="text-[10px] text-zinc-500">Lỗi 1-đổi-1 an tâm</div>
+          <!-- Item 4: Đổi Mới 30 Ngày -->
+          <div class="flex items-center gap-3 p-2 rounded-xl transition-all duration-200 hover:bg-zinc-50 group pt-3 sm:pt-2">
+            <div class="w-10 h-10 rounded-xl bg-zinc-100 text-zinc-800 border border-zinc-200/60 flex items-center justify-center shrink-0 group-hover:bg-red-50 group-hover:text-red-600 group-hover:border-red-200 transition-all duration-200">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="23 4 23 10 17 10"/>
+                <polyline points="1 20 1 14 7 14"/>
+                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+              </svg>
+            </div>
+            <div class="min-w-0">
+              <div class="text-xs sm:text-sm font-bold text-zinc-900 tracking-tight group-hover:text-red-600 transition-colors">Đổi Mới 30 Ngày</div>
+              <div class="text-[11px] text-zinc-500 truncate">Lỗi phần cứng 1-đổi-1 an tâm</div>
+            </div>
           </div>
         </div>
       </div>
@@ -313,7 +160,11 @@
       badge="Dành cho bạn"
       :items="personalizedProducts"
       :loading="loadingPersonalized"
-    />
+    >
+      <template #action>
+        <router-link to="/products" class="catalog-shelf-link">Khám phá thêm <span aria-hidden="true">→</span></router-link>
+      </template>
+    </RecommendationCarousel>
 
     <!-- Sản phẩm Nổi Bật -->
     <RecommendationCarousel
@@ -359,6 +210,8 @@ import RecommendationCarousel from '@/components/RecommendationCarousel.vue'
 import FeaturedCategoriesGrid from '@/components/FeaturedCategoriesGrid.vue'
 import { recommendationApi } from '@/api/recommendationApi'
 import { catalogApi } from '@/api/catalogApi'
+import { bannerApi } from '@/api/bannerApi'
+import { behaviorApi } from '@/api/behaviorApi'
 import { useAuthStore } from '@/stores/auth'
 import type { Product, Category } from '@/types'
 
@@ -401,7 +254,7 @@ const loadCatalogShelf = async (shelf: CatalogShelf) => {
   shelf.error = ''
   try {
     const res = await catalogApi.getProducts({
-      page: 0, size: 8, status: 'ACTIVE', sortBy: 'createdAt', sortDirection: 'DESC',
+      page: 0, size: 10, status: 'ACTIVE', sortBy: 'createdAt', sortDirection: 'DESC',
       ...(shelf.categoryId !== undefined ? { categoryId: shelf.categoryId } : {})
     })
     if (!res.success) throw new Error('Catalog request failed')
@@ -448,8 +301,14 @@ const retryCatalogShelf = (shelf: CatalogShelf) => {
 }
 
 // ================= E-COMMERCE HERO GRID DATA (ADMIN-READY) =================
-// Top Trending Keyword Tags
-const trendingTags = [
+// Top Trending Keyword Tags (Tự động tải từ hành vi người dùng)
+interface TrendingTag {
+  label: string
+  link: string
+  count?: number
+}
+
+const trendingTags = ref<TrendingTag[]>([
   { label: 'iPhone 16 Pro Max', link: '/products?keyword=iPhone+16' },
   { label: 'Laptop AI 2026', link: '/products?keyword=AI' },
   { label: 'MacBook Air M3', link: '/products?keyword=MacBook' },
@@ -458,135 +317,22 @@ const trendingTags = [
   { label: 'Bàn Phím Cơ', link: '/products?keyword=Bàn+phím' },
   { label: 'Tai Nghe ANC', link: '/products?keyword=Tai+nghe' },
   { label: 'Back to School 50%', link: '/products?keyword=Khuyen+mai' }
-]
+])
 
-// Sidebar Categories
-const sidebarCategories = [
-  {
-    name: 'Laptop & MacBook',
-    link: '/products?category=Laptop',
-    iconSvg: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M2 20h20"/></svg>'
-  },
-  {
-    name: 'Apple Authorised',
-    link: '/products?brandId=1',
-    iconSvg: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.37c.61-.75 1.04-1.8 1.01-2.87-.92.04-2.02.62-2.67 1.37-.58.65-1.09 1.71-1.03 2.74 1.03.08 2.07-.5 2.69-1.24z"/></svg>'
-  },
-  {
-    name: 'PC & Máy tính bàn',
-    link: '/products?keyword=PC',
-    iconSvg: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>'
-  },
-  {
-    name: 'Linh kiện máy tính',
-    link: '/products?keyword=Linh+kiện',
-    iconSvg: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3"/></svg>'
-  },
-  {
-    name: 'Màn hình máy tính',
-    link: '/products?keyword=Màn+hình',
-    iconSvg: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="12" y1="17" x2="12" y2="21"/></svg>'
-  },
-  {
-    name: 'Điện thoại & Tablet',
-    link: '/products?category=Điện+thoại',
-    iconSvg: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>'
-  },
-  {
-    name: 'Bàn phím & Chuột',
-    link: '/products?keyword=Bàn+phím',
-    iconSvg: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="6" y1="8" x2="6" y2="8"/><line x1="10" y1="8" x2="10" y2="8"/><line x1="14" y1="8" x2="14" y2="8"/><line x1="18" y1="8" x2="18" y2="8"/></svg>'
-  },
-  {
-    name: 'Tai nghe & Âm thanh',
-    link: '/products?category=Âm+thanh',
-    iconSvg: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>'
-  },
-  {
-    name: 'Phụ kiện công nghệ',
-    link: '/products?keyword=Phụ+kiện',
-    iconSvg: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v6M12 18v4M4.93 4.93l4.24 4.24M14.83 14.83l4.24 4.24M2 12h6M18 12h4M4.93 19.07l4.24-4.24M14.83 9.17l4.24-4.24"/></svg>'
-  },
-  {
-    name: 'TechNews & Tin tức',
-    link: '/products',
-    iconSvg: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8M15 18h-5M10 6h8v4h-8V6Z"/></svg>'
+const loadTrendingKeywords = async () => {
+  try {
+    const res = await behaviorApi.getTrendingKeywords(8, 7)
+    if (res.success && res.data && res.data.length > 0) {
+      trendingTags.value = res.data.map(item => ({
+        label: item.keyword,
+        link: item.link,
+        count: item.searchCount
+      }))
+    }
+  } catch (err) {
+    // Keep defaults on network/api error
   }
-]
-
-// Right Side Promotional Banners (Stacked)
-const sidePromoBanners = [
-  {
-    id: 1,
-    badge: 'ƯU ĐÃI ĐỘC QUYỀN',
-    badgeClass: 'bg-blue-600 text-white',
-    title: 'HỌC SINH - SINH VIÊN',
-    titleClass: 'text-zinc-900',
-    subtitle: 'Giảm thêm 5% + Quà tặng balo TechStore',
-    subtitleClass: 'text-blue-600',
-    ctaText: 'Đăng ký ngay',
-    ctaClass: 'text-blue-700',
-    iconSvg: '<svg class="w-5 h-5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>',
-    bgClass: 'bg-gradient-to-br from-blue-50/90 via-indigo-50/60 to-white',
-    image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=500&auto=format&fit=crop&q=80',
-    link: '/products?keyword=Hoc+sinh+sinh+vien'
-  },
-  {
-    id: 2,
-    badge: 'KHUYẾN MÃI THÁNG',
-    badgeClass: 'bg-red-600 text-white',
-    title: 'GIẢM ĐẾN 50%',
-    titleClass: 'text-zinc-900',
-    subtitle: 'Xả kho thiết bị công nghệ & Phụ kiện',
-    subtitleClass: 'text-red-600',
-    ctaText: 'Săn deal ngay',
-    ctaClass: 'text-red-700',
-    iconSvg: '<svg class="w-5 h-5 text-red-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>',
-    bgClass: 'bg-gradient-to-br from-red-50/90 via-rose-50/60 to-white',
-    image: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=500&auto=format&fit=crop&q=80',
-    link: '/products?keyword=Khuyen+mai'
-  }
-]
-
-// Bottom 4 Mini Promo Cards (Phong Vũ Style)
-const bottomMiniCards = [
-  {
-    id: 1,
-    badge: 'FLASH SALE',
-    badgeClass: 'bg-amber-100 text-amber-800 border border-amber-200',
-    title: 'Laptop Gaming & AI',
-    highlight: 'Giảm đến 7 Triệu',
-    image: 'https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=300&auto=format&fit=crop&q=80',
-    link: '/products?category=Laptop'
-  },
-  {
-    id: 2,
-    badge: 'APPLE STORE',
-    badgeClass: 'bg-zinc-100 text-zinc-800 border border-zinc-200',
-    title: 'Mac mini M4 & Studio',
-    highlight: 'Trả góp 0% duyệt 5P',
-    image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=300&auto=format&fit=crop&q=80',
-    link: '/products?brandId=1'
-  },
-  {
-    id: 3,
-    badge: 'BẢO HÀNH VÀNG',
-    badgeClass: 'bg-blue-100 text-blue-800 border border-blue-200',
-    title: 'Gói Bảo Hành 1 Đổi 1',
-    highlight: 'Giá chỉ từ 199K',
-    image: 'https://images.unsplash.com/photo-1563770660941-20978e870e26?w=300&auto=format&fit=crop&q=80',
-    link: '/products'
-  },
-  {
-    id: 4,
-    badge: 'BUILD PC',
-    badgeClass: 'bg-emerald-100 text-emerald-800 border border-emerald-200',
-    title: 'Tự Ráp PC Theo Ý',
-    highlight: 'Tặng tản nước 3 Triệu',
-    image: 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=300&auto=format&fit=crop&q=80',
-    link: '/products?keyword=PC'
-  }
-]
+}
 
 // Flagship Showcase Slides
 interface HudSpec {
@@ -770,11 +516,28 @@ const formatCurrency = (value?: number | null): string => {
 }
 
 
+
+const loadHeroBanners = async () => {
+  try {
+    const res = await bannerApi.getActiveBanners('HERO_SLIDER')
+    if (res.success && res.data && res.data.length > 0) {
+      featuredSlides.value = res.data.map(b => ({
+        id: b.id,
+        title: b.title,
+        image: b.imageUrl,
+        link: b.linkUrl
+      }))
+    }
+  } catch (err) {
+    // Keep fallback featuredSlides
+  }
+}
+
 const loadBestSellers = async () => {
   loadingBestSellers.value = true
   bestSellerError.value = ''
   try {
-    const res = await catalogApi.getBestSellers(4)
+    const res = await catalogApi.getBestSellers(10)
     bestSellerProducts.value = res.data
   } catch (error) {
     bestSellerProducts.value = []
@@ -791,7 +554,7 @@ const loadPersonalized = async () => {
   loadingPersonalized.value = true
   personalizedProducts.value = []
   try {
-    const res = await recommendationApi.getPersonalized(4)
+    const res = await recommendationApi.getPersonalized(10)
     if (requestId !== personalizedRequestId) return
     personalizedProducts.value = res.data.recommendations.map(item => ({
       ...item.product,
@@ -808,6 +571,8 @@ const loadPersonalized = async () => {
 watch(() => authStore.token, loadPersonalized, { immediate: true })
 
 onMounted(() => {
+  void loadHeroBanners()
+  void loadTrendingKeywords()
   loadBestSellers()
   const newest = catalogShelves.value.find(shelf => shelf.key === 'newest')
   if (newest) void loadCatalogShelf(newest)
@@ -823,7 +588,7 @@ onUnmounted(() => {
 
 <style scoped>
 .catalog-shelf-link {
-  @apply inline-flex items-center justify-center gap-2 self-start sm:self-auto shrink-0 rounded-lg border border-zinc-200 bg-white px-4 py-2 text-xs font-semibold text-zinc-700 transition-colors hover:border-zinc-400 hover:text-zinc-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:ring-offset-2;
+ @apply inline-flex items-center justify-center gap-1.5 self-start sm:self-auto shrink-0 rounded-full border border-zinc-200/90 bg-white px-3.5 py-1.5 text-xs font-semibold text-zinc-700 shadow-sm transition-all hover:border-zinc-300 hover:text-red-600 hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:ring-offset-2;
 }
 
 /* Card Slide Transition */
@@ -915,4 +680,15 @@ onUnmounted(() => {
   opacity: 0;
   transform: scale(0.96) translateY(-12px);
 }
+
+/* Hero Image Slide Fade Transition */
+.hero-slide-fade-enter-active,
+.hero-slide-fade-leave-active {
+  transition: opacity 0.4s ease;
+}
+.hero-slide-fade-enter-from,
+.hero-slide-fade-leave-to {
+  opacity: 0;
+}
+
 </style>

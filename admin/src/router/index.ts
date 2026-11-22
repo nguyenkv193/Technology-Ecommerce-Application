@@ -50,6 +50,12 @@ const routes: Array<RouteRecordRaw> = [
         meta: { title: 'Quản lý Thương hiệu' }
       },
       {
+        path: 'banners',
+        name: 'banners',
+        component: () => import('@/views/banners/BannerListView.vue'),
+        meta: { title: 'Quản lý Banner & Slider' }
+      },
+      {
         path: 'orders',
         name: 'orders',
         component: () => import('@/views/orders/OrderListView.vue'),

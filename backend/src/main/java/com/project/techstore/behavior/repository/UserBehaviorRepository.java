@@ -46,4 +46,19 @@ public interface UserBehaviorRepository extends JpaRepository<UserBehavior, Long
            "HAVING " + INTERACTION_SCORE_EXPRESSION + " > 0 " +
            "ORDER BY MAX(b.createdAt) DESC, b.user.id ASC, b.product.id ASC")
     List<Object[]> aggregateTrainingInteractions(@Param("asOf") Instant asOf, Pageable pageable);
+
+    @Query("SELECT b.actionValue, COUNT(b) FROM UserBehavior b " +
+           "WHERE b.actionType = com.project.techstore.behavior.entity.BehaviorType.SEARCH " +
+           "AND b.actionValue IS NOT NULL AND TRIM(b.actionValue) != '' " +
+           "AND b.createdAt >= :since " +
+           "GROUP BY b.actionValue " +
+           "ORDER BY COUNT(b) DESC, MAX(b.createdAt) DESC")
+    List<Object[]> findTopSearchKeywordsSince(@Param("since") Instant since, Pageable pageable);
+
+    @Query("SELECT b.actionValue, COUNT(b) FROM UserBehavior b " +
+           "WHERE b.actionType = com.project.techstore.behavior.entity.BehaviorType.SEARCH " +
+           "AND b.actionValue IS NOT NULL AND TRIM(b.actionValue) != '' " +
+           "GROUP BY b.actionValue " +
+           "ORDER BY COUNT(b) DESC, MAX(b.createdAt) DESC")
+    List<Object[]> findAllTimeTopSearchKeywords(Pageable pageable);
 }

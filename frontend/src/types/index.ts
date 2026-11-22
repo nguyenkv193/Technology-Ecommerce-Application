@@ -25,6 +25,8 @@ export interface User {
   email: string
   fullName: string
   phoneNumber?: string
+  phone?: string
+  avatarUrl?: string | null
   role: 'USER' | 'ADMIN' | 'STAFF'
   status: 'ACTIVE' | 'INACTIVE' | 'BLOCKED'
   createdAt?: string
@@ -261,6 +263,8 @@ export interface Order {
   orderStatus: 'PENDING' | 'CONFIRMED' | 'SHIPPING' | 'DELIVERED' | 'CANCELLED'
   paymentMethod: 'COD' | 'VNPAY' | 'MOMO' | 'BANK_TRANSFER'
   paymentStatus: 'PENDING' | 'PAID' | 'FAILED' | 'REFUNDED'
+  paymentExpiresAt?: string | null
+  paidAt?: string | null
   items: OrderItem[]
   createdAt: string
   updatedAt?: string
@@ -298,4 +302,45 @@ export interface RecommendationResponse {
   source: RecommendationSource
   fallbackReason: 'no_history' | 'ai_unavailable' | 'insufficient_matches' | null
   recommendations: RecommendationItem[]
+}
+
+
+export interface UserAddress {
+  id: number
+  recipientName: string
+  phone: string
+  province: string
+  district: string
+  ward: string
+  addressDetail: string
+  fullAddress: string
+  isDefault: boolean
+  createdAt?: string
+}
+
+export interface CreateAddressRequest {
+  recipientName: string
+  phone: string
+  province: string
+  district: string
+  ward: string
+  addressDetail: string
+  isDefault?: boolean
+}
+
+
+export interface Banner {
+  id: number
+  title: string
+  imageUrl: string
+  mobileImageUrl?: string
+  linkUrl: string
+  targetType?: string
+  position?: string
+  displayOrder?: number
+  status?: string
+  startDate?: string
+  endDate?: string
+  clickCount?: number
+  createdAt?: string
 }

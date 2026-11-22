@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -65,6 +66,12 @@ public class Order extends BaseEntity {
     @Column(name = "payment_status", nullable = false, length = 50)
     @Builder.Default
     private PaymentStatus paymentStatus = PaymentStatus.PENDING;
+
+    @Column(name = "payment_expires_at")
+    private Instant paymentExpiresAt;
+
+    @Column(name = "paid_at")
+    private Instant paidAt;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default

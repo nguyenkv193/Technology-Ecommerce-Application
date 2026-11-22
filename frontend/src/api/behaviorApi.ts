@@ -26,5 +26,11 @@ export const behaviorApi = {
     })
   },
   getMyBehaviors: (): Promise<ApiResponse<any[]>> => 
-    apiClient.get('/behaviors/my')
+    apiClient.get('/behaviors/my'),
+
+  /**
+   * Lấy top các từ khóa tìm kiếm thịnh hành từ hành vi người dùng thực tế
+   */
+  getTrendingKeywords: (limit: number = 8, days: number = 7): Promise<ApiResponse<{ keyword: string; link: string; searchCount: number }[]>> =>
+    apiClient.get('/behaviors/trending-keywords', { params: { limit, days } })
 }

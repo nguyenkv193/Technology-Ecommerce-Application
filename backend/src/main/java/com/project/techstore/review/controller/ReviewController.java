@@ -1,6 +1,8 @@
 package com.project.techstore.review.controller;
 
 import com.project.techstore.common.dto.PageResponse;
+import com.project.techstore.common.exception.AppException;
+import com.project.techstore.common.exception.ErrorCode;
 import com.project.techstore.common.response.ApiResponse;
 import com.project.techstore.review.dto.CreateReviewRequest;
 import com.project.techstore.review.dto.ProductReviewSummaryResponse;
@@ -26,7 +28,7 @@ public class ReviewController {
     private final ReviewService reviewService;
 
     @GetMapping("/product/{productId}")
-    @Operation(summary = "Lấy danh sách đánh giá của sản phẩm (phân trang)")
+    @Operation(summary = "Lấy danh sách đánh giá công khai của một sản phẩm (phân trang)")
     public ResponseEntity<ApiResponse<PageResponse<ReviewResponse>>> getProductReviews(
             @PathVariable Long productId,
             @RequestParam(defaultValue = "0") int page,
@@ -54,6 +56,9 @@ public class ReviewController {
             @AuthenticationPrincipal User currentUser,
             @Valid @RequestBody CreateReviewRequest request
     ) {
+        if (currentUser == null) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
         ReviewResponse response = reviewService.createOrUpdateReview(currentUser.getId(), request);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success("Đánh giá sản phẩm thành công", response));
     }

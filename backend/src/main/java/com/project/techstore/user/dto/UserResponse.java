@@ -30,6 +30,9 @@ public class UserResponse {
     @Schema(description = "Số điện thoại liên hệ", example = "0987654321")
     private String phone;
 
+    @Schema(description = "Ảnh đại diện (URL hoặc Data URL)")
+    private String avatarUrl;
+
     @Schema(description = "Vai trò hệ thống", example = "USER")
     private Role role;
 
@@ -46,6 +49,7 @@ public class UserResponse {
                 .email(user.getEmail())
                 .fullName(user.getFullName())
                 .phone(user.getPhone())
+                .avatarUrl(user.getAvatarUrl())
                 .role(user.getRole())
                 .status(user.getStatus())
                 .createdAt(user.getCreatedAt())

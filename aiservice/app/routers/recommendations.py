@@ -133,7 +133,7 @@ def similar(product_id: int = Path(gt=0), limit: int = Query(10, ge=1, le=50)) -
 @router.post("/recommend/user", response_model=RecommendationResponse)
 def personalized(
     request: PersonalizedRequest,
-    strategy: Literal["hybrid", "content_based", "collaborative"] = Query(default="hybrid"),
+    strategy: Literal["hybrid", "content_based", "collaborative"] = Query(default="collaborative"),
 ) -> RecommendationResponse:
     source, results = model_state.recommend_for_user(request.interactions, request.limit, strategy)
     return RecommendationResponse(source=source, total=len(results), recommendations=results)

@@ -2,9 +2,12 @@ package com.project.techstore.behavior.controller;
 
 import com.project.techstore.behavior.dto.TrackBehaviorRequest;
 import com.project.techstore.behavior.dto.RecommendationTrainingDataPage;
+import com.project.techstore.behavior.dto.TrendingKeywordResponse;
 import com.project.techstore.behavior.dto.UserBehaviorResponse;
 import com.project.techstore.behavior.service.AiServiceKeyValidator;
 import com.project.techstore.behavior.service.BehaviorService;
+import com.project.techstore.common.exception.AppException;
+import com.project.techstore.common.exception.ErrorCode;
 import com.project.techstore.common.response.ApiResponse;
 import com.project.techstore.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
@@ -46,10 +49,23 @@ public class BehaviorController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
+    @GetMapping("/trending-keywords")
+    @Operation(summary = "Lấy top các từ khóa tìm kiếm thịnh hành (Trending Keywords) dựa trên dữ liệu người dùng thực tế")
+    public ResponseEntity<ApiResponse<List<TrendingKeywordResponse>>> getTrendingKeywords(
+            @RequestParam(defaultValue = "8") @Min(1) @Max(20) int limit,
+            @RequestParam(defaultValue = "7") @Min(1) @Max(30) int days
+    ) {
+        List<TrendingKeywordResponse> trendingKeywords = behaviorService.getTrendingKeywords(limit, days);
+        return ResponseEntity.ok(ApiResponse.success(trendingKeywords));
+    }
+
     @GetMapping("/my")
     @SecurityRequirement(name = "BearerAuth")
     @Operation(summary = "Lấy danh sách 50 hành vi gần nhất của người dùng hiện tại")
     public ResponseEntity<ApiResponse<List<UserBehaviorResponse>>> getMyBehaviors(@AuthenticationPrincipal User currentUser) {
+        if (currentUser == null) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
         return ResponseEntity.ok(ApiResponse.success(behaviorService.getUserRecentBehaviors(currentUser.getId())));
     }
 
@@ -66,5 +82,4 @@ public class BehaviorController {
         }
         return ResponseEntity.ok(ApiResponse.success(behaviorService.getTrainingInteractions(page, size, asOf)));
     }
-
 }
