@@ -153,6 +153,43 @@ export interface DashboardMetrics {
   lowStockCount: number
 }
 
+export interface InteractionSummary {
+  totalViews: number
+  totalWishlists: number
+  totalAddToCart: number
+  totalPurchases: number
+  totalSearches: number
+}
+
+export interface DailyInteractionPoint {
+  date: string
+  views: number
+  wishlists: number
+  addToCarts: number
+  purchases: number
+}
+
+export interface TopInteractedProduct {
+  productId: number
+  productName: string
+  slug: string
+  categoryName?: string
+  thumbnailUrl?: string
+  minPrice?: number
+  viewCount: number
+  wishlistCount: number
+  addToCartCount: number
+  purchaseCount: number
+  interactionScore: number
+}
+
+export interface BehaviorAnalytics {
+  days: number
+  summary: InteractionSummary
+  dailySeries: DailyInteractionPoint[]
+  topProducts: TopInteractedProduct[]
+}
+
 
 export interface Banner {
   id: number

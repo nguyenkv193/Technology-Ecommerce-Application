@@ -1,5 +1,6 @@
 package com.project.techstore.behavior.controller;
 
+import com.project.techstore.behavior.dto.BehaviorAnalyticsResponse;
 import com.project.techstore.behavior.dto.TrackBehaviorRequest;
 import com.project.techstore.behavior.dto.RecommendationTrainingDataPage;
 import com.project.techstore.behavior.dto.TrendingKeywordResponse;
@@ -20,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -67,6 +69,17 @@ public class BehaviorController {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
         return ResponseEntity.ok(ApiResponse.success(behaviorService.getUserRecentBehaviors(currentUser.getId())));
+    }
+
+    @GetMapping("/admin/analytics")
+    @SecurityRequirement(name = "BearerAuth")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Thống kê tương tác người dùng và bảng xếp hạng sản phẩm được tương tác nhiều nhất (Admin)")
+    public ResponseEntity<ApiResponse<BehaviorAnalyticsResponse>> getAdminAnalytics(
+            @RequestParam(defaultValue = "30") @Min(1) @Max(90) int days,
+            @RequestParam(defaultValue = "10") @Min(1) @Max(50) int limit
+    ) {
+        return ResponseEntity.ok(ApiResponse.success(behaviorService.getAdminAnalytics(days, limit)));
     }
 
     @GetMapping("/recommendation-training-data")

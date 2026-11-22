@@ -85,67 +85,159 @@
       </div>
 
       <!-- Chart Content Area -->
-      <div class="relative h-56 w-full pt-2">
-        <!-- Horizontal Reference Gridlines -->
-        <div class="absolute inset-0 flex flex-col justify-between pointer-events-none text-[10px] font-mono text-zinc-400">
-          <div class="border-b border-zinc-100 w-full flex justify-between pr-2">
-            <span>{{ formatCompactCurrency(chartMax) }}</span>
+      <RevenueChart :points="revenuePoints" />
+    </div>
+
+    <!-- User Interaction Analytics & Top Products -->
+    <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
+      <!-- Interaction Trend Chart (7 cols) -->
+      <div class="xl:col-span-7 p-5 rounded-xl bg-white border border-zinc-200 shadow-sm space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 class="text-sm font-semibold text-zinc-900 tracking-tight">Thống kê tương tác người dùng</h2>
+            <p class="text-xs text-zinc-500 mt-0.5">Theo dõi lượt xem (click), lượt tym, thêm giỏ hàng và mua hàng</p>
           </div>
-          <div class="border-b border-zinc-100 w-full flex justify-between pr-2">
-            <span>{{ formatCompactCurrency(chartMax / 2) }}</span>
-          </div>
-          <div class="border-b border-zinc-100 w-full flex justify-between pr-2">
-            <span>0 ₫</span>
+
+          <div class="flex items-center gap-1 p-1 rounded-lg bg-zinc-100 border border-zinc-200 text-xs font-mono self-start sm:self-auto">
+            <button
+              v-for="opt in interactionDayOptions"
+              :key="opt.days"
+              @click="changeInteractionDays(opt.days)"
+              class="px-2.5 py-1 rounded-md transition-all text-[11px]"
+              :class="interactionDays === opt.days ? 'bg-white text-zinc-900 font-semibold shadow-xs' : 'text-zinc-600 hover:text-zinc-900'"
+            >
+              {{ opt.label }}
+            </button>
           </div>
         </div>
 
-        <!-- SVG Line & Fill -->
-        <svg
-          class="w-full h-full overflow-visible relative z-10"
-          preserveAspectRatio="none"
-          viewBox="0 0 700 180"
-        >
-          <defs>
-            <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#2563eb" stop-opacity="0.12" />
-              <stop offset="100%" stop-color="#2563eb" stop-opacity="0.0" />
-            </linearGradient>
-          </defs>
+        <!-- Mini KPI Pills -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+          <div class="p-2.5 rounded-lg bg-blue-50/60 border border-blue-100">
+            <div class="flex items-center gap-1.5 text-[11px] text-blue-700 font-medium">
+              <Eye class="w-3.5 h-3.5" />
+              <span>Lượt xem</span>
+            </div>
+            <div class="text-base font-bold font-mono text-zinc-900 mt-1 tabular-nums">
+              {{ behaviorAnalytics.summary.totalViews.toLocaleString('vi-VN') }}
+            </div>
+          </div>
 
-          <!-- Area under curve -->
-          <path
-            v-if="chartPoints.length > 0"
-            :d="areaPath"
-            fill="url(#chartGradient)"
-          />
+          <div class="p-2.5 rounded-lg bg-rose-50/60 border border-rose-100">
+            <div class="flex items-center gap-1.5 text-[11px] text-rose-700 font-medium">
+              <Heart class="w-3.5 h-3.5" />
+              <span>Lượt tym</span>
+            </div>
+            <div class="text-base font-bold font-mono text-zinc-900 mt-1 tabular-nums">
+              {{ behaviorAnalytics.summary.totalWishlists.toLocaleString('vi-VN') }}
+            </div>
+          </div>
 
-          <!-- Line -->
-          <path
-            v-if="chartPoints.length > 0"
-            :d="linePath"
-            fill="none"
-            stroke="#2563eb"
-            stroke-width="2.2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
+          <div class="p-2.5 rounded-lg bg-amber-50/60 border border-amber-100">
+            <div class="flex items-center gap-1.5 text-[11px] text-amber-700 font-medium">
+              <ShoppingCart class="w-3.5 h-3.5" />
+              <span>Thêm giỏ</span>
+            </div>
+            <div class="text-base font-bold font-mono text-zinc-900 mt-1 tabular-nums">
+              {{ behaviorAnalytics.summary.totalAddToCart.toLocaleString('vi-VN') }}
+            </div>
+          </div>
 
-          <!-- Interactive Data Points -->
-          <g v-for="(pt, idx) in chartPoints" :key="idx">
-            <circle
-              :cx="pt.x"
-              :cy="pt.y"
-              r="4"
-              class="fill-white stroke-blue-600 stroke-2 hover:r-5 hover:fill-blue-600 transition-all cursor-pointer"
+          <div class="p-2.5 rounded-lg bg-emerald-50/60 border border-emerald-100">
+            <div class="flex items-center gap-1.5 text-[11px] text-emerald-700 font-medium">
+              <CheckCircle2 class="w-3.5 h-3.5" />
+              <span>Mua hàng</span>
+            </div>
+            <div class="text-base font-bold font-mono text-zinc-900 mt-1 tabular-nums">
+              {{ behaviorAnalytics.summary.totalPurchases.toLocaleString('vi-VN') }}
+            </div>
+          </div>
+        </div>
+
+        <InteractionChart :series="behaviorAnalytics.dailySeries" />
+      </div>
+
+      <!-- Top Interacted Products Ranking (5 cols) -->
+      <div class="xl:col-span-5 p-5 rounded-xl bg-white border border-zinc-200 shadow-sm flex flex-col space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-zinc-100">
+          <div>
+            <h2 class="text-sm font-semibold text-zinc-900 tracking-tight">Xếp hạng sản phẩm tương tác</h2>
+            <p class="text-xs text-zinc-500 mt-0.5">Top sản phẩm nổi bật trong {{ interactionDays }} ngày qua</p>
+          </div>
+
+          <select
+            v-model="rankingSortKey"
+            class="h-8 px-2.5 text-[11px] font-mono bg-zinc-50 border border-zinc-200 rounded-lg text-zinc-700 focus:outline-none focus:border-zinc-900 self-start sm:self-auto"
+          >
+            <option value="interactionScore">Theo điểm tương tác</option>
+            <option value="viewCount">Theo lượt xem</option>
+            <option value="wishlistCount">Theo lượt tym</option>
+            <option value="addToCartCount">Theo thêm giỏ</option>
+            <option value="purchaseCount">Theo lượt mua</option>
+          </select>
+        </div>
+
+        <div v-if="isLoadingAnalytics" class="py-12 text-center text-zinc-500 text-xs">
+          <Loader2 class="w-4 h-4 animate-spin mx-auto mb-2 text-zinc-500" />
+          <span>Đang tải bảng xếp hạng...</span>
+        </div>
+
+        <div v-else-if="sortedTopProducts.length === 0" class="py-12 text-center text-zinc-400 text-xs">
+          Chưa có dữ liệu tương tác trong khoảng thời gian này.
+        </div>
+
+        <div v-else class="space-y-2.5 overflow-y-auto max-h-[340px] pr-1">
+          <div
+            v-for="(item, idx) in sortedTopProducts"
+            :key="item.productId"
+            class="flex items-center gap-3 p-2.5 rounded-xl border border-zinc-100 hover:border-zinc-200 hover:bg-zinc-50/70 transition-colors"
+          >
+            <!-- Rank Badge -->
+            <div
+              class="w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-mono font-bold shrink-0"
+              :class="rankBadgeClass(idx)"
             >
-              <title>{{ pt.label }}: {{ formatCurrency(pt.amount) }} ({{ pt.count }} đơn hàng)</title>
-            </circle>
-          </g>
-        </svg>
+              {{ idx + 1 }}
+            </div>
 
-        <!-- X-Axis Labels -->
-        <div class="flex justify-between text-[11px] font-mono text-zinc-500 mt-2 px-1">
-          <span v-for="pt in chartPoints" :key="pt.label">{{ pt.label }}</span>
+            <!-- Thumbnail -->
+            <div class="w-10 h-10 rounded-lg bg-zinc-50 border border-zinc-200 overflow-hidden flex items-center justify-center shrink-0">
+              <img
+                v-if="item.thumbnailUrl"
+                :src="item.thumbnailUrl"
+                :alt="item.productName"
+                class="w-full h-full object-cover"
+              />
+              <Package v-else class="w-4 h-4 text-zinc-400" />
+            </div>
+
+            <!-- Product Info -->
+            <div class="min-w-0 flex-1">
+              <router-link
+                :to="`/products/${item.productId}/edit`"
+                class="text-xs font-semibold text-zinc-900 hover:text-blue-600 truncate block"
+                :title="item.productName"
+              >
+                {{ item.productName }}
+              </router-link>
+              <div class="flex flex-wrap items-center gap-x-2.5 gap-y-0.5 text-[10px] font-mono text-zinc-500 mt-1">
+                <span class="text-blue-600 font-medium">{{ item.viewCount }} xem</span>
+                <span class="text-rose-600 font-medium">{{ item.wishlistCount }} tym</span>
+                <span class="text-amber-600 font-medium">{{ item.addToCartCount }} giỏ</span>
+                <span class="text-emerald-600 font-medium">{{ item.purchaseCount }} mua</span>
+              </div>
+            </div>
+
+            <!-- Score -->
+            <div class="text-right shrink-0">
+              <div class="text-xs font-bold font-mono text-zinc-900 tabular-nums">
+                {{ Math.round(item.interactionScore) }}đ
+              </div>
+              <div v-if="item.minPrice" class="text-[10px] font-mono text-zinc-400 tabular-nums">
+                {{ formatCompactCurrency(item.minPrice) }}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -353,13 +445,20 @@ import {
   Plus,
   RefreshCw,
   ChevronRight,
-  Loader2
+  Loader2,
+  Eye,
+  Heart,
+  ShoppingCart,
+  CheckCircle2,
+  Package
 } from 'lucide-vue-next'
 import { useAdminAuthStore } from '@/stores/auth'
 import StatCard from '@/components/common/StatCard.vue'
 import BadgeStatus from '@/components/common/BadgeStatus.vue'
-import { fetchDashboardOverview } from '@/api/dashboard'
-import type { DashboardMetrics, Order } from '@/types'
+import RevenueChart, { type RevenuePoint } from '@/components/dashboard/RevenueChart.vue'
+import InteractionChart from '@/components/dashboard/InteractionChart.vue'
+import { fetchDashboardOverview, fetchBehaviorAnalytics } from '@/api/dashboard'
+import type { BehaviorAnalytics, DashboardMetrics, Order } from '@/types'
 
 const authStore = useAdminAuthStore()
 const isLoading = ref(true)
@@ -391,6 +490,39 @@ const metrics = ref<DashboardMetrics>({
 const recentOrders = ref<Order[]>([])
 const allOrders = ref<Order[]>([])
 
+const interactionDays = ref<7 | 14 | 30>(14)
+const interactionDayOptions = [
+  { days: 7 as const, label: '7 ngày' },
+  { days: 14 as const, label: '14 ngày' },
+  { days: 30 as const, label: '30 ngày' }
+]
+const isLoadingAnalytics = ref(false)
+const rankingSortKey = ref<'interactionScore' | 'viewCount' | 'wishlistCount' | 'addToCartCount' | 'purchaseCount'>('interactionScore')
+const behaviorAnalytics = ref<BehaviorAnalytics>({
+  days: 14,
+  summary: {
+    totalViews: 0,
+    totalWishlists: 0,
+    totalAddToCart: 0,
+    totalPurchases: 0,
+    totalSearches: 0
+  },
+  dailySeries: [],
+  topProducts: []
+})
+
+const sortedTopProducts = computed(() => {
+  const key = rankingSortKey.value
+  return [...behaviorAnalytics.value.topProducts].sort((a, b) => Number(b[key]) - Number(a[key]))
+})
+
+function rankBadgeClass(index: number): string {
+  if (index === 0) return 'bg-amber-100 text-amber-800 border border-amber-300'
+  if (index === 1) return 'bg-zinc-200 text-zinc-800 border border-zinc-300'
+  if (index === 2) return 'bg-orange-100 text-orange-800 border border-orange-300'
+  return 'bg-zinc-100 text-zinc-500 border border-zinc-200'
+}
+
 // Real dynamic status distribution
 const statusCounts = computed(() => {
   const counts = {
@@ -408,21 +540,11 @@ const statusCounts = computed(() => {
   return counts
 })
 
-// Dynamic Chart Calculations based on actual orders
-interface ChartPoint {
-  label: string
-  amount: number
-  count: number
-  x: number
-  y: number
-}
-
-const chartPoints = computed<ChartPoint[]>(() => {
-  const points: { label: string; amount: number; count: number }[] = []
+const revenuePoints = computed<RevenuePoint[]>(() => {
+  const points: RevenuePoint[] = []
   const now = new Date()
 
   if (activeRange.value === '7d') {
-    // 7 past days
     for (let i = 6; i >= 0; i--) {
       const d = new Date(now)
       d.setDate(d.getDate() - i)
@@ -444,7 +566,6 @@ const chartPoints = computed<ChartPoint[]>(() => {
       points.push({ label, amount, count: dayOrders.length })
     }
   } else if (activeRange.value === '30d') {
-    // 6 intervals of 5 days
     for (let i = 5; i >= 0; i--) {
       const endD = new Date(now)
       endD.setDate(endD.getDate() - i * 5)
@@ -469,7 +590,6 @@ const chartPoints = computed<ChartPoint[]>(() => {
       points.push({ label, amount, count: bucketOrders.length })
     }
   } else {
-    // 12 months of current year
     const currentYear = now.getFullYear()
     for (let m = 0; m < 12; m++) {
       const monthPrefix = `${currentYear}-${String(m + 1).padStart(2, '0')}`
@@ -491,45 +611,7 @@ const chartPoints = computed<ChartPoint[]>(() => {
     }
   }
 
-  // Calculate SVG coordinates
-  const svgWidth = 700
-  const svgHeight = 180
-  const padX = 35
-  const padYTop = 20
-  const padYBottom = 25
-
-  const maxVal = Math.max(...points.map((p) => p.amount), 5000000)
-
-  return points.map((p, index) => {
-    const x = padX + (index / (points.length - 1)) * (svgWidth - 2 * padX)
-    const yRatio = p.amount / maxVal
-    const y = svgHeight - padYBottom - yRatio * (svgHeight - padYTop - padYBottom)
-    return {
-      ...p,
-      x: Math.round(x),
-      y: Math.round(y)
-    }
-  })
-})
-
-const chartMax = computed(() => {
-  const max = Math.max(...chartPoints.value.map((p) => p.amount), 5000000)
-  return Math.ceil(max / 1000000) * 1000000
-})
-
-const linePath = computed(() => {
-  if (chartPoints.value.length === 0) return ''
-  return chartPoints.value.reduce((acc, pt, idx) => {
-    return idx === 0 ? `M ${pt.x} ${pt.y}` : `${acc} L ${pt.x} ${pt.y}`
-  }, '')
-})
-
-const areaPath = computed(() => {
-  if (chartPoints.value.length === 0) return ''
-  const first = chartPoints.value[0]
-  const last = chartPoints.value[chartPoints.value.length - 1]
-  const baseline = 180 - 25
-  return `${linePath.value} L ${last.x} ${baseline} L ${first.x} ${baseline} Z`
+  return points
 })
 
 function formatCurrency(val: number): string {
@@ -546,10 +628,25 @@ function formatCompactCurrency(val: number): string {
   return `${val} ₫`
 }
 
+async function loadInteractionAnalytics() {
+  isLoadingAnalytics.value = true
+  try {
+    behaviorAnalytics.value = await fetchBehaviorAnalytics(interactionDays.value, 10)
+  } finally {
+    isLoadingAnalytics.value = false
+  }
+}
+
+function changeInteractionDays(days: 7 | 14 | 30) {
+  if (interactionDays.value === days) return
+  interactionDays.value = days
+  loadInteractionAnalytics()
+}
+
 async function loadData() {
   isLoading.value = true
   try {
-    const overview = await fetchDashboardOverview()
+    const [overview] = await Promise.all([fetchDashboardOverview(), loadInteractionAnalytics()])
     metrics.value = overview.metrics
     recentOrders.value = overview.recentOrders
     allOrders.value = overview.allOrders

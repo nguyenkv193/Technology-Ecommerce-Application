@@ -1,12 +1,15 @@
 package com.project.techstore.behavior.service;
 
+import com.project.techstore.behavior.dto.BehaviorAnalyticsResponse;
 import com.project.techstore.behavior.dto.TrackBehaviorRequest;
 import com.project.techstore.behavior.dto.RecommendationTrainingDataPage;
 import com.project.techstore.behavior.dto.TrendingKeywordResponse;
 import com.project.techstore.behavior.dto.UserBehaviorResponse;
 import com.project.techstore.behavior.dto.UserInteractionExportDto;
+import com.project.techstore.behavior.entity.BehaviorType;
 import com.project.techstore.behavior.entity.UserBehavior;
 import com.project.techstore.behavior.repository.UserBehaviorRepository;
+import com.project.techstore.product.dto.ProductResponse;
 import com.project.techstore.product.entity.Product;
 import com.project.techstore.product.repository.ProductRepository;
 import com.project.techstore.user.entity.User;
@@ -21,9 +24,14 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @Slf4j
@@ -174,5 +182,110 @@ public class BehaviorService {
             return timestamp.toInstant();
         }
         throw new IllegalStateException("Unsupported interaction timestamp type");
+    }
+
+    @Transactional(readOnly = true)
+    public BehaviorAnalyticsResponse getAdminAnalytics(int days, int limit) {
+        int safeDays = Math.max(1, Math.min(days, 90));
+        int safeLimit = Math.max(1, Math.min(limit, 50));
+
+        ZoneId vnZone = ZoneId.of("Asia/Ho_Chi_Minh");
+        LocalDate today = LocalDate.now(vnZone);
+        LocalDate startDate = today.minusDays(safeDays - 1L);
+        Instant since = startDate.atStartOfDay(vnZone).toInstant();
+
+        // 1. Summary counts
+        long totalViews = 0;
+        long totalWishlists = 0;
+        long totalAddToCart = 0;
+        long totalPurchases = 0;
+        long totalSearches = 0;
+
+        for (Object[] row : userBehaviorRepository.countByActionTypeSince(since)) {
+            BehaviorType type = (BehaviorType) row[0];
+            long count = ((Number) row[1]).longValue();
+            switch (type) {
+                case VIEW -> totalViews = count;
+                case WISHLIST -> totalWishlists = count;
+                case ADD_TO_CART -> totalAddToCart = count;
+                case PURCHASE -> totalPurchases = count;
+                case SEARCH -> totalSearches = count;
+                default -> { }
+            }
+        }
+
+        // 2. Daily series (fill all days in range)
+        Map<String, BehaviorAnalyticsResponse.DailyInteractionPoint> dailyMap = new LinkedHashMap<>();
+        for (int i = 0; i < safeDays; i++) {
+            String dateStr = startDate.plusDays(i).toString();
+            dailyMap.put(dateStr, BehaviorAnalyticsResponse.DailyInteractionPoint.builder()
+                    .date(dateStr)
+                    .views(0)
+                    .wishlists(0)
+                    .addToCarts(0)
+                    .purchases(0)
+                    .build());
+        }
+
+        for (Object[] row : userBehaviorRepository.findDailyActionCountsSince(since)) {
+            String dayStr = String.valueOf(row[0]);
+            String actionStr = String.valueOf(row[1]);
+            long count = ((Number) row[2]).longValue();
+            BehaviorAnalyticsResponse.DailyInteractionPoint point = dailyMap.get(dayStr);
+            if (point == null) continue;
+            switch (actionStr) {
+                case "VIEW" -> point.setViews(count);
+                case "WISHLIST" -> point.setWishlists(count);
+                case "ADD_TO_CART" -> point.setAddToCarts(count);
+                case "PURCHASE" -> point.setPurchases(count);
+                default -> { }
+            }
+        }
+
+        // 3. Top interacted products
+        List<Object[]> topRows = userBehaviorRepository.findTopInteractedProductsSince(since, PageRequest.of(0, safeLimit));
+        List<Long> productIds = topRows.stream().map(r -> ((Number) r[0]).longValue()).toList();
+        Map<Long, ProductResponse> productMap = new HashMap<>();
+        if (!productIds.isEmpty()) {
+            for (Product product : productRepository.findAllById(productIds)) {
+                ProductResponse dto = ProductResponse.from(product);
+                if (dto != null) {
+                    productMap.put(dto.getId(), dto);
+                }
+            }
+        }
+
+        List<BehaviorAnalyticsResponse.TopInteractedProduct> topProducts = new ArrayList<>();
+        for (Object[] row : topRows) {
+            Long productId = ((Number) row[0]).longValue();
+            ProductResponse prod = productMap.get(productId);
+            if (prod == null) continue;
+            topProducts.add(BehaviorAnalyticsResponse.TopInteractedProduct.builder()
+                    .productId(productId)
+                    .productName(prod.getName())
+                    .slug(prod.getSlug())
+                    .categoryName(prod.getCategoryName())
+                    .thumbnailUrl(prod.getThumbnailUrl())
+                    .minPrice(prod.getMinPrice())
+                    .viewCount(((Number) row[1]).longValue())
+                    .wishlistCount(((Number) row[2]).longValue())
+                    .addToCartCount(((Number) row[3]).longValue())
+                    .purchaseCount(((Number) row[4]).longValue())
+                    .interactionScore(((Number) row[5]).doubleValue())
+                    .build());
+        }
+
+        return BehaviorAnalyticsResponse.builder()
+                .days(safeDays)
+                .summary(BehaviorAnalyticsResponse.InteractionSummary.builder()
+                        .totalViews(totalViews)
+                        .totalWishlists(totalWishlists)
+                        .totalAddToCart(totalAddToCart)
+                        .totalPurchases(totalPurchases)
+                        .totalSearches(totalSearches)
+                        .build())
+                .dailySeries(new ArrayList<>(dailyMap.values()))
+                .topProducts(topProducts)
+                .build();
     }
 }

@@ -1,10 +1,45 @@
 import apiClient from './client'
-import type { ApiResponse, PageResponse, Order, Product, DashboardMetrics } from '@/types'
+import type { ApiResponse, PageResponse, Order, Product, DashboardMetrics, BehaviorAnalytics } from '@/types'
 
 export interface DashboardOverview {
   metrics: DashboardMetrics
   recentOrders: Order[]
   allOrders: Order[]
+}
+
+export async function fetchBehaviorAnalytics(days = 30, limit = 10): Promise<BehaviorAnalytics> {
+  try {
+    const res = await apiClient.get<ApiResponse<BehaviorAnalytics>>('/behaviors/admin/analytics', {
+      params: { days, limit }
+    })
+    return (
+      res.data?.data || {
+        days,
+        summary: {
+          totalViews: 0,
+          totalWishlists: 0,
+          totalAddToCart: 0,
+          totalPurchases: 0,
+          totalSearches: 0
+        },
+        dailySeries: [],
+        topProducts: []
+      }
+    )
+  } catch {
+    return {
+      days,
+      summary: {
+        totalViews: 0,
+        totalWishlists: 0,
+        totalAddToCart: 0,
+        totalPurchases: 0,
+        totalSearches: 0
+      },
+      dailySeries: [],
+      topProducts: []
+    }
+  }
 }
 
 export async function fetchDashboardOverview(): Promise<DashboardOverview> {

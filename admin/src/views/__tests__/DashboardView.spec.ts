@@ -18,7 +18,15 @@ const router = createRouter({
 vi.mock('@/api/dashboard', () => ({
   fetchDashboardMetrics: vi.fn(),
   fetchRecentOrders: vi.fn(),
-  fetchDashboardOverview: vi.fn()
+  fetchDashboardOverview: vi.fn(),
+  fetchBehaviorAnalytics: vi.fn()
+}))
+
+vi.mock('vue-chartjs', () => ({
+  Line: {
+    name: 'Line',
+    template: '<div class="mock-chart" />'
+  }
 }))
 
 describe('DashboardView', () => {
@@ -58,6 +66,32 @@ describe('DashboardView', () => {
       allOrders: [mockOrder]
     })
 
+    vi.mocked(dashboardApi.fetchBehaviorAnalytics).mockResolvedValueOnce({
+      days: 14,
+      summary: {
+        totalViews: 120,
+        totalWishlists: 35,
+        totalAddToCart: 24,
+        totalPurchases: 12,
+        totalSearches: 18
+      },
+      dailySeries: [
+        { date: '2026-10-27', views: 50, wishlists: 12, addToCarts: 8, purchases: 4 }
+      ],
+      topProducts: [
+        {
+          productId: 1,
+          productName: 'MacBook Pro M3',
+          slug: 'macbook-pro-m3',
+          viewCount: 80,
+          wishlistCount: 20,
+          addToCartCount: 15,
+          purchaseCount: 6,
+          interactionScore: 225
+        }
+      ]
+    })
+
     const wrapper = mount(DashboardView, {
       global: {
         plugins: [router]
@@ -72,5 +106,7 @@ describe('DashboardView', () => {
     expect(text).toContain('Tổng đơn hàng')
     expect(text).toContain('Đơn chờ xác nhận')
     expect(text).toContain('ORD-101')
+    expect(text).toContain('Thống kê tương tác người dùng')
+    expect(text).toContain('MacBook Pro M3')
   })
 })
