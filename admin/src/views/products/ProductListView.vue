@@ -96,8 +96,8 @@
               <td class="py-3 px-4">
                 <div class="w-10 h-10 rounded-lg bg-zinc-50 border border-zinc-200 flex items-center justify-center overflow-hidden shrink-0">
                   <img
-                    v-if="product.primaryImageUrl"
-                    :src="product.primaryImageUrl"
+                    v-if="product.thumbnailUrl"
+                    :src="product.thumbnailUrl"
                     :alt="product.name"
                     class="w-full h-full object-cover"
                   />
@@ -120,19 +120,22 @@
               </td>
               <td class="py-3 px-4">
                 <div class="font-semibold text-zinc-900 tabular-nums">
-                  {{ formatCurrency(product.salePrice) }}
+                  {{ formatCurrency(getProductMinPrice(product)) }}
+                  <span v-if="getProductMaxPrice(product) > getProductMinPrice(product)" class="text-zinc-500 font-normal">
+                    – {{ formatCurrency(getProductMaxPrice(product)) }}
+                  </span>
                 </div>
-                <div v-if="product.originalPrice > product.salePrice" class="text-[10px] text-zinc-400 line-through tabular-nums">
-                  {{ formatCurrency(product.originalPrice) }}
+                <div v-if="getProductOriginalPrice(product) > getProductMinPrice(product)" class="text-[10px] text-zinc-400 line-through tabular-nums">
+                  {{ formatCurrency(getProductOriginalPrice(product)) }}
                 </div>
               </td>
               <td class="py-3 px-4 text-center">
                 <span
                   class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium"
-                  :class="(product.stockQuantity ?? 0) > 5 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'"
+                  :class="(product.totalStock ?? 0) > 5 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'"
                 >
-                  <span class="w-1 h-1 rounded-full" :class="(product.stockQuantity ?? 0) > 5 ? 'bg-emerald-500' : 'bg-rose-500'"></span>
-                  <span>{{ product.stockQuantity ?? 0 }}</span>
+                  <span class="w-1 h-1 rounded-full" :class="(product.totalStock ?? 0) > 5 ? 'bg-emerald-500' : 'bg-rose-500'"></span>
+                  <span>{{ product.totalStock ?? 0 }}</span>
                 </span>
               </td>
               <td class="py-3 px-4 text-right">
@@ -217,6 +220,29 @@ const productToDelete = ref<Product | null>(null)
 
 function formatCurrency(val: number): string {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val || 0)
+}
+
+function getProductMinPrice(product: Product): number {
+  if (typeof product.minPrice === 'number') return product.minPrice
+  if (product.variants && product.variants.length > 0) {
+    return Math.min(...product.variants.map((v) => v.price || 0))
+  }
+  return 0
+}
+
+function getProductMaxPrice(product: Product): number {
+  if (typeof product.maxPrice === 'number') return product.maxPrice
+  if (product.variants && product.variants.length > 0) {
+    return Math.max(...product.variants.map((v) => v.price || 0))
+  }
+  return getProductMinPrice(product)
+}
+
+function getProductOriginalPrice(product: Product): number {
+  if (!product.variants || product.variants.length === 0) return 0
+  const minPrice = getProductMinPrice(product)
+  const matched = product.variants.find((v) => v.price === minPrice) ?? product.variants[0]
+  return matched?.originalPrice || 0
 }
 
 async function loadProducts() {

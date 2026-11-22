@@ -204,14 +204,14 @@
                   </span>
                 </td>
                 <td class="py-3 px-3 font-sans">
-                  <div class="font-medium text-zinc-900">{{ order.customerName }}</div>
-                  <div class="text-[11px] font-mono text-zinc-500">{{ order.customerPhone }}</div>
+                  <div class="font-medium text-zinc-900">{{ order.recipientName }}</div>
+                  <div class="text-[11px] font-mono text-zinc-500">{{ order.phoneNumber }}</div>
                 </td>
                 <td class="py-3 px-3 font-semibold text-zinc-900 tabular-nums">
-                  {{ formatCurrency(order.totalAmount) }}
+                  {{ formatCurrency(order.finalAmount ?? order.totalAmount) }}
                 </td>
                 <td class="py-3 px-3 font-sans">
-                  <BadgeStatus :status="order.status" />
+                  <BadgeStatus :status="order.orderStatus" />
                 </td>
                 <td class="py-3 px-3 text-right font-sans">
                   <router-link
@@ -401,8 +401,8 @@ const statusCounts = computed(() => {
     CANCELLED: 0
   }
   allOrders.value.forEach((o) => {
-    if (o.status && counts[o.status] !== undefined) {
-      counts[o.status]++
+    if (o.orderStatus && counts[o.orderStatus] !== undefined) {
+      counts[o.orderStatus]++
     }
   })
   return counts
@@ -435,8 +435,8 @@ const chartPoints = computed<ChartPoint[]>(() => {
       })
 
       const amount = dayOrders.reduce((sum, o) => {
-        if (o.status === 'DELIVERED' || o.paymentStatus === 'PAID') {
-          return sum + (o.totalAmount || 0)
+        if (o.orderStatus === 'DELIVERED' || o.paymentStatus === 'PAID') {
+          return sum + (o.finalAmount ?? o.totalAmount ?? 0)
         }
         return sum
       }, 0)
@@ -460,8 +460,8 @@ const chartPoints = computed<ChartPoint[]>(() => {
       })
 
       const amount = bucketOrders.reduce((sum, o) => {
-        if (o.status === 'DELIVERED' || o.paymentStatus === 'PAID') {
-          return sum + (o.totalAmount || 0)
+        if (o.orderStatus === 'DELIVERED' || o.paymentStatus === 'PAID') {
+          return sum + (o.finalAmount ?? o.totalAmount ?? 0)
         }
         return sum
       }, 0)
@@ -481,8 +481,8 @@ const chartPoints = computed<ChartPoint[]>(() => {
       })
 
       const amount = monthOrders.reduce((sum, o) => {
-        if (o.status === 'DELIVERED' || o.paymentStatus === 'PAID') {
-          return sum + (o.totalAmount || 0)
+        if (o.orderStatus === 'DELIVERED' || o.paymentStatus === 'PAID') {
+          return sum + (o.finalAmount ?? o.totalAmount ?? 0)
         }
         return sum
       }, 0)

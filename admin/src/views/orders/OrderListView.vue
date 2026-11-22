@@ -78,8 +78,8 @@
                 </span>
               </td>
               <td class="py-3 px-4 font-sans">
-                <div class="font-medium text-zinc-900 text-xs">{{ order.customerName }}</div>
-                <div class="text-[11px] font-mono text-zinc-500">{{ order.customerPhone }}</div>
+                <div class="font-medium text-zinc-900 text-xs">{{ order.recipientName }}</div>
+                <div class="text-[11px] font-mono text-zinc-500">{{ order.phoneNumber }}</div>
               </td>
               <td class="py-3 px-4 text-xs">
                 <span class="px-2 py-0.5 rounded bg-zinc-100 border border-zinc-200 text-zinc-700 font-mono text-[11px]">
@@ -87,10 +87,10 @@
                 </span>
               </td>
               <td class="py-3 px-4 font-semibold text-zinc-900 tabular-nums">
-                {{ formatCurrency(order.totalAmount) }}
+                {{ formatCurrency(order.finalAmount ?? order.totalAmount) }}
               </td>
               <td class="py-3 px-4 font-sans">
-                <BadgeStatus :status="order.status" />
+                <BadgeStatus :status="order.orderStatus" />
               </td>
               <td class="py-3 px-4 text-xs text-zinc-500 tabular-nums">
                 {{ formatDate(order.createdAt) }}

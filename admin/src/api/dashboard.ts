@@ -24,10 +24,10 @@ export async function fetchDashboardOverview(): Promise<DashboardOverview> {
 
     orders.forEach((ord) => {
       // Calculate revenue from completed or paid orders
-      if (ord.status === 'DELIVERED' || ord.paymentStatus === 'PAID') {
-        totalRevenue += ord.totalAmount
+      if (ord.orderStatus === 'DELIVERED' || ord.paymentStatus === 'PAID') {
+        totalRevenue += ord.finalAmount ?? ord.totalAmount ?? 0
       }
-      if (ord.status === 'PENDING') {
+      if (ord.orderStatus === 'PENDING') {
         pendingOrders += 1
       }
     })
