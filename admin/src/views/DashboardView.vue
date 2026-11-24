@@ -181,7 +181,7 @@
                   type="button"
                   data-testid="interaction-apply-btn"
                   @click="applyCustomInteractionRange"
-                  class="h-8 px-3 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-[11px] font-medium transition-colors cursor-pointer"
+                  class="h-8 px-3 inline-flex items-center justify-center rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-900 text-white text-[11px] font-medium transition-colors cursor-pointer shrink-0"
                 >
                   Áp dụng
                 </button>

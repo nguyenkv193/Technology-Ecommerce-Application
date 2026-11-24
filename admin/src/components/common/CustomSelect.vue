@@ -1,5 +1,5 @@
 <template>
-  <div ref="rootRef" class="relative" :class="block ? 'w-full' : 'inline-block'">
+  <div ref="rootRef" class="relative" :class="block ? 'w-full' : 'inline-flex shrink-0'">
     <button
       type="button"
       :data-testid="triggerTestId"
