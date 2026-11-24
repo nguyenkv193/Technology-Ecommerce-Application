@@ -2,7 +2,7 @@
   <div class="space-y-8">
     <div class="pb-4 border-b border-zinc-200/80">
       <h1 class="text-lg sm:text-xl font-bold text-zinc-900 tracking-tight">Thông Tin Cá Nhân</h1>
-      <p class="text-xs text-zinc-500 mt-1">Quản lý hồ sơ, mật khẩu và sổ địa chỉ giao hàng của bạn</p>
+      <p class="text-xs text-zinc-500 mt-1">Quản lý hồ sơ, mật khẩu và địa chỉ giao hàng của bạn</p>
     </div>
 
     <div v-if="!authStore.isAuthenticated" class="text-center py-16 bg-white rounded-2xl border border-zinc-200/80 p-8 space-y-4">
@@ -62,7 +62,7 @@
         <div class="space-y-4 pt-2">
           <div class="flex items-center justify-between">
             <div>
-              <h3 class="text-sm font-semibold text-zinc-900">Sổ địa chỉ giao hàng</h3>
+              <h3 class="text-sm font-semibold text-zinc-900">Địa chỉ giao hàng</h3>
               <p class="text-xs text-zinc-500">Bạn có {{ addresses.length }} địa chỉ giao hàng</p>
             </div>
             <button v-if="!showAddressForm" type="button" data-testid="add-address" @click="openAddressForm()" class="px-4 py-2 rounded-xl text-xs font-medium bg-zinc-900 text-white hover:bg-zinc-800 transition cursor-pointer">
