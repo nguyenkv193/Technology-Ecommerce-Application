@@ -115,10 +115,15 @@ describe('DashboardView', () => {
 
     // Test custom from-to range on interactions
     await wrapper.find('[data-testid="interaction-custom-btn"]').trigger('click')
+    await wrapper.find('[data-testid="interaction-from"]').setValue('2026-01-01')
+    await wrapper.find('[data-testid="interaction-to"]').setValue('2026-10-15')
+    await wrapper.find('[data-testid="interaction-apply-btn"]').trigger('click')
+    expect(wrapper.find('[data-testid="interaction-range-error"]').text()).toContain('tối đa là 90 ngày')
+
     await wrapper.find('[data-testid="interaction-from"]').setValue('2026-10-01')
     await wrapper.find('[data-testid="interaction-to"]').setValue('2026-10-15')
     await wrapper.find('[data-testid="interaction-apply-btn"]').trigger('click')
-    expect(dashboardApi.fetchBehaviorAnalytics).toHaveBeenLastCalledWith(14, 10, '2026-10-01', '2026-10-15')
+    expect(dashboardApi.fetchBehaviorAnalytics).toHaveBeenLastCalledWith(14, 10, '2026-10-01', '2026-10-15', true)
 
     await trigger.trigger('click')
     await wrapper.find('[data-testid="dashboard-section-option-all"]').trigger('click')

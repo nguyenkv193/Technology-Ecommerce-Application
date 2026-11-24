@@ -11,7 +11,8 @@ export async function fetchBehaviorAnalytics(
   days = 30,
   limit = 10,
   from?: string,
-  to?: string
+  to?: string,
+  throwOnError = false
 ): Promise<BehaviorAnalytics> {
   try {
     const res = await apiClient.get<ApiResponse<BehaviorAnalytics>>('/behaviors/admin/analytics', {
@@ -36,7 +37,10 @@ export async function fetchBehaviorAnalytics(
         topProducts: []
       }
     )
-  } catch {
+  } catch (err) {
+    if (throwOnError) {
+      throw err
+    }
     return {
       days,
       summary: {

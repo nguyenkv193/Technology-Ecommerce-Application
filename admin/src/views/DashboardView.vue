@@ -73,14 +73,14 @@
     <!-- Dynamic Revenue Chart -->
     <div v-if="isSectionVisible('revenue')" class="p-5 rounded-xl bg-white border border-zinc-200 shadow-sm relative overflow-hidden">
       <!-- Chart Header & Range Filter -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
-        <div>
-          <h2 class="text-sm font-semibold text-zinc-900 tracking-tight">Doanh thu & Số lượng đơn</h2>
-          <p class="text-xs text-zinc-500 mt-0.5">Biểu đồ tổng hợp từ dữ liệu đơn hàng thực tế</p>
-        </div>
+      <div class="space-y-3 mb-5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 class="text-sm font-semibold text-zinc-900 tracking-tight">Doanh thu & Số lượng đơn</h2>
+            <p class="text-xs text-zinc-500 mt-0.5">Biểu đồ tổng hợp từ dữ liệu đơn hàng thực tế</p>
+          </div>
 
-        <div class="flex flex-wrap items-center gap-2 self-start sm:self-auto">
-          <div class="flex items-center gap-1 p-1 rounded-lg bg-zinc-100 border border-zinc-200 text-xs font-mono">
+          <div class="flex items-center gap-1 p-1 rounded-lg bg-zinc-100 border border-zinc-200 text-xs font-mono self-start sm:self-auto shrink-0">
             <button
               v-for="range in timeRanges"
               :key="range.id"
@@ -92,21 +92,30 @@
               {{ range.label }}
             </button>
           </div>
+        </div>
 
-          <div v-if="activeRange === 'custom'" class="flex items-center gap-1.5 text-xs">
+        <div
+          v-if="activeRange === 'custom'"
+          class="flex flex-wrap items-center justify-between gap-2.5 px-3 py-2 rounded-lg bg-zinc-50 border border-zinc-200/80 text-xs"
+        >
+          <span class="text-zinc-500 font-medium">Khoảng thời gian:</span>
+          <div class="flex flex-wrap items-center gap-2">
             <input
               v-model="revenueFrom"
               type="date"
               data-testid="revenue-from"
-              class="h-8 px-2 rounded-lg bg-white border border-zinc-200 text-xs text-zinc-700 focus:outline-none focus:border-zinc-900"
+              class="h-8 px-2.5 rounded-lg bg-white border border-zinc-200 text-xs text-zinc-700 focus:outline-none focus:border-zinc-900"
             />
             <span class="text-zinc-400">–</span>
             <input
               v-model="revenueTo"
               type="date"
               data-testid="revenue-to"
-              class="h-8 px-2 rounded-lg bg-white border border-zinc-200 text-xs text-zinc-700 focus:outline-none focus:border-zinc-900"
+              class="h-8 px-2.5 rounded-lg bg-white border border-zinc-200 text-xs text-zinc-700 focus:outline-none focus:border-zinc-900"
             />
+            <span v-if="revenueRangeError" class="text-[11px] text-rose-600 font-medium">
+              {{ revenueRangeError }}
+            </span>
           </div>
         </div>
       </div>
@@ -119,14 +128,14 @@
     <div v-if="isSectionVisible('interactions')" class="grid grid-cols-1 xl:grid-cols-12 gap-6">
       <!-- Interaction Trend Chart (7 cols) -->
       <div class="xl:col-span-7 p-5 rounded-xl bg-white border border-zinc-200 shadow-sm space-y-4">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <h2 class="text-sm font-semibold text-zinc-900 tracking-tight">Thống kê tương tác người dùng</h2>
-            <p class="text-xs text-zinc-500 mt-0.5">Theo dõi lượt xem (click), lượt tym, thêm giỏ hàng và mua hàng</p>
-          </div>
+        <div class="space-y-3">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h2 class="text-sm font-semibold text-zinc-900 tracking-tight">Thống kê tương tác người dùng</h2>
+              <p class="text-xs text-zinc-500 mt-0.5">Theo dõi lượt xem (click), lượt tym, thêm giỏ hàng và mua hàng</p>
+            </div>
 
-          <div class="flex flex-wrap items-center gap-2 self-start sm:self-auto">
-            <div class="flex items-center gap-1 p-1 rounded-lg bg-zinc-100 border border-zinc-200 text-xs font-mono">
+            <div class="flex items-center gap-1 p-1 rounded-lg bg-zinc-100 border border-zinc-200 text-xs font-mono self-start sm:self-auto shrink-0">
               <button
                 v-for="opt in interactionDayOptions"
                 :key="opt.days"
@@ -146,30 +155,41 @@
                 Tùy chỉnh
               </button>
             </div>
+          </div>
 
-            <div v-if="interactionMode === 'custom'" class="flex items-center gap-1.5 text-xs">
-              <input
-                v-model="interactionFrom"
-                type="date"
-                data-testid="interaction-from"
-                class="h-8 px-2 rounded-lg bg-white border border-zinc-200 text-xs text-zinc-700 focus:outline-none focus:border-zinc-900"
-              />
-              <span class="text-zinc-400">–</span>
-              <input
-                v-model="interactionTo"
-                type="date"
-                data-testid="interaction-to"
-                class="h-8 px-2 rounded-lg bg-white border border-zinc-200 text-xs text-zinc-700 focus:outline-none focus:border-zinc-900"
-              />
-              <button
-                type="button"
-                data-testid="interaction-apply-btn"
-                @click="applyCustomInteractionRange"
-                class="h-8 px-2.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-[11px] font-medium transition-colors cursor-pointer"
-              >
-                Áp dụng
-              </button>
+          <div
+            v-if="interactionMode === 'custom'"
+            class="flex flex-col gap-1.5 px-3 py-2 rounded-lg bg-zinc-50 border border-zinc-200/80 text-xs"
+          >
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="text-zinc-500 font-medium">Khoảng thời gian (tối đa 90 ngày):</span>
+              <div class="flex flex-wrap items-center gap-2">
+                <input
+                  v-model="interactionFrom"
+                  type="date"
+                  data-testid="interaction-from"
+                  class="h-8 px-2.5 rounded-lg bg-white border border-zinc-200 text-xs text-zinc-700 focus:outline-none focus:border-zinc-900"
+                />
+                <span class="text-zinc-400">–</span>
+                <input
+                  v-model="interactionTo"
+                  type="date"
+                  data-testid="interaction-to"
+                  class="h-8 px-2.5 rounded-lg bg-white border border-zinc-200 text-xs text-zinc-700 focus:outline-none focus:border-zinc-900"
+                />
+                <button
+                  type="button"
+                  data-testid="interaction-apply-btn"
+                  @click="applyCustomInteractionRange"
+                  class="h-8 px-3 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-[11px] font-medium transition-colors cursor-pointer"
+                >
+                  Áp dụng
+                </button>
+              </div>
             </div>
+            <p v-if="interactionRangeError" data-testid="interaction-range-error" class="text-[11px] text-rose-600 font-medium">
+              {{ interactionRangeError }}
+            </p>
           </div>
         </div>
 
@@ -579,6 +599,12 @@ const timeRanges = [
 ]
 const revenueFrom = ref<string>(getDefaultDateOffset(6))
 const revenueTo = ref<string>(getDefaultDateOffset(0))
+const revenueRangeError = computed(() => {
+  if (activeRange.value !== 'custom') return ''
+  if (!revenueFrom.value || !revenueTo.value) return 'Vui lòng chọn đủ ngày bắt đầu và kết thúc'
+  if (revenueFrom.value > revenueTo.value) return 'Ngày bắt đầu không được lớn hơn ngày kết thúc'
+  return ''
+})
 
 const formattedDate = computed(() => {
   return new Intl.DateTimeFormat('vi-VN', {
@@ -604,6 +630,8 @@ const interactionDays = ref<7 | 14 | 30>(14)
 const interactionMode = ref<'preset' | 'custom'>('preset')
 const interactionFrom = ref<string>(getDefaultDateOffset(13))
 const interactionTo = ref<string>(getDefaultDateOffset(0))
+const interactionRangeError = ref<string>('')
+const MAX_ANALYTICS_DAYS = 90
 const interactionDayOptions = [
   { days: 7 as const, label: '7 ngày' },
   { days: 14 as const, label: '14 ngày' },
@@ -795,7 +823,7 @@ function formatCompactCurrency(val: number): string {
   return `${val} ₫`
 }
 
-async function loadInteractionAnalytics() {
+async function loadInteractionAnalytics(throwOnError = false) {
   isLoadingAnalytics.value = true
   try {
     if (interactionMode.value === 'custom') {
@@ -803,11 +831,23 @@ async function loadInteractionAnalytics() {
         interactionDays.value,
         10,
         interactionFrom.value,
-        interactionTo.value
+        interactionTo.value,
+        throwOnError
       )
     } else {
-      behaviorAnalytics.value = await fetchBehaviorAnalytics(interactionDays.value, 10)
+      behaviorAnalytics.value = await fetchBehaviorAnalytics(
+        interactionDays.value,
+        10,
+        undefined,
+        undefined,
+        throwOnError
+      )
     }
+    interactionRangeError.value = ''
+  } catch (err: any) {
+    const msg = err?.message || 'Không thể tải thống kê tương tác cho khoảng thời gian này'
+    interactionRangeError.value = msg
+    toast.error(msg)
   } finally {
     isLoadingAnalytics.value = false
   }
@@ -816,27 +856,41 @@ async function loadInteractionAnalytics() {
 function changeInteractionDays(days: 7 | 14 | 30) {
   if (interactionMode.value === 'preset' && interactionDays.value === days) return
   interactionMode.value = 'preset'
+  interactionRangeError.value = ''
   interactionDays.value = days
-  loadInteractionAnalytics()
+  loadInteractionAnalytics(true)
 }
 
 function enableCustomInteractionRange() {
   interactionMode.value = 'custom'
-  if (interactionFrom.value && interactionTo.value && interactionFrom.value <= interactionTo.value) {
-    loadInteractionAnalytics()
+  interactionRangeError.value = ''
+}
+
+function validateCustomInteractionRange(): string {
+  if (!interactionFrom.value || !interactionTo.value) {
+    return 'Vui lòng chọn đầy đủ ngày bắt đầu và ngày kết thúc'
   }
+  if (interactionFrom.value > interactionTo.value) {
+    return 'Ngày bắt đầu không được lớn hơn ngày kết thúc'
+  }
+  const startMs = new Date(`${interactionFrom.value}T00:00:00`).getTime()
+  const endMs = new Date(`${interactionTo.value}T00:00:00`).getTime()
+  const spanDays = Math.floor((endMs - startMs) / 86_400_000) + 1
+  if (spanDays > MAX_ANALYTICS_DAYS) {
+    return `Khoảng thời gian thống kê tối đa là ${MAX_ANALYTICS_DAYS} ngày (bạn đang chọn ${spanDays} ngày)`
+  }
+  return ''
 }
 
 function applyCustomInteractionRange() {
-  if (!interactionFrom.value || !interactionTo.value) {
-    toast.error('Vui lòng chọn đầy đủ ngày bắt đầu và ngày kết thúc')
+  const err = validateCustomInteractionRange()
+  if (err) {
+    interactionRangeError.value = err
+    toast.error(err)
     return
   }
-  if (interactionFrom.value > interactionTo.value) {
-    toast.error('Ngày bắt đầu không được lớn hơn ngày kết thúc')
-    return
-  }
-  loadInteractionAnalytics()
+  interactionRangeError.value = ''
+  loadInteractionAnalytics(true)
 }
 
 async function loadData() {
