@@ -16,7 +16,6 @@
       <!-- LEFT: avatar + tabs -->
       <AccountSidebar
         :active-tab="activeTab"
-        :address-count="addresses.length"
         @select-tab="handleTabSelect"
       />
 
@@ -25,8 +24,9 @@
         <h2 class="text-base font-semibold text-zinc-900" data-testid="active-tab-title">{{ activeTabLabel }}</h2>
 
         <div :key="activeTab">
-        <!-- Profile -->
-        <form v-if="activeTab === 'profile'" data-testid="profile-form" @submit.prevent="handleUpdateProfile" class="bg-white border border-zinc-200/80 rounded-2xl p-5 sm:p-6 space-y-5 shadow-xs">
+        <!-- Profile & Addresses -->
+        <div v-if="activeTab === 'profile'" class="space-y-6">
+        <form data-testid="profile-form" @submit.prevent="handleUpdateProfile" class="bg-white border border-zinc-200/80 rounded-2xl p-5 sm:p-6 space-y-5 shadow-xs">
           <div class="grid grid-cols-2 gap-4 text-xs">
             <div>
               <div class="text-zinc-400">Vai trò</div>
@@ -58,35 +58,13 @@
           </button>
         </form>
 
-        <!-- Password -->
-        <form v-else-if="activeTab === 'password'" data-testid="password-form" @submit.prevent="handleChangePassword" class="bg-white border border-zinc-200/80 rounded-2xl p-5 sm:p-6 space-y-5 shadow-xs">
-          <div class="space-y-1.5">
-            <label class="text-xs font-medium text-zinc-700" for="currentPassword">Mật khẩu hiện tại</label>
-            <input id="currentPassword" v-model="passwordForm.currentPassword" :type="showPassword ? 'text' : 'password'" class="w-full rounded-xl border border-zinc-200 text-xs px-3 py-2.5 focus:outline-none focus:border-zinc-900" />
-          </div>
-          <div class="grid sm:grid-cols-2 gap-4">
-            <div class="space-y-1.5">
-              <label class="text-xs font-medium text-zinc-700" for="newPassword">Mật khẩu mới</label>
-              <input id="newPassword" v-model="passwordForm.newPassword" :type="showPassword ? 'text' : 'password'" class="w-full rounded-xl border border-zinc-200 text-xs px-3 py-2.5 focus:outline-none focus:border-zinc-900" />
-            </div>
-            <div class="space-y-1.5">
-              <label class="text-xs font-medium text-zinc-700" for="confirmPassword">Xác nhận mật khẩu mới</label>
-              <input id="confirmPassword" v-model="passwordForm.confirmPassword" :type="showPassword ? 'text' : 'password'" class="w-full rounded-xl border border-zinc-200 text-xs px-3 py-2.5 focus:outline-none focus:border-zinc-900" />
-            </div>
-          </div>
-          <p v-if="passwordError" data-testid="password-error" class="text-[11px] text-red-600">{{ passwordError }}</p>
-          <label class="flex items-center gap-2 text-xs text-zinc-600 cursor-pointer">
-            <input type="checkbox" v-model="showPassword" /> Hiện mật khẩu
-          </label>
-          <button type="submit" :disabled="savingPassword" class="px-5 py-2.5 rounded-xl text-xs font-medium bg-zinc-900 text-white hover:bg-zinc-800 transition disabled:opacity-50 cursor-pointer">
-            {{ savingPassword ? 'Đang xử lý...' : 'Đổi mật khẩu' }}
-          </button>
-        </form>
-
-        <!-- Addresses -->
-        <div v-else class="space-y-4">
+        <!-- Addresses (integrated in Profile tab) -->
+        <div class="space-y-4 pt-2">
           <div class="flex items-center justify-between">
-            <p class="text-xs text-zinc-500">Bạn có {{ addresses.length }} địa chỉ giao hàng</p>
+            <div>
+              <h3 class="text-sm font-semibold text-zinc-900">Sổ địa chỉ giao hàng</h3>
+              <p class="text-xs text-zinc-500">Bạn có {{ addresses.length }} địa chỉ giao hàng</p>
+            </div>
             <button v-if="!showAddressForm" type="button" data-testid="add-address" @click="openAddressForm()" class="px-4 py-2 rounded-xl text-xs font-medium bg-zinc-900 text-white hover:bg-zinc-800 transition cursor-pointer">
               + Thêm địa chỉ
             </button>
@@ -140,6 +118,32 @@
           </div>
         </div>
         </div>
+
+        <!-- Password -->
+        <form v-else data-testid="password-form" @submit.prevent="handleChangePassword" class="bg-white border border-zinc-200/80 rounded-2xl p-5 sm:p-6 space-y-5 shadow-xs">
+          <div class="space-y-1.5">
+            <label class="text-xs font-medium text-zinc-700" for="currentPassword">Mật khẩu hiện tại</label>
+            <input id="currentPassword" v-model="passwordForm.currentPassword" :type="showPassword ? 'text' : 'password'" class="w-full rounded-xl border border-zinc-200 text-xs px-3 py-2.5 focus:outline-none focus:border-zinc-900" />
+          </div>
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div class="space-y-1.5">
+              <label class="text-xs font-medium text-zinc-700" for="newPassword">Mật khẩu mới</label>
+              <input id="newPassword" v-model="passwordForm.newPassword" :type="showPassword ? 'text' : 'password'" class="w-full rounded-xl border border-zinc-200 text-xs px-3 py-2.5 focus:outline-none focus:border-zinc-900" />
+            </div>
+            <div class="space-y-1.5">
+              <label class="text-xs font-medium text-zinc-700" for="confirmPassword">Xác nhận mật khẩu mới</label>
+              <input id="confirmPassword" v-model="passwordForm.confirmPassword" :type="showPassword ? 'text' : 'password'" class="w-full rounded-xl border border-zinc-200 text-xs px-3 py-2.5 focus:outline-none focus:border-zinc-900" />
+            </div>
+          </div>
+          <p v-if="passwordError" data-testid="password-error" class="text-[11px] text-red-600">{{ passwordError }}</p>
+          <label class="flex items-center gap-2 text-xs text-zinc-600 cursor-pointer">
+            <input type="checkbox" v-model="showPassword" /> Hiện mật khẩu
+          </label>
+          <button type="submit" :disabled="savingPassword" class="px-5 py-2.5 rounded-xl text-xs font-medium bg-zinc-900 text-white hover:bg-zinc-800 transition disabled:opacity-50 cursor-pointer">
+            {{ savingPassword ? 'Đang xử lý...' : 'Đổi mật khẩu' }}
+          </button>
+        </form>
+        </div>
       </section>
     </div>
   </div>
@@ -155,7 +159,7 @@ import CustomSearchSelect, { type SelectOption } from '@/components/CustomSearch
 import { vietnamAddressApi } from '@/api/vietnamAddressApi'
 import type { UserAddress } from '@/types'
 
-type TabKey = 'profile' | 'password' | 'addresses'
+type TabKey = 'profile' | 'password'
 
 const PHONE_REGEX = /^(0|\+84)[35789][0-9]{8}$/
 
@@ -166,13 +170,10 @@ const route = instance?.appContext.config.globalProperties.$route
 const authStore = useAuthStore()
 const tabLabels: Record<TabKey, string> = {
   profile: 'Hồ sơ cá nhân',
-  password: 'Đổi mật khẩu',
-  addresses: 'Sổ địa chỉ'
+  password: 'Đổi mật khẩu'
 }
 const initialQueryTab = route?.query?.tab as string | undefined
-const activeTab = ref<TabKey>(
-  initialQueryTab === 'password' || initialQueryTab === 'addresses' ? initialQueryTab : 'profile'
-)
+const activeTab = ref<TabKey>(initialQueryTab === 'password' ? 'password' : 'profile')
 const activeTabLabel = computed(() => tabLabels[activeTab.value] || '')
 
 const handleTabSelect = (tab: AccountTabKey) => {

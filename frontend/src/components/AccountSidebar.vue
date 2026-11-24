@@ -62,7 +62,6 @@
       >
         <component :is="tab.icon" class="w-4 h-4" />
         <span class="flex-1 text-left">{{ tab.label }}</span>
-        <span v-if="tab.key === 'addresses' && addressCount !== undefined" class="text-[10px] opacity-70">{{ addressCount }}</span>
         <span v-if="tab.key === 'orders' && orderCount !== undefined" class="text-[10px] opacity-70">{{ orderCount }}</span>
       </button>
     </nav>
@@ -71,15 +70,14 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { User as UserIcon, Lock, MapPin, Package, Camera } from 'lucide-vue-next'
+import { User as UserIcon, Lock, Package, Camera } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 import { useAuthStore } from '@/stores/auth'
 
-export type AccountTabKey = 'profile' | 'password' | 'addresses' | 'orders'
+export type AccountTabKey = 'profile' | 'password' | 'orders'
 
 defineProps<{
   activeTab: AccountTabKey
-  addressCount?: number
   orderCount?: number
 }>()
 
@@ -99,7 +97,6 @@ const initial = computed(() => authStore.user?.fullName?.trim().charAt(0).toUppe
 const tabs: Array<{ key: AccountTabKey; label: string; icon: unknown }> = [
   { key: 'profile', label: 'Hồ sơ cá nhân', icon: UserIcon },
   { key: 'password', label: 'Đổi mật khẩu', icon: Lock },
-  { key: 'addresses', label: 'Sổ địa chỉ', icon: MapPin },
   { key: 'orders', label: 'Lịch sử đơn hàng', icon: Package }
 ]
 
