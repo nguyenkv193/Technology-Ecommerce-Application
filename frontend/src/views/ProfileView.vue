@@ -14,72 +14,11 @@
 
     <div v-else class="flex flex-col md:flex-row gap-6 items-start">
       <!-- LEFT: avatar + tabs -->
-      <aside class="w-full md:w-72 shrink-0 bg-white border border-zinc-200/80 rounded-2xl shadow-xs overflow-hidden md:sticky md:top-20">
-        <div class="p-6 flex flex-col items-center text-center border-b border-zinc-100">
-          <div class="relative">
-            <img
-              v-if="authStore.user?.avatarUrl"
-              :src="authStore.user.avatarUrl"
-              alt="Ảnh đại diện"
-              data-testid="profile-avatar-img"
-              class="w-24 h-24 rounded-full object-cover ring-4 ring-zinc-100"
-            />
-            <div
-              v-else
-              data-testid="profile-avatar-initial"
-              class="w-24 h-24 rounded-full bg-zinc-900 text-white text-3xl font-bold flex items-center justify-center ring-4 ring-zinc-100"
-            >
-              {{ initial }}
-            </div>
-            <button
-              type="button"
-              data-testid="avatar-trigger"
-              :disabled="uploadingAvatar"
-              @click="avatarInput?.click()"
-              class="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-white border border-zinc-200 shadow flex items-center justify-center text-zinc-700 hover:bg-zinc-100 transition cursor-pointer disabled:opacity-50"
-              title="Đổi ảnh đại diện"
-            >
-              <Camera class="w-4 h-4" />
-            </button>
-            <div v-if="uploadingAvatar" class="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center text-white text-[10px] font-medium">
-              Đang tải...
-            </div>
-            <input ref="avatarInput" type="file" accept="image/*" class="hidden" data-testid="avatar-input" @change="handleAvatarChange" />
-          </div>
-          <div class="mt-4 font-semibold text-zinc-900 text-sm truncate max-w-full">{{ authStore.user?.fullName }}</div>
-          <div class="text-[11px] text-zinc-400 truncate max-w-full">{{ authStore.user?.email }}</div>
-          <span class="mt-2 px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-600 text-[10px] font-medium">{{ authStore.user?.role }}</span>
-          <button
-            v-if="authStore.user?.avatarUrl"
-            type="button"
-            data-testid="avatar-remove"
-            :disabled="uploadingAvatar"
-            @click="handleRemoveAvatar"
-            class="mt-2 text-[11px] text-red-600 hover:underline cursor-pointer disabled:opacity-50"
-          >
-            Xóa ảnh đại diện
-          </button>
-        </div>
-        <nav class="p-2 space-y-1" role="tablist">
-          <button
-            v-for="tab in tabs"
-            :key="tab.key"
-            type="button"
-            role="tab"
-            :data-testid="`tab-${tab.key}`"
-            :aria-selected="activeTab === tab.key"
-            @click="activeTab = tab.key"
-            :class="[
-              'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition cursor-pointer',
-              activeTab === tab.key ? 'bg-zinc-900 text-white' : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900'
-            ]"
-          >
-            <component :is="tab.icon" class="w-4 h-4" />
-            <span class="flex-1 text-left">{{ tab.label }}</span>
-            <span v-if="tab.key === 'addresses'" class="text-[10px] opacity-70">{{ addresses.length }}</span>
-          </button>
-        </nav>
-      </aside>
+      <AccountSidebar
+        :active-tab="activeTab"
+        :address-count="addresses.length"
+        @select-tab="handleTabSelect"
+      />
 
       <!-- RIGHT: tab content -->
       <section class="flex-1 min-w-0 w-full space-y-4">
@@ -207,11 +146,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted, watch } from 'vue'
-import { User as UserIcon, Lock, MapPin, Camera } from 'lucide-vue-next'
+import { ref, reactive, computed, onMounted, watch, getCurrentInstance } from 'vue'
 import { toast } from 'vue-sonner'
 import { useAuthStore } from '@/stores/auth'
 import { authApi } from '@/api/authApi'
+import AccountSidebar, { type AccountTabKey } from '@/components/AccountSidebar.vue'
 import CustomSearchSelect, { type SelectOption } from '@/components/CustomSearchSelect.vue'
 import { vietnamAddressApi } from '@/api/vietnamAddressApi'
 import type { UserAddress } from '@/types'
@@ -219,86 +158,32 @@ import type { UserAddress } from '@/types'
 type TabKey = 'profile' | 'password' | 'addresses'
 
 const PHONE_REGEX = /^(0|\+84)[35789][0-9]{8}$/
-const AVATAR_SIZE = 256
-const MAX_AVATAR_FILE_BYTES = 5 * 1024 * 1024
+
+const instance = getCurrentInstance()
+const router = instance?.appContext.config.globalProperties.$router
+const route = instance?.appContext.config.globalProperties.$route
 
 const authStore = useAuthStore()
-const tabs: Array<{ key: TabKey; label: string; icon: unknown }> = [
-  { key: 'profile', label: 'Hồ sơ cá nhân', icon: UserIcon },
-  { key: 'password', label: 'Đổi mật khẩu', icon: Lock },
-  { key: 'addresses', label: 'Sổ địa chỉ', icon: MapPin }
-]
-const activeTab = ref<TabKey>('profile')
-const activeTabLabel = computed(() => tabs.find(t => t.key === activeTab.value)?.label || '')
-const initial = computed(() => authStore.user?.fullName?.trim().charAt(0).toUpperCase() || 'U')
+const tabLabels: Record<TabKey, string> = {
+  profile: 'Hồ sơ cá nhân',
+  password: 'Đổi mật khẩu',
+  addresses: 'Sổ địa chỉ'
+}
+const initialQueryTab = route?.query?.tab as string | undefined
+const activeTab = ref<TabKey>(
+  initialQueryTab === 'password' || initialQueryTab === 'addresses' ? initialQueryTab : 'profile'
+)
+const activeTabLabel = computed(() => tabLabels[activeTab.value] || '')
+
+const handleTabSelect = (tab: AccountTabKey) => {
+  if (tab === 'orders') {
+    router?.push('/orders')
+    return
+  }
+  activeTab.value = tab
+}
 
 const formatDate = (d?: string) => (d ? new Date(d).toLocaleDateString('vi-VN') : '—')
-
-// ---------- Avatar ----------
-const avatarInput = ref<HTMLInputElement | null>(null)
-const uploadingAvatar = ref(false)
-
-// Crop vuông chính giữa và nén về 256x256 JPEG để lưu gọn trong DB
-const resizeImage = (file: File): Promise<string> =>
-  new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onerror = () => reject(new Error('Không đọc được file ảnh'))
-    reader.onload = () => {
-      const img = new Image()
-      img.onerror = () => reject(new Error('File ảnh không hợp lệ'))
-      img.onload = () => {
-        const canvas = document.createElement('canvas')
-        canvas.width = AVATAR_SIZE
-        canvas.height = AVATAR_SIZE
-        const ctx = canvas.getContext('2d')
-        if (!ctx) return reject(new Error('Trình duyệt không hỗ trợ xử lý ảnh'))
-        const side = Math.min(img.width, img.height)
-        ctx.drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, AVATAR_SIZE, AVATAR_SIZE)
-        resolve(canvas.toDataURL('image/jpeg', 0.85))
-      }
-      img.src = reader.result as string
-    }
-    reader.readAsDataURL(file)
-  })
-
-const saveAvatar = async (avatarUrl: string, successMsg: string) => {
-  uploadingAvatar.value = true
-  try {
-    await authStore.updateProfile({
-      fullName: authStore.user?.fullName || '',
-      phone: authStore.user?.phone || undefined,
-      avatarUrl
-    })
-    toast.success(successMsg)
-  } catch (e: any) {
-    toast.error(e?.message || 'Không thể cập nhật ảnh đại diện')
-  } finally {
-    uploadingAvatar.value = false
-  }
-}
-
-const handleAvatarChange = async (event: Event) => {
-  const input = event.target as HTMLInputElement
-  const file = input.files?.[0]
-  input.value = ''
-  if (!file) return
-  if (!file.type.startsWith('image/')) {
-    toast.error('Vui lòng chọn file ảnh')
-    return
-  }
-  if (file.size > MAX_AVATAR_FILE_BYTES) {
-    toast.error('Ảnh tối đa 5MB')
-    return
-  }
-  try {
-    const dataUrl = await resizeImage(file)
-    await saveAvatar(dataUrl, 'Đã cập nhật ảnh đại diện')
-  } catch (e: any) {
-    toast.error(e?.message || 'Không thể xử lý ảnh')
-  }
-}
-
-const handleRemoveAvatar = () => saveAvatar('', 'Đã xóa ảnh đại diện')
 
 // ---------- Profile ----------
 const profileForm = reactive({ fullName: '', phone: '' })

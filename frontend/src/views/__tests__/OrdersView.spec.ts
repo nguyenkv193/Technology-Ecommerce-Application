@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
+import { createPinia, setActivePinia } from 'pinia'
 import OrdersView from '../OrdersView.vue'
 import { orderApi } from '@/api/orderApi'
 
@@ -14,6 +15,7 @@ vi.mock('@/api/orderApi', () => ({
 
 describe('OrdersView.vue', () => {
   beforeEach(() => {
+    setActivePinia(createPinia())
     vi.clearAllMocks()
   })
 
@@ -105,10 +107,11 @@ describe('OrdersView.vue', () => {
     expect(wrapper.text()).toContain('Tran Van C')
 
     // Click cancel button
-    const cancelBtn = wrapper.find('button')
-    expect(cancelBtn.text()).toContain('Hủy đơn')
-    await cancelBtn.trigger('click')
+    const cancelBtn = wrapper.findAll('button').find(b => b.text().includes('Hủy đơn'))
+    expect(cancelBtn).toBeTruthy()
+    await cancelBtn!.trigger('click')
 
+    expect(wrapper.find('[data-testid="tab-orders"]').attributes('aria-selected')).toBe('true')
     expect(confirmSpy).toHaveBeenCalled()
     expect(orderApi.cancelOrder).toHaveBeenCalledWith(10)
   })
