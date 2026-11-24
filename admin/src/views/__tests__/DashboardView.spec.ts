@@ -106,13 +106,15 @@ describe('DashboardView', () => {
     expect(wrapper.text()).toContain('Doanh thu & Số lượng đơn')
     expect(wrapper.text()).not.toContain('Thống kê tương tác người dùng')
 
-    const select = wrapper.find('[data-testid="dashboard-section-select"]')
-    await select.setValue('interactions')
+    const trigger = wrapper.find('[data-testid="dashboard-section-select"]')
+    await trigger.trigger('click')
+    await wrapper.find('[data-testid="dashboard-section-option-interactions"]').trigger('click')
     expect(wrapper.text()).toContain('Thống kê tương tác người dùng')
     expect(wrapper.text()).not.toContain('ORD-101')
     expect(localStorage.getItem('techstore_admin_dashboard_section')).toBe('interactions')
 
-    await select.setValue('all')
+    await trigger.trigger('click')
+    await wrapper.find('[data-testid="dashboard-section-option-all"]').trigger('click')
 
     const text = wrapper.text()
     expect(text).toContain('Tổng doanh thu')
