@@ -4,6 +4,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { setActivePinia, createPinia } from 'pinia'
 import ProductListView from '../products/ProductListView.vue'
 import * as productsApi from '@/api/products'
+import * as categoriesApi from '@/api/categories'
+import * as brandsApi from '@/api/brands'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -19,6 +21,14 @@ vi.mock('@/api/products', () => ({
   deleteProduct: vi.fn()
 }))
 
+vi.mock('@/api/categories', () => ({
+  fetchCategories: vi.fn()
+}))
+
+vi.mock('@/api/brands', () => ({
+  fetchBrands: vi.fn()
+}))
+
 describe('ProductListView', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
@@ -26,6 +36,8 @@ describe('ProductListView', () => {
   })
 
   it('renders products table with items and handles pagination', async () => {
+    vi.mocked(categoriesApi.fetchCategories).mockResolvedValueOnce([])
+    vi.mocked(brandsApi.fetchBrands).mockResolvedValueOnce([])
     vi.mocked(productsApi.fetchProducts).mockResolvedValueOnce({
       content: [
         {

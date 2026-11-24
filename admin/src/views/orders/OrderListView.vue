@@ -22,7 +22,7 @@
     </div>
 
     <!-- Status Tabs (Linear Style) -->
-    <div class="flex items-center gap-1.5 overflow-x-auto pb-2 border-b border-zinc-200 font-mono">
+      <div class="flex items-center gap-1.5 overflow-x-auto pb-2 border-b border-zinc-200 font-mono">
       <button
         v-for="tab in statusTabs"
         :key="tab.value"
@@ -36,6 +36,40 @@
       >
         <span>{{ tab.label }}</span>
       </button>
+    </div>
+
+    <!-- Search & Payment Filters -->
+    <div class="bg-white border border-zinc-200 rounded-xl p-3 flex flex-col lg:flex-row gap-3 items-stretch lg:items-center justify-between shadow-xs">
+      <div class="relative w-full lg:w-80">
+        <Search class="w-3.5 h-3.5 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
+        <input
+          v-model="keyword"
+          type="text"
+          placeholder="Tìm theo mã đơn, tên khách, SĐT..."
+          class="w-full bg-white border border-zinc-200 rounded-lg pl-9 pr-8 py-2 text-xs text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-zinc-900"
+        />
+        <button
+          v-if="keyword"
+          type="button"
+          @click="keyword = ''"
+          class="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 text-xs"
+        >
+          ✕
+        </button>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2 justify-end">
+        <CustomSelect v-model="selectedPaymentMethod" :options="paymentMethodOptions" />
+        <CustomSelect v-model="selectedPaymentStatus" :options="paymentStatusOptions" align="right" />
+        <button
+          v-if="keyword || selectedPaymentMethod !== 'ALL' || selectedPaymentStatus !== 'ALL'"
+          type="button"
+          @click="resetOrderFilters"
+          class="h-9 px-2.5 rounded-lg text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 text-xs transition-colors cursor-pointer"
+        >
+          Đặt lại
+        </button>
+      </div>
     </div>
 
     <!-- Data Table (Linear High-Density) -->
@@ -62,13 +96,13 @@
                 </div>
               </td>
             </tr>
-            <tr v-else-if="orders.length === 0">
+            <tr v-else-if="filteredOrders.length === 0">
               <td colspan="7" class="py-12 text-center text-zinc-400 text-xs font-sans">
-                Không có đơn hàng nào trong mục này.
+                Không có đơn hàng nào phù hợp trong mục này.
               </td>
             </tr>
             <tr
-              v-for="order in orders"
+              v-for="order in filteredOrders"
               :key="order.id"
               class="hover:bg-zinc-50/70 transition-colors group"
             >
@@ -144,9 +178,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { RefreshCw, Loader2 } from 'lucide-vue-next'
+import { ref, computed, onMounted } from 'vue'
+import { RefreshCw, Search, Loader2 } from 'lucide-vue-next'
 import BadgeStatus from '@/components/common/BadgeStatus.vue'
+import CustomSelect, { type CustomSelectOption } from '@/components/common/CustomSelect.vue'
 import OrderDetailModal from './OrderDetailModal.vue'
 import { fetchOrders } from '@/api/orders'
 import type { Order } from '@/types'
@@ -157,6 +192,45 @@ const currentPage = ref(0)
 const totalPages = ref(1)
 const totalElements = ref(0)
 const currentStatusTab = ref('ALL')
+const keyword = ref('')
+const selectedPaymentMethod = ref('ALL')
+const selectedPaymentStatus = ref('ALL')
+
+const paymentMethodOptions: CustomSelectOption[] = [
+  { value: 'ALL', label: 'Tất cả thanh toán' },
+  { value: 'COD', label: 'COD (Tiền mặt)' },
+  { value: 'BANK_TRANSFER', label: 'VietQR (Chuyển khoản)' }
+]
+
+const paymentStatusOptions: CustomSelectOption[] = [
+  { value: 'ALL', label: 'Tất cả TT thanh toán' },
+  { value: 'PENDING', label: 'Chờ thanh toán' },
+  { value: 'PAID', label: 'Đã thanh toán' },
+  { value: 'FAILED', label: 'Thất bại / Hết hạn' },
+  { value: 'REFUNDED', label: 'Đã hoàn tiền' }
+]
+
+const filteredOrders = computed(() => {
+  const kw = keyword.value.trim().toLowerCase()
+  return orders.value.filter((o) => {
+    const matchesKw =
+      !kw ||
+      o.orderCode.toLowerCase().includes(kw) ||
+      o.recipientName.toLowerCase().includes(kw) ||
+      (o.phoneNumber || '').toLowerCase().includes(kw)
+    const matchesMethod =
+      selectedPaymentMethod.value === 'ALL' || o.paymentMethod === selectedPaymentMethod.value
+    const matchesPayStatus =
+      selectedPaymentStatus.value === 'ALL' || o.paymentStatus === selectedPaymentStatus.value
+    return matchesKw && matchesMethod && matchesPayStatus
+  })
+})
+
+function resetOrderFilters() {
+  keyword.value = ''
+  selectedPaymentMethod.value = 'ALL'
+  selectedPaymentStatus.value = 'ALL'
+}
 
 const isDetailOpen = ref(false)
 const selectedOrder = ref<Order | null>(null)

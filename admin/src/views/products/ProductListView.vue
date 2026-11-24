@@ -22,37 +22,53 @@
     </div>
 
     <!-- Filters Bar (Linear Style) -->
-    <div class="bg-white border border-zinc-200 rounded-xl p-3 flex flex-col md:flex-row gap-3 items-center justify-between shadow-xs">
+    <div class="bg-white border border-zinc-200 rounded-xl p-3 flex flex-col lg:flex-row gap-3 items-stretch lg:items-center justify-between shadow-xs">
       <!-- Search Input -->
-      <div class="relative w-full md:w-80">
+      <div class="relative w-full lg:w-72">
         <Search class="w-3.5 h-3.5 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
         <input
           v-model="keyword"
           @keyup.enter="handleSearch"
           type="text"
           placeholder="Tìm theo tên sản phẩm, slug..."
-          class="w-full bg-white border border-zinc-200 rounded-lg pl-9 pr-8 py-2 text-xs text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900/10 transition-colors font-mono"
+          class="w-full bg-white border border-zinc-200 rounded-lg pl-9 pr-8 py-2 text-xs text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900/10 transition-colors"
         />
         <button
           v-if="keyword"
-          @click="resetFilters"
+          @click="keyword = ''; handleSearch()"
           class="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 text-xs"
         >
           ✕
         </button>
       </div>
 
-      <!-- Quick Action Buttons -->
-      <div class="flex items-center gap-2 w-full md:w-auto justify-end font-mono">
+      <!-- Criteria Filters & Quick Action Buttons -->
+      <div class="flex flex-wrap items-center gap-2 justify-end">
+        <CustomSelect
+          v-model="selectedCategoryId"
+          :options="categoryFilterOptions"
+          @change="handleSearch"
+        />
+        <CustomSelect
+          v-model="selectedBrandId"
+          :options="brandFilterOptions"
+          @change="handleSearch"
+        />
+        <CustomSelect
+          v-model="sortOption"
+          :options="sortOptions"
+          align="right"
+          @change="handleSearch"
+        />
         <button
           @click="handleSearch"
-          class="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-medium shadow-xs transition-colors flex items-center gap-1.5"
+          class="h-9 px-3.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-medium shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
         >
           <span>Lọc</span>
         </button>
         <button
           @click="resetFilters"
-          class="px-2.5 py-1.5 rounded-lg text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 text-xs transition-colors"
+          class="h-9 px-2.5 rounded-lg text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 text-xs transition-colors cursor-pointer"
         >
           Đặt lại
         </button>
@@ -199,20 +215,45 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { Plus, Search, Edit3, Trash2, Package, Loader2 } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 import ConfirmModal from '@/components/common/ConfirmModal.vue'
+import CustomSelect, { type CustomSelectOption } from '@/components/common/CustomSelect.vue'
 import { fetchProducts, deleteProduct } from '@/api/products'
-import type { Product } from '@/types'
+import { fetchCategories } from '@/api/categories'
+import { fetchBrands } from '@/api/brands'
+import type { Brand, Category, Product } from '@/types'
 
 const products = ref<Product[]>([])
+const categories = ref<Category[]>([])
+const brands = ref<Brand[]>([])
 const isLoading = ref(false)
 const keyword = ref('')
+const selectedCategoryId = ref<number | ''>('')
+const selectedBrandId = ref<number | ''>('')
+const sortOption = ref('createdAt:DESC')
 const currentPage = ref(0)
 const pageSize = ref(10)
 const totalPages = ref(1)
 const totalElements = ref(0)
+
+const categoryFilterOptions = computed<CustomSelectOption[]>(() => [
+  { value: '', label: 'Tất cả danh mục' },
+  ...categories.value.map((c) => ({ value: c.id, label: c.name }))
+])
+
+const brandFilterOptions = computed<CustomSelectOption[]>(() => [
+  { value: '', label: 'Tất cả thương hiệu' },
+  ...brands.value.map((b) => ({ value: b.id, label: b.name }))
+])
+
+const sortOptions: CustomSelectOption[] = [
+  { value: 'createdAt:DESC', label: 'Mới nhất' },
+  { value: 'name:ASC', label: 'Tên A–Z' },
+  { value: 'minPrice:ASC', label: 'Giá thấp → cao' },
+  { value: 'minPrice:DESC', label: 'Giá cao → thấp' }
+]
 
 const isConfirmOpen = ref(false)
 const isDeleting = ref(false)
@@ -248,8 +289,13 @@ function getProductOriginalPrice(product: Product): number {
 async function loadProducts() {
   isLoading.value = true
   try {
+    const [sortBy, sortDirection] = sortOption.value.split(':') as [string, 'ASC' | 'DESC']
     const res = await fetchProducts({
       keyword: keyword.value,
+      categoryId: selectedCategoryId.value || undefined,
+      brandId: selectedBrandId.value || undefined,
+      sortBy,
+      sortDirection,
       page: currentPage.value,
       size: pageSize.value
     })
@@ -261,6 +307,16 @@ async function loadProducts() {
   }
 }
 
+async function loadFilterOptions() {
+  try {
+    const [cats, brs] = await Promise.all([fetchCategories(), fetchBrands()])
+    categories.value = cats || []
+    brands.value = brs || []
+  } catch {
+    // Bỏ qua nếu không tải được danh mục/thương hiệu cho filter
+  }
+}
+
 function handleSearch() {
   currentPage.value = 0
   loadProducts()
@@ -268,6 +324,9 @@ function handleSearch() {
 
 function resetFilters() {
   keyword.value = ''
+  selectedCategoryId.value = ''
+  selectedBrandId.value = ''
+  sortOption.value = 'createdAt:DESC'
   currentPage.value = 0
   loadProducts()
 }
@@ -302,6 +361,7 @@ async function executeDelete() {
 }
 
 onMounted(() => {
+  loadFilterOptions()
   loadProducts()
 })
 </script>
