@@ -47,24 +47,24 @@ const chartData = computed(() => ({
       label: 'Doanh thu',
       data: props.points.map((p) => p.amount),
       borderColor: '#2563eb',
-      borderWidth: 2.5,
+      borderWidth: 2,
       tension: 0.35,
       fill: true,
       backgroundColor: (context: ScriptableContext<'line'>) => {
         const { ctx, chartArea } = context.chart
         if (!chartArea) return 'rgba(37, 99, 235, 0.12)'
         const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom)
-        gradient.addColorStop(0, 'rgba(37, 99, 235, 0.22)')
+        gradient.addColorStop(0, 'rgba(37, 99, 235, 0.20)')
         gradient.addColorStop(1, 'rgba(37, 99, 235, 0.0)')
         return gradient
       },
-      pointRadius: 3.5,
-      pointHoverRadius: 6,
-      pointBackgroundColor: '#ffffff',
-      pointBorderColor: '#2563eb',
-      pointBorderWidth: 2,
+      pointRadius: 3,
+      pointHoverRadius: 5.5,
+      pointBackgroundColor: '#2563eb',
+      pointBorderWidth: 0,
       pointHoverBackgroundColor: '#2563eb',
-      pointHoverBorderColor: '#ffffff'
+      pointHoverBorderColor: '#ffffff',
+      pointHoverBorderWidth: 2
     }
   ]
 }))
@@ -113,7 +113,7 @@ const chartOptions = computed<ChartOptions<'line'>>(() => ({
       ticks: {
         color: '#71717a',
         font: {
-          family: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+          family: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
           size: 11
         }
       }
@@ -131,7 +131,7 @@ const chartOptions = computed<ChartOptions<'line'>>(() => ({
         color: '#a1a1aa',
         maxTicksLimit: 5,
         font: {
-          family: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+          family: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
           size: 10
         },
         callback: (value) => formatCompactVnd(Number(value))

@@ -44,8 +44,12 @@ const chartData = computed(() => ({
       borderWidth: 2,
       tension: 0.35,
       fill: true,
-      pointRadius: 2.5,
-      pointHoverRadius: 5
+      pointRadius: 3,
+      pointHoverRadius: 5.5,
+      pointBackgroundColor: '#2563eb',
+      pointBorderWidth: 0,
+      pointHoverBorderColor: '#ffffff',
+      pointHoverBorderWidth: 2
     },
     {
       label: 'Lượt tym (Wishlist)',
@@ -55,8 +59,12 @@ const chartData = computed(() => ({
       borderWidth: 2,
       tension: 0.35,
       fill: false,
-      pointRadius: 2.5,
-      pointHoverRadius: 5
+      pointRadius: 3,
+      pointHoverRadius: 5.5,
+      pointBackgroundColor: '#e11d48',
+      pointBorderWidth: 0,
+      pointHoverBorderColor: '#ffffff',
+      pointHoverBorderWidth: 2
     },
     {
       label: 'Thêm giỏ hàng',
@@ -66,8 +74,12 @@ const chartData = computed(() => ({
       borderWidth: 2,
       tension: 0.35,
       fill: false,
-      pointRadius: 2.5,
-      pointHoverRadius: 5
+      pointRadius: 3,
+      pointHoverRadius: 5.5,
+      pointBackgroundColor: '#d97706',
+      pointBorderWidth: 0,
+      pointHoverBorderColor: '#ffffff',
+      pointHoverBorderWidth: 2
     },
     {
       label: 'Mua hàng',
@@ -77,8 +89,12 @@ const chartData = computed(() => ({
       borderWidth: 2,
       tension: 0.35,
       fill: false,
-      pointRadius: 2.5,
-      pointHoverRadius: 5
+      pointRadius: 3,
+      pointHoverRadius: 5.5,
+      pointBackgroundColor: '#059669',
+      pointBorderWidth: 0,
+      pointHoverBorderColor: '#ffffff',
+      pointHoverBorderWidth: 2
     }
   ]
 }))
@@ -101,6 +117,7 @@ const chartOptions = computed<ChartOptions<'line'>>(() => ({
         pointStyle: 'circle',
         color: '#52525b',
         font: {
+          family: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
           size: 11
         }
       }
@@ -127,8 +144,8 @@ const chartOptions = computed<ChartOptions<'line'>>(() => ({
         color: '#71717a',
         maxTicksLimit: 10,
         font: {
-          family: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
-          size: 10
+          family: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
+          size: 11
         }
       }
     },
@@ -145,7 +162,7 @@ const chartOptions = computed<ChartOptions<'line'>>(() => ({
         precision: 0,
         maxTicksLimit: 5,
         font: {
-          family: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+          family: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
           size: 10
         }
       }
