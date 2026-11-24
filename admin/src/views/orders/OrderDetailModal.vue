@@ -10,7 +10,7 @@
         <div>
           <div class="flex items-center gap-3">
             <h3 class="text-base font-bold text-zinc-900 font-mono tracking-tight">{{ order.orderCode }}</h3>
-            <BadgeStatus :status="order.status" />
+            <BadgeStatus :status="order.orderStatus" />
           </div>
           <p class="text-[11px] text-zinc-500 font-mono mt-0.5">
             Thời gian tạo: {{ formatDate(order.createdAt) }}
@@ -30,9 +30,9 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-xl bg-zinc-50 border border-zinc-200 text-xs">
           <div class="space-y-1.5">
             <span class="font-mono text-[10px] uppercase tracking-wider text-zinc-500 font-semibold">Khách hàng nhận</span>
-            <p class="font-semibold text-zinc-900 text-sm">{{ order.customerName }}</p>
-            <p class="text-zinc-600 font-mono text-[11px]">SĐT: <span class="text-zinc-900 font-medium">{{ order.customerPhone }}</span></p>
-            <p class="text-zinc-600 font-mono text-[11px]">Email: <span class="text-zinc-900 font-medium">{{ order.customerEmail }}</span></p>
+            <p class="font-semibold text-zinc-900 text-sm">{{ order.recipientName }}</p>
+            <p class="text-zinc-600 font-mono text-[11px]">SĐT: <span class="text-zinc-900 font-medium">{{ order.phoneNumber }}</span></p>
+            <p v-if="order.note" class="text-zinc-600 text-[11px]">Ghi chú: <span class="text-zinc-900">{{ order.note }}</span></p>
           </div>
           <div class="space-y-1.5">
             <span class="font-mono text-[10px] uppercase tracking-wider text-zinc-500 font-semibold">Giao hàng & Thanh toán</span>
@@ -66,9 +66,13 @@
                 <tr v-for="item in (order.items || [])" :key="item.id" class="text-zinc-700 hover:bg-zinc-50/70 transition-colors">
                   <td class="py-3 px-3.5">
                     <div class="font-medium text-zinc-900">{{ item.productName }}</div>
-                    <div v-if="item.skuCode" class="font-mono text-[10px] text-zinc-400">SKU: {{ item.skuCode }}</div>
+                    <div v-if="item.variantName || item.sku" class="font-mono text-[10px] text-zinc-400">
+                      <span v-if="item.variantName">{{ item.variantName }}</span>
+                      <span v-if="item.variantName && item.sku"> • </span>
+                      <span v-if="item.sku">SKU: {{ item.sku }}</span>
+                    </div>
                   </td>
-                  <td class="py-3 px-3.5 text-right font-mono text-zinc-600 tabular-nums">{{ formatCurrency(item.unitPrice) }}</td>
+                  <td class="py-3 px-3.5 text-right font-mono text-zinc-600 tabular-nums">{{ formatCurrency(item.price) }}</td>
                   <td class="py-3 px-3.5 text-center font-mono font-semibold text-zinc-900">{{ item.quantity }}</td>
                   <td class="py-3 px-3.5 text-right font-mono font-semibold text-zinc-900 tabular-nums">{{ formatCurrency(item.totalPrice) }}</td>
                 </tr>
@@ -86,7 +90,7 @@
         <div class="p-4 rounded-xl bg-zinc-50 border border-zinc-200 space-y-2 text-xs">
           <div class="flex justify-between text-zinc-600">
             <span>Tạm tính tiền hàng:</span>
-            <span class="font-mono text-zinc-900 tabular-nums">{{ formatCurrency(order.subtotal) }}</span>
+            <span class="font-mono text-zinc-900 tabular-nums">{{ formatCurrency(order.totalAmount) }}</span>
           </div>
           <div class="flex justify-between text-zinc-600">
             <span>Phí vận chuyển:</span>
@@ -98,7 +102,7 @@
           </div>
           <div class="pt-2 border-t border-zinc-200 flex justify-between text-xs font-semibold text-zinc-900">
             <span>Tổng thanh toán:</span>
-            <span class="font-mono text-emerald-700 text-sm font-bold tabular-nums">{{ formatCurrency(order.totalAmount) }}</span>
+            <span class="font-mono text-emerald-700 text-sm font-bold tabular-nums">{{ formatCurrency(order.finalAmount ?? order.totalAmount) }}</span>
           </div>
         </div>
       </div>
@@ -120,7 +124,7 @@
         <div class="flex items-center gap-2">
           <!-- Next status actions -->
           <button
-            v-if="order.status === 'PENDING'"
+            v-if="order.orderStatus === 'PENDING'"
             type="button"
             @click="advanceStatus('CONFIRMED')"
             :disabled="isProcessing"
@@ -131,7 +135,7 @@
           </button>
 
           <button
-            v-if="order.status === 'CONFIRMED'"
+            v-if="order.orderStatus === 'CONFIRMED'"
             type="button"
             @click="advanceStatus('SHIPPING')"
             :disabled="isProcessing"
@@ -142,7 +146,7 @@
           </button>
 
           <button
-            v-if="order.status === 'SHIPPING'"
+            v-if="order.orderStatus === 'SHIPPING'"
             type="button"
             @click="advanceStatus('DELIVERED')"
             :disabled="isProcessing"
@@ -194,7 +198,7 @@ const emit = defineEmits<{
 const isProcessing = ref(false)
 
 const canCancel = computed(() => {
-  return props.order && (props.order.status === 'PENDING' || props.order.status === 'CONFIRMED')
+  return props.order && (props.order.orderStatus === 'PENDING' || props.order.orderStatus === 'CONFIRMED')
 })
 
 function formatCurrency(val: number): string {

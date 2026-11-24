@@ -2,9 +2,12 @@ package com.project.techstore.user.controller;
 
 import com.project.techstore.common.exception.AppException;
 import com.project.techstore.common.exception.ErrorCode;
+import com.project.techstore.common.dto.PageResponse;
 import com.project.techstore.common.response.ApiResponse;
 import com.project.techstore.user.dto.*;
+import com.project.techstore.user.entity.Role;
 import com.project.techstore.user.entity.User;
+import com.project.techstore.user.entity.UserStatus;
 import com.project.techstore.user.service.AddressService;
 import com.project.techstore.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,6 +17,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -114,5 +118,37 @@ public class UserController {
     ) {
         AddressResponse defaultAddress = addressService.setDefaultAddress(ensureAuthenticated(currentUser).getId(), id);
         return ResponseEntity.ok(ApiResponse.success("Đã đặt làm địa chỉ mặc định", defaultAddress));
+    }
+
+    // ==========================================
+    // ADMIN USER MANAGEMENT
+    // ==========================================
+
+    @GetMapping("/admin")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Lấy danh sách tài khoản người dùng có tìm kiếm & lọc (Admin)")
+    public ResponseEntity<ApiResponse<PageResponse<UserResponse>>> getAllUsersForAdmin(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Role role,
+            @RequestParam(required = false) UserStatus status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok(ApiResponse.success(
+                userService.getAllUsersForAdmin(keyword, role, status, page, size)
+        ));
+    }
+
+    @PatchMapping("/admin/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Cập nhật vai trò hoặc trạng thái khóa/mở khóa tài khoản (Admin)")
+    public ResponseEntity<ApiResponse<UserResponse>> updateUserByAdmin(
+            @AuthenticationPrincipal User currentUser,
+            @PathVariable Long id,
+            @Valid @RequestBody AdminUpdateUserRequest request
+    ) {
+        User admin = ensureAuthenticated(currentUser);
+        UserResponse updated = userService.updateUserByAdmin(admin.getId(), id, request);
+        return ResponseEntity.ok(ApiResponse.success("Đã cập nhật tài khoản người dùng", updated));
     }
 }

@@ -31,7 +31,7 @@
       >
         <div class="w-1/3">
           <input
-            v-model="spec.specKey"
+            v-model="spec.name"
             type="text"
             placeholder="Tên thông số (e.g. CPU, RAM, GPU)"
             class="w-full bg-white border border-zinc-200 rounded-lg px-3 py-2 text-xs text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900/10 transition-colors"
@@ -39,7 +39,7 @@
         </div>
         <div class="flex-1">
           <input
-            v-model="spec.specValue"
+            v-model="spec.value"
             type="text"
             placeholder="Giá trị (e.g. Apple M3 Max 14-core, 36GB Unified)"
             class="w-full bg-white border border-zinc-200 rounded-lg px-3 py-2 text-xs font-mono text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900/10 transition-colors"
@@ -59,35 +59,33 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import { Plus, Trash2 } from 'lucide-vue-next'
-
-interface SpecItem {
-  specKey: string
-  specValue: string
-  displayOrder?: number
-}
+import type { ProductAttribute } from '@/types'
 
 const props = defineProps<{
-  modelValue: SpecItem[]
+  modelValue: ProductAttribute[]
 }>()
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: SpecItem[]): void
+  (e: 'update:modelValue', value: ProductAttribute[]): void
 }>()
 
-const specs = props.modelValue
+const specs = computed(() => props.modelValue)
 
 function addSpec() {
-  specs.push({
-    specKey: '',
-    specValue: '',
-    displayOrder: specs.length + 1
-  })
-  emit('update:modelValue', specs)
+  emit('update:modelValue', [
+    ...props.modelValue,
+    {
+      name: '',
+      value: ''
+    }
+  ])
 }
 
 function removeSpec(index: number) {
-  specs.splice(index, 1)
-  emit('update:modelValue', specs)
+  const next = [...props.modelValue]
+  next.splice(index, 1)
+  emit('update:modelValue', next)
 }
 </script>

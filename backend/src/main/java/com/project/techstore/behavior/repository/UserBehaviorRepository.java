@@ -61,4 +61,60 @@ public interface UserBehaviorRepository extends JpaRepository<UserBehavior, Long
            "GROUP BY b.actionValue " +
            "ORDER BY COUNT(b) DESC, MAX(b.createdAt) DESC")
     List<Object[]> findAllTimeTopSearchKeywords(Pageable pageable);
+
+    @Query("SELECT b.actionType, COUNT(b) FROM UserBehavior b " +
+           "WHERE b.createdAt >= :since " +
+           "GROUP BY b.actionType")
+    List<Object[]> countByActionTypeSince(@Param("since") Instant since);
+
+    @Query(value = "SELECT TO_CHAR(created_at AT TIME ZONE 'Asia/Ho_Chi_Minh', 'YYYY-MM-DD') AS day_str, " +
+                   "action_type, COUNT(*) AS cnt " +
+                   "FROM user_behaviors " +
+                   "WHERE created_at >= :since " +
+                   "GROUP BY day_str, action_type " +
+                   "ORDER BY day_str ASC", nativeQuery = true)
+    List<Object[]> findDailyActionCountsSince(@Param("since") Instant since);
+
+    @Query("SELECT b.product.id, " +
+           "SUM(CASE WHEN b.actionType = com.project.techstore.behavior.entity.BehaviorType.VIEW THEN 1L ELSE 0L END), " +
+           "SUM(CASE WHEN b.actionType = com.project.techstore.behavior.entity.BehaviorType.WISHLIST THEN 1L ELSE 0L END), " +
+           "SUM(CASE WHEN b.actionType = com.project.techstore.behavior.entity.BehaviorType.ADD_TO_CART THEN 1L ELSE 0L END), " +
+           "SUM(CASE WHEN b.actionType = com.project.techstore.behavior.entity.BehaviorType.PURCHASE THEN 1L ELSE 0L END), " +
+           INTERACTION_SCORE_EXPRESSION + " " +
+           "FROM UserBehavior b " +
+           "WHERE b.product IS NOT NULL AND b.createdAt >= :since " +
+           "GROUP BY b.product.id " +
+           "ORDER BY " + INTERACTION_SCORE_EXPRESSION + " DESC, " +
+           "SUM(CASE WHEN b.actionType = com.project.techstore.behavior.entity.BehaviorType.VIEW THEN 1L ELSE 0L END) DESC")
+    List<Object[]> findTopInteractedProductsSince(@Param("since") Instant since, Pageable pageable);
+
+    @Query("SELECT b.actionType, COUNT(b) FROM UserBehavior b " +
+           "WHERE b.createdAt >= :since AND b.createdAt < :until " +
+           "GROUP BY b.actionType")
+    List<Object[]> countByActionTypeBetween(@Param("since") Instant since, @Param("until") Instant until);
+
+    @Query(value = "SELECT TO_CHAR(created_at AT TIME ZONE 'Asia/Ho_Chi_Minh', 'YYYY-MM-DD') AS day_str, " +
+                   "action_type, COUNT(*) AS cnt " +
+                   "FROM user_behaviors " +
+                   "WHERE created_at >= :since AND created_at < :until " +
+                   "GROUP BY day_str, action_type " +
+                   "ORDER BY day_str ASC", nativeQuery = true)
+    List<Object[]> findDailyActionCountsBetween(@Param("since") Instant since, @Param("until") Instant until);
+
+    @Query("SELECT b.product.id, " +
+           "SUM(CASE WHEN b.actionType = com.project.techstore.behavior.entity.BehaviorType.VIEW THEN 1L ELSE 0L END), " +
+           "SUM(CASE WHEN b.actionType = com.project.techstore.behavior.entity.BehaviorType.WISHLIST THEN 1L ELSE 0L END), " +
+           "SUM(CASE WHEN b.actionType = com.project.techstore.behavior.entity.BehaviorType.ADD_TO_CART THEN 1L ELSE 0L END), " +
+           "SUM(CASE WHEN b.actionType = com.project.techstore.behavior.entity.BehaviorType.PURCHASE THEN 1L ELSE 0L END), " +
+           INTERACTION_SCORE_EXPRESSION + " " +
+           "FROM UserBehavior b " +
+           "WHERE b.product IS NOT NULL AND b.createdAt >= :since AND b.createdAt < :until " +
+           "GROUP BY b.product.id " +
+           "ORDER BY " + INTERACTION_SCORE_EXPRESSION + " DESC, " +
+           "SUM(CASE WHEN b.actionType = com.project.techstore.behavior.entity.BehaviorType.VIEW THEN 1L ELSE 0L END) DESC")
+    List<Object[]> findTopInteractedProductsBetween(
+            @Param("since") Instant since,
+            @Param("until") Instant until,
+            Pageable pageable
+    );
 }

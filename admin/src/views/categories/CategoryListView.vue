@@ -6,7 +6,7 @@
         <div class="flex items-center gap-2">
           <h1 class="text-xl font-semibold tracking-tight text-zinc-900">Quản lý Danh mục</h1>
           <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-medium bg-zinc-100 text-zinc-700 border border-zinc-200">
-            {{ categories.length }} danh mục
+            {{ filteredCategories.length }} danh mục
           </span>
         </div>
         <p class="text-xs text-zinc-500 mt-1 font-mono">Cấu trúc cây danh mục ngành hàng sản phẩm trên toàn sàn</p>
@@ -20,6 +20,46 @@
         <Plus class="w-3.5 h-3.5" />
         <span>Thêm danh mục</span>
       </button>
+    </div>
+
+    <!-- Filters Bar -->
+    <div class="bg-white border border-zinc-200 rounded-xl p-2.5 flex flex-wrap items-center gap-2.5 shadow-xs">
+      <div class="relative flex-1 min-w-[220px]">
+        <Search class="w-3.5 h-3.5 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
+        <input
+          v-model="keyword"
+          type="text"
+          placeholder="Tìm theo tên danh mục, slug, mô tả..."
+          class="w-full h-9 bg-zinc-50/70 focus:bg-white border border-zinc-200 rounded-lg pl-9 pr-8 text-xs text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-zinc-900 transition-colors"
+        />
+        <button
+          v-if="keyword"
+          type="button"
+          @click="keyword = ''"
+          class="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 text-xs"
+        >
+          ✕
+        </button>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2">
+        <CustomSelect v-model="productPresenceFilter" :options="presenceOptions" />
+        <CustomSelect v-model="sortOption" :options="sortOptions" align="right" />
+        <button
+          type="button"
+          @click="loadCategories"
+          class="h-9 px-3.5 inline-flex items-center justify-center rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-900 text-white text-xs font-medium shadow-xs transition-colors cursor-pointer shrink-0"
+        >
+          Tìm kiếm
+        </button>
+        <button
+          type="button"
+          @click="resetFilters"
+          class="h-9 px-3 inline-flex items-center justify-center rounded-lg bg-white hover:bg-zinc-50 border border-zinc-200 text-zinc-700 hover:text-zinc-900 text-xs font-medium shadow-xs transition-colors cursor-pointer shrink-0"
+        >
+          Đặt lại
+        </button>
+      </div>
     </div>
 
     <!-- Data Table (Linear High-Density) -->
@@ -44,13 +84,13 @@
                 </div>
               </td>
             </tr>
-            <tr v-else-if="categories.length === 0">
+            <tr v-else-if="filteredCategories.length === 0">
               <td colspan="5" class="py-12 text-center text-zinc-400 text-xs font-sans">
-                Chưa có danh mục nào.
+                {{ categories.length === 0 ? 'Chưa có danh mục nào.' : 'Không tìm thấy danh mục phù hợp với bộ lọc.' }}
               </td>
             </tr>
             <tr
-              v-for="cat in categories"
+              v-for="cat in filteredCategories"
               :key="cat.id"
               class="hover:bg-zinc-50/70 transition-colors group"
             >
@@ -178,15 +218,62 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
-import { Plus, Edit3, Trash2, Folder, Loader2 } from 'lucide-vue-next'
+import { ref, reactive, computed, onMounted } from 'vue'
+import { Plus, Search, Edit3, Trash2, Folder, Loader2 } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 import ConfirmModal from '@/components/common/ConfirmModal.vue'
+import CustomSelect, { type CustomSelectOption } from '@/components/common/CustomSelect.vue'
 import { fetchCategories, createCategory, updateCategory, deleteCategory } from '@/api/categories'
 import type { Category } from '@/types'
 
 const categories = ref<Category[]>([])
 const isLoading = ref(false)
+const keyword = ref('')
+const productPresenceFilter = ref<'ALL' | 'HAS_PRODUCTS' | 'EMPTY'>('ALL')
+const sortOption = ref<'DEFAULT' | 'NAME_ASC' | 'PRODUCTS_DESC'>('DEFAULT')
+
+const presenceOptions: CustomSelectOption[] = [
+  { value: 'ALL', label: 'Tất cả danh mục' },
+  { value: 'HAS_PRODUCTS', label: 'Đã có sản phẩm' },
+  { value: 'EMPTY', label: 'Chưa có sản phẩm' }
+]
+
+const sortOptions: CustomSelectOption[] = [
+  { value: 'DEFAULT', label: 'Mặc định' },
+  { value: 'NAME_ASC', label: 'Tên A–Z' },
+  { value: 'PRODUCTS_DESC', label: 'Nhiều sản phẩm nhất' }
+]
+
+const filteredCategories = computed(() => {
+  const kw = keyword.value.trim().toLowerCase()
+  const list = categories.value.filter((cat) => {
+    const matchesKeyword =
+      !kw ||
+      cat.name.toLowerCase().includes(kw) ||
+      cat.slug.toLowerCase().includes(kw) ||
+      (cat.description || '').toLowerCase().includes(kw)
+    const count = cat.productCount ?? 0
+    const matchesPresence =
+      productPresenceFilter.value === 'ALL' ||
+      (productPresenceFilter.value === 'HAS_PRODUCTS' && count > 0) ||
+      (productPresenceFilter.value === 'EMPTY' && count === 0)
+    return matchesKeyword && matchesPresence
+  })
+
+  if (sortOption.value === 'NAME_ASC') {
+    return [...list].sort((a, b) => a.name.localeCompare(b.name, 'vi'))
+  }
+  if (sortOption.value === 'PRODUCTS_DESC') {
+    return [...list].sort((a, b) => (b.productCount ?? 0) - (a.productCount ?? 0))
+  }
+  return list
+})
+
+function resetFilters() {
+  keyword.value = ''
+  productPresenceFilter.value = 'ALL'
+  sortOption.value = 'DEFAULT'
+}
 
 const isModalOpen = ref(false)
 const isSubmitting = ref(false)

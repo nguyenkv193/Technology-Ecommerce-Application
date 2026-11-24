@@ -4,6 +4,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { setActivePinia, createPinia } from 'pinia'
 import ProductListView from '../products/ProductListView.vue'
 import * as productsApi from '@/api/products'
+import * as categoriesApi from '@/api/categories'
+import * as brandsApi from '@/api/brands'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -19,6 +21,14 @@ vi.mock('@/api/products', () => ({
   deleteProduct: vi.fn()
 }))
 
+vi.mock('@/api/categories', () => ({
+  fetchCategories: vi.fn()
+}))
+
+vi.mock('@/api/brands', () => ({
+  fetchBrands: vi.fn()
+}))
+
 describe('ProductListView', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
@@ -26,6 +36,8 @@ describe('ProductListView', () => {
   })
 
   it('renders products table with items and handles pagination', async () => {
+    vi.mocked(categoriesApi.fetchCategories).mockResolvedValueOnce([])
+    vi.mocked(brandsApi.fetchBrands).mockResolvedValueOnce([])
     vi.mocked(productsApi.fetchProducts).mockResolvedValueOnce({
       content: [
         {
@@ -36,10 +48,19 @@ describe('ProductListView', () => {
           categoryName: 'Laptop',
           brandId: 1,
           brandName: 'Apple',
-          originalPrice: 89990000,
-          salePrice: 84990000,
-          stockQuantity: 15,
-          primaryImageUrl: 'https://example.com/macbook.png'
+          minPrice: 84990000,
+          maxPrice: 89990000,
+          totalStock: 15,
+          thumbnailUrl: 'https://example.com/macbook.png',
+          variants: [
+            {
+              id: 10,
+              name: '36GB / 1TB SSD',
+              price: 84990000,
+              originalPrice: 89990000,
+              stock: 15
+            }
+          ]
         }
       ],
       page: 0,
@@ -60,6 +81,8 @@ describe('ProductListView', () => {
     expect(wrapper.text()).toContain('MacBook Pro M3 Max 16 inch')
     expect(wrapper.text()).toContain('Apple')
     expect(wrapper.text()).toContain('Laptop')
+    expect(wrapper.text()).toContain('84.990.000')
+    expect(wrapper.text()).toContain('15')
     expect(wrapper.text()).toContain('Thêm sản phẩm')
   })
 })

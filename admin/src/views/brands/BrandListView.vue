@@ -6,7 +6,7 @@
         <div class="flex items-center gap-2">
           <h1 class="text-xl font-semibold tracking-tight text-zinc-900">Quản lý Thương hiệu</h1>
           <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-medium bg-zinc-100 text-zinc-700 border border-zinc-200">
-            {{ brands.length }} thương hiệu
+            {{ filteredBrands.length }} thương hiệu
           </span>
         </div>
         <p class="text-xs text-zinc-500 mt-1 font-mono">Các hãng công nghệ, nhà sản xuất phân phối chính hãng trên TechStore</p>
@@ -20,6 +20,46 @@
         <Plus class="w-3.5 h-3.5" />
         <span>Thêm thương hiệu</span>
       </button>
+    </div>
+
+    <!-- Filters Bar -->
+    <div class="bg-white border border-zinc-200 rounded-xl p-2.5 flex flex-wrap items-center gap-2.5 shadow-xs">
+      <div class="relative flex-1 min-w-[220px]">
+        <Search class="w-3.5 h-3.5 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
+        <input
+          v-model="keyword"
+          type="text"
+          placeholder="Tìm theo tên thương hiệu, slug, xuất xứ..."
+          class="w-full h-9 bg-zinc-50/70 focus:bg-white border border-zinc-200 rounded-lg pl-9 pr-8 text-xs text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-zinc-900 transition-colors"
+        />
+        <button
+          v-if="keyword"
+          type="button"
+          @click="keyword = ''"
+          class="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 text-xs"
+        >
+          ✕
+        </button>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2">
+        <CustomSelect v-model="selectedCountry" :options="countryFilterOptions" />
+        <CustomSelect v-model="productPresenceFilter" :options="presenceOptions" align="right" />
+        <button
+          type="button"
+          @click="loadBrands"
+          class="h-9 px-3.5 inline-flex items-center justify-center rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-900 text-white text-xs font-medium shadow-xs transition-colors cursor-pointer shrink-0"
+        >
+          Tìm kiếm
+        </button>
+        <button
+          type="button"
+          @click="resetFilters"
+          class="h-9 px-3 inline-flex items-center justify-center rounded-lg bg-white hover:bg-zinc-50 border border-zinc-200 text-zinc-700 hover:text-zinc-900 text-xs font-medium shadow-xs transition-colors cursor-pointer shrink-0"
+        >
+          Đặt lại
+        </button>
+      </div>
     </div>
 
     <!-- Data Table (Linear High-Density) -->
@@ -45,13 +85,13 @@
                 </div>
               </td>
             </tr>
-            <tr v-else-if="brands.length === 0">
+            <tr v-else-if="filteredBrands.length === 0">
               <td colspan="6" class="py-12 text-center text-zinc-400 text-xs font-sans">
-                Chưa có thương hiệu nào.
+                {{ brands.length === 0 ? 'Chưa có thương hiệu nào.' : 'Không tìm thấy thương hiệu phù hợp với bộ lọc.' }}
               </td>
             </tr>
             <tr
-              v-for="brand in brands"
+              v-for="brand in filteredBrands"
               :key="brand.id"
               class="hover:bg-zinc-50/70 transition-colors group"
             >
@@ -197,15 +237,61 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
-import { Plus, Edit3, Trash2, Award, Loader2 } from 'lucide-vue-next'
+import { ref, reactive, computed, onMounted } from 'vue'
+import { Plus, Search, Edit3, Trash2, Award, Loader2 } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 import ConfirmModal from '@/components/common/ConfirmModal.vue'
+import CustomSelect, { type CustomSelectOption } from '@/components/common/CustomSelect.vue'
 import { fetchBrands, createBrand, updateBrand, deleteBrand } from '@/api/brands'
 import type { Brand } from '@/types'
 
 const brands = ref<Brand[]>([])
 const isLoading = ref(false)
+const keyword = ref('')
+const selectedCountry = ref('ALL')
+const productPresenceFilter = ref<'ALL' | 'HAS_PRODUCTS' | 'EMPTY'>('ALL')
+
+const presenceOptions: CustomSelectOption[] = [
+  { value: 'ALL', label: 'Tất cả thương hiệu' },
+  { value: 'HAS_PRODUCTS', label: 'Đã có sản phẩm' },
+  { value: 'EMPTY', label: 'Chưa có sản phẩm' }
+]
+
+const countryFilterOptions = computed<CustomSelectOption[]>(() => {
+  const countries = Array.from(
+    new Set(brands.value.map((b) => (b.originCountry || '').trim()).filter(Boolean))
+  ).sort((a, b) => a.localeCompare(b, 'vi'))
+  return [
+    { value: 'ALL', label: 'Tất cả xuất xứ' },
+    ...countries.map((c) => ({ value: c, label: c }))
+  ]
+})
+
+const filteredBrands = computed(() => {
+  const kw = keyword.value.trim().toLowerCase()
+  return brands.value.filter((brand) => {
+    const matchesKeyword =
+      !kw ||
+      brand.name.toLowerCase().includes(kw) ||
+      brand.slug.toLowerCase().includes(kw) ||
+      (brand.originCountry || '').toLowerCase().includes(kw)
+    const matchesCountry =
+      selectedCountry.value === 'ALL' ||
+      (brand.originCountry || '').trim() === selectedCountry.value
+    const count = brand.productCount ?? 0
+    const matchesPresence =
+      productPresenceFilter.value === 'ALL' ||
+      (productPresenceFilter.value === 'HAS_PRODUCTS' && count > 0) ||
+      (productPresenceFilter.value === 'EMPTY' && count === 0)
+    return matchesKeyword && matchesCountry && matchesPresence
+  })
+})
+
+function resetFilters() {
+  keyword.value = ''
+  selectedCountry.value = 'ALL'
+  productPresenceFilter.value = 'ALL'
+}
 
 const isModalOpen = ref(false)
 const isSubmitting = ref(false)

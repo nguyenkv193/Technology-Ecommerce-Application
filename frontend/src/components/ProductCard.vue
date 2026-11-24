@@ -90,15 +90,15 @@
         <div class="text-[10px] text-zinc-400 font-medium truncate" :title="activeVariant ? activeVariant.name : 'Giá tham khảo'">
           {{ activeVariant ? activeVariant.name : 'Giá tham khảo' }}
         </div>
-        <div class="flex items-baseline gap-1.5 flex-wrap">
-          <span class="text-sm sm:text-base font-bold text-zinc-900">
-            {{ formatPrice(displayPrice) }}
-          </span>
-          <span 
-            v-if="displayOriginalPrice && displayOriginalPrice > displayPrice" 
-            class="text-[11px] text-zinc-400 line-through"
+        <div class="flex flex-col">
+          <span
+            v-if="displayOriginalPrice && displayOriginalPrice > displayPrice"
+            class="text-[11px] text-zinc-400 line-through leading-tight"
           >
             {{ formatPrice(displayOriginalPrice) }}
+          </span>
+          <span class="text-sm sm:text-base font-bold text-zinc-900 leading-tight">
+            {{ formatPrice(displayPrice) }}
           </span>
         </div>
       </div>

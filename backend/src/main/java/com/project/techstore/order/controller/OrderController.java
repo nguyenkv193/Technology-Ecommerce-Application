@@ -49,6 +49,7 @@ public class OrderController {
     public ResponseEntity<ApiResponse<PageResponse<OrderResponse>>> getOrders(
             @AuthenticationPrincipal User currentUser,
             @RequestParam(required = false) OrderStatus status,
+            @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
@@ -59,7 +60,7 @@ public class OrderController {
         if (currentUser.getRole() == Role.ADMIN) {
             orders = orderService.getAllOrders(status, page, size);
         } else {
-            orders = orderService.getUserOrders(currentUser.getId(), page, size);
+            orders = orderService.getUserOrders(currentUser.getId(), status, keyword, page, size);
         }
         return ResponseEntity.ok(ApiResponse.success(orders));
     }

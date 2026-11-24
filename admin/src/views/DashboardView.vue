@@ -11,7 +11,15 @@
         </p>
       </div>
 
-      <div class="flex items-center gap-2.5 shrink-0">
+      <div class="flex flex-wrap items-center gap-2.5 shrink-0">
+        <CustomSelect
+          v-model="activeSection"
+          :options="sectionOptions"
+          align="right"
+          menu-width-class="w-64"
+          trigger-test-id="dashboard-section-select"
+          option-test-id-prefix="dashboard-section-option"
+        />
         <router-link
           to="/products/create"
           class="px-3.5 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-medium shadow-sm flex items-center gap-2 transition-all"
@@ -63,95 +71,259 @@
     </div>
 
     <!-- Dynamic Revenue Chart -->
-    <div class="p-5 rounded-xl bg-white border border-zinc-200 shadow-sm relative overflow-hidden">
+    <div v-if="isSectionVisible('revenue')" class="p-5 rounded-xl bg-white border border-zinc-200 shadow-sm relative overflow-hidden">
       <!-- Chart Header & Range Filter -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
-        <div>
-          <h2 class="text-sm font-semibold text-zinc-900 tracking-tight">Doanh thu & Số lượng đơn</h2>
-          <p class="text-xs text-zinc-500 mt-0.5">Biểu đồ tổng hợp từ dữ liệu đơn hàng thực tế</p>
+      <div class="space-y-3 mb-5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 class="text-sm font-semibold text-zinc-900 tracking-tight">Doanh thu & Số lượng đơn</h2>
+            <p class="text-xs text-zinc-500 mt-0.5">Biểu đồ tổng hợp từ dữ liệu đơn hàng thực tế</p>
+          </div>
+
+          <div class="flex items-center gap-1 p-1 rounded-lg bg-zinc-100 border border-zinc-200 text-xs font-mono self-start sm:self-auto shrink-0">
+            <button
+              v-for="range in timeRanges"
+              :key="range.id"
+              :data-testid="`revenue-range-${range.id}`"
+              @click="activeRange = range.id"
+              class="px-2.5 py-1 rounded-md transition-all text-[11px]"
+              :class="activeRange === range.id ? 'bg-white text-zinc-900 font-semibold shadow-xs' : 'text-zinc-600 hover:text-zinc-900'"
+            >
+              {{ range.label }}
+            </button>
+          </div>
         </div>
 
-        <div class="flex items-center gap-1 p-1 rounded-lg bg-zinc-100 border border-zinc-200 text-xs font-mono self-start sm:self-auto">
-          <button
-            v-for="range in timeRanges"
-            :key="range.id"
-            @click="activeRange = range.id"
-            class="px-2.5 py-1 rounded-md transition-all text-[11px]"
-            :class="activeRange === range.id ? 'bg-white text-zinc-900 font-semibold shadow-xs' : 'text-zinc-600 hover:text-zinc-900'"
-          >
-            {{ range.label }}
-          </button>
+        <div
+          v-if="activeRange === 'custom'"
+          class="flex flex-wrap items-center justify-between gap-2.5 px-3 py-2 rounded-lg bg-zinc-50 border border-zinc-200/80 text-xs"
+        >
+          <span class="text-zinc-500 font-medium">Khoảng thời gian:</span>
+          <div class="flex flex-wrap items-center gap-2">
+            <input
+              v-model="revenueFrom"
+              type="date"
+              data-testid="revenue-from"
+              class="h-8 px-2.5 rounded-lg bg-white border border-zinc-200 text-xs text-zinc-700 focus:outline-none focus:border-zinc-900"
+            />
+            <span class="text-zinc-400">–</span>
+            <input
+              v-model="revenueTo"
+              type="date"
+              data-testid="revenue-to"
+              class="h-8 px-2.5 rounded-lg bg-white border border-zinc-200 text-xs text-zinc-700 focus:outline-none focus:border-zinc-900"
+            />
+            <span v-if="revenueRangeError" class="text-[11px] text-rose-600 font-medium">
+              {{ revenueRangeError }}
+            </span>
+          </div>
         </div>
       </div>
 
       <!-- Chart Content Area -->
-      <div class="relative h-56 w-full pt-2">
-        <!-- Horizontal Reference Gridlines -->
-        <div class="absolute inset-0 flex flex-col justify-between pointer-events-none text-[10px] font-mono text-zinc-400">
-          <div class="border-b border-zinc-100 w-full flex justify-between pr-2">
-            <span>{{ formatCompactCurrency(chartMax) }}</span>
+      <RevenueChart :points="revenuePoints" />
+    </div>
+
+    <!-- User Interaction Analytics & Top Products -->
+    <div v-if="isSectionVisible('interactions')" class="grid grid-cols-1 xl:grid-cols-12 gap-6">
+      <!-- Interaction Trend Chart (7 cols) -->
+      <div class="xl:col-span-7 p-5 rounded-xl bg-white border border-zinc-200 shadow-sm space-y-4">
+        <div class="space-y-3">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h2 class="text-sm font-semibold text-zinc-900 tracking-tight">Thống kê tương tác người dùng</h2>
+              <p class="text-xs text-zinc-500 mt-0.5">Theo dõi lượt xem (click), lượt tym, thêm giỏ hàng và mua hàng</p>
+            </div>
+
+            <div class="flex items-center gap-1 p-1 rounded-lg bg-zinc-100 border border-zinc-200 text-xs font-mono self-start sm:self-auto shrink-0">
+              <button
+                v-for="opt in interactionDayOptions"
+                :key="opt.days"
+                @click="changeInteractionDays(opt.days)"
+                class="px-2.5 py-1 rounded-md transition-all text-[11px]"
+                :class="interactionMode === 'preset' && interactionDays === opt.days ? 'bg-white text-zinc-900 font-semibold shadow-xs' : 'text-zinc-600 hover:text-zinc-900'"
+              >
+                {{ opt.label }}
+              </button>
+              <button
+                type="button"
+                data-testid="interaction-custom-btn"
+                @click="enableCustomInteractionRange"
+                class="px-2.5 py-1 rounded-md transition-all text-[11px]"
+                :class="interactionMode === 'custom' ? 'bg-white text-zinc-900 font-semibold shadow-xs' : 'text-zinc-600 hover:text-zinc-900'"
+              >
+                Tùy chỉnh
+              </button>
+            </div>
           </div>
-          <div class="border-b border-zinc-100 w-full flex justify-between pr-2">
-            <span>{{ formatCompactCurrency(chartMax / 2) }}</span>
-          </div>
-          <div class="border-b border-zinc-100 w-full flex justify-between pr-2">
-            <span>0 ₫</span>
+
+          <div
+            v-if="interactionMode === 'custom'"
+            class="flex flex-col gap-1.5 px-3 py-2 rounded-lg bg-zinc-50 border border-zinc-200/80 text-xs"
+          >
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="text-zinc-500 font-medium">Khoảng thời gian (tối đa 90 ngày):</span>
+              <div class="flex flex-wrap items-center gap-2">
+                <input
+                  v-model="interactionFrom"
+                  type="date"
+                  data-testid="interaction-from"
+                  class="h-8 px-2.5 rounded-lg bg-white border border-zinc-200 text-xs text-zinc-700 focus:outline-none focus:border-zinc-900"
+                />
+                <span class="text-zinc-400">–</span>
+                <input
+                  v-model="interactionTo"
+                  type="date"
+                  data-testid="interaction-to"
+                  class="h-8 px-2.5 rounded-lg bg-white border border-zinc-200 text-xs text-zinc-700 focus:outline-none focus:border-zinc-900"
+                />
+                <button
+                  type="button"
+                  data-testid="interaction-apply-btn"
+                  @click="applyCustomInteractionRange"
+                  class="h-8 px-3 inline-flex items-center justify-center rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-900 text-white text-[11px] font-medium transition-colors cursor-pointer shrink-0"
+                >
+                  Áp dụng
+                </button>
+              </div>
+            </div>
+            <p v-if="interactionRangeError" data-testid="interaction-range-error" class="text-[11px] text-rose-600 font-medium">
+              {{ interactionRangeError }}
+            </p>
           </div>
         </div>
 
-        <!-- SVG Line & Fill -->
-        <svg
-          class="w-full h-full overflow-visible relative z-10"
-          preserveAspectRatio="none"
-          viewBox="0 0 700 180"
-        >
-          <defs>
-            <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#2563eb" stop-opacity="0.12" />
-              <stop offset="100%" stop-color="#2563eb" stop-opacity="0.0" />
-            </linearGradient>
-          </defs>
+        <!-- Mini KPI Pills -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+          <div class="p-2.5 rounded-lg bg-blue-50/60 border border-blue-100">
+            <div class="flex items-center gap-1.5 text-[11px] text-blue-700 font-medium">
+              <Eye class="w-3.5 h-3.5" />
+              <span>Lượt xem</span>
+            </div>
+            <div class="text-base font-bold font-mono text-zinc-900 mt-1 tabular-nums">
+              {{ behaviorAnalytics.summary.totalViews.toLocaleString('vi-VN') }}
+            </div>
+          </div>
 
-          <!-- Area under curve -->
-          <path
-            v-if="chartPoints.length > 0"
-            :d="areaPath"
-            fill="url(#chartGradient)"
+          <div class="p-2.5 rounded-lg bg-rose-50/60 border border-rose-100">
+            <div class="flex items-center gap-1.5 text-[11px] text-rose-700 font-medium">
+              <Heart class="w-3.5 h-3.5" />
+              <span>Lượt tym</span>
+            </div>
+            <div class="text-base font-bold font-mono text-zinc-900 mt-1 tabular-nums">
+              {{ behaviorAnalytics.summary.totalWishlists.toLocaleString('vi-VN') }}
+            </div>
+          </div>
+
+          <div class="p-2.5 rounded-lg bg-amber-50/60 border border-amber-100">
+            <div class="flex items-center gap-1.5 text-[11px] text-amber-700 font-medium">
+              <ShoppingCart class="w-3.5 h-3.5" />
+              <span>Thêm giỏ</span>
+            </div>
+            <div class="text-base font-bold font-mono text-zinc-900 mt-1 tabular-nums">
+              {{ behaviorAnalytics.summary.totalAddToCart.toLocaleString('vi-VN') }}
+            </div>
+          </div>
+
+          <div class="p-2.5 rounded-lg bg-emerald-50/60 border border-emerald-100">
+            <div class="flex items-center gap-1.5 text-[11px] text-emerald-700 font-medium">
+              <CheckCircle2 class="w-3.5 h-3.5" />
+              <span>Mua hàng</span>
+            </div>
+            <div class="text-base font-bold font-mono text-zinc-900 mt-1 tabular-nums">
+              {{ behaviorAnalytics.summary.totalPurchases.toLocaleString('vi-VN') }}
+            </div>
+          </div>
+        </div>
+
+        <InteractionChart :series="behaviorAnalytics.dailySeries" />
+      </div>
+
+      <!-- Top Interacted Products Ranking (5 cols) -->
+      <div class="xl:col-span-5 p-5 rounded-xl bg-white border border-zinc-200 shadow-sm flex flex-col space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-zinc-100">
+          <div>
+            <h2 class="text-sm font-semibold text-zinc-900 tracking-tight">Xếp hạng sản phẩm tương tác</h2>
+            <p class="text-xs text-zinc-500 mt-0.5">
+              {{ interactionRangeLabel }}
+            </p>
+          </div>
+
+          <CustomSelect
+            v-model="rankingSortKey"
+            :options="rankingSortOptions"
+            align="right"
+            size="sm"
           />
+        </div>
 
-          <!-- Line -->
-          <path
-            v-if="chartPoints.length > 0"
-            :d="linePath"
-            fill="none"
-            stroke="#2563eb"
-            stroke-width="2.2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
+        <div v-if="isLoadingAnalytics" class="py-12 text-center text-zinc-500 text-xs">
+          <Loader2 class="w-4 h-4 animate-spin mx-auto mb-2 text-zinc-500" />
+          <span>Đang tải bảng xếp hạng...</span>
+        </div>
 
-          <!-- Interactive Data Points -->
-          <g v-for="(pt, idx) in chartPoints" :key="idx">
-            <circle
-              :cx="pt.x"
-              :cy="pt.y"
-              r="4"
-              class="fill-white stroke-blue-600 stroke-2 hover:r-5 hover:fill-blue-600 transition-all cursor-pointer"
+        <div v-else-if="sortedTopProducts.length === 0" class="py-12 text-center text-zinc-400 text-xs">
+          Chưa có dữ liệu tương tác trong khoảng thời gian này.
+        </div>
+
+        <div v-else class="space-y-2.5 overflow-y-auto max-h-[340px] pr-1">
+          <div
+            v-for="(item, idx) in sortedTopProducts"
+            :key="item.productId"
+            class="flex items-center gap-3 p-2.5 rounded-xl border border-zinc-100 hover:border-zinc-200 hover:bg-zinc-50/70 transition-colors"
+          >
+            <!-- Rank Badge -->
+            <div
+              class="w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-mono font-bold shrink-0"
+              :class="rankBadgeClass(idx)"
             >
-              <title>{{ pt.label }}: {{ formatCurrency(pt.amount) }} ({{ pt.count }} đơn hàng)</title>
-            </circle>
-          </g>
-        </svg>
+              {{ idx + 1 }}
+            </div>
 
-        <!-- X-Axis Labels -->
-        <div class="flex justify-between text-[11px] font-mono text-zinc-500 mt-2 px-1">
-          <span v-for="pt in chartPoints" :key="pt.label">{{ pt.label }}</span>
+            <!-- Thumbnail -->
+            <div class="w-10 h-10 rounded-lg bg-zinc-50 border border-zinc-200 overflow-hidden flex items-center justify-center shrink-0">
+              <img
+                v-if="item.thumbnailUrl"
+                :src="item.thumbnailUrl"
+                :alt="item.productName"
+                class="w-full h-full object-cover"
+              />
+              <Package v-else class="w-4 h-4 text-zinc-400" />
+            </div>
+
+            <!-- Product Info -->
+            <div class="min-w-0 flex-1">
+              <router-link
+                :to="`/products/${item.productId}/edit`"
+                class="text-xs font-semibold text-zinc-900 hover:text-blue-600 truncate block"
+                :title="item.productName"
+              >
+                {{ item.productName }}
+              </router-link>
+              <div class="flex flex-wrap items-center gap-x-2.5 gap-y-0.5 text-[10px] font-mono text-zinc-500 mt-1">
+                <span class="text-blue-600 font-medium">{{ item.viewCount }} xem</span>
+                <span class="text-rose-600 font-medium">{{ item.wishlistCount }} tym</span>
+                <span class="text-amber-600 font-medium">{{ item.addToCartCount }} giỏ</span>
+                <span class="text-emerald-600 font-medium">{{ item.purchaseCount }} mua</span>
+              </div>
+            </div>
+
+            <!-- Score -->
+            <div class="text-right shrink-0">
+              <div class="text-xs font-bold font-mono text-zinc-900 tabular-nums">
+                {{ Math.round(item.interactionScore) }}đ
+              </div>
+              <div v-if="item.minPrice" class="text-[10px] font-mono text-zinc-400 tabular-nums">
+                {{ formatCompactCurrency(item.minPrice) }}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- 2-Column Bottom Layout -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div v-if="isSectionVisible('orders')" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <!-- Recent Orders Table (2 Cols) -->
       <div class="lg:col-span-2 bg-white border border-zinc-200 rounded-xl p-5 shadow-sm space-y-4">
         <div class="flex items-center justify-between pb-3 border-b border-zinc-100">
@@ -204,14 +376,14 @@
                   </span>
                 </td>
                 <td class="py-3 px-3 font-sans">
-                  <div class="font-medium text-zinc-900">{{ order.customerName }}</div>
-                  <div class="text-[11px] font-mono text-zinc-500">{{ order.customerPhone }}</div>
+                  <div class="font-medium text-zinc-900">{{ order.recipientName }}</div>
+                  <div class="text-[11px] font-mono text-zinc-500">{{ order.phoneNumber }}</div>
                 </td>
                 <td class="py-3 px-3 font-semibold text-zinc-900 tabular-nums">
-                  {{ formatCurrency(order.totalAmount) }}
+                  {{ formatCurrency(order.finalAmount ?? order.totalAmount) }}
                 </td>
                 <td class="py-3 px-3 font-sans">
-                  <BadgeStatus :status="order.status" />
+                  <BadgeStatus :status="order.orderStatus" />
                 </td>
                 <td class="py-3 px-3 text-right font-sans">
                   <router-link
@@ -330,10 +502,10 @@
               <ChevronRight class="w-3.5 h-3.5 text-zinc-400" />
             </router-link>
             <router-link
-              to="/system-ops"
+              to="/users"
               class="w-full flex items-center justify-between p-2.5 rounded-lg bg-zinc-50 border border-zinc-200/80 hover:border-zinc-300 hover:bg-zinc-100/70 transition-all text-xs"
             >
-              <span class="text-zinc-800 font-medium">Giám sát & Vận hành Hệ thống</span>
+              <span class="text-zinc-800 font-medium">Quản lý tài khoản người dùng</span>
               <ChevronRight class="w-3.5 h-3.5 text-zinc-400" />
             </router-link>
           </div>
@@ -344,7 +516,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import {
   DollarSign,
   ShoppingBag,
@@ -353,23 +525,86 @@ import {
   Plus,
   RefreshCw,
   ChevronRight,
-  Loader2
+  BarChart3,
+  LayoutGrid,
+  Loader2,
+  Eye,
+  Heart,
+  ShoppingCart,
+  CheckCircle2,
+  Package
 } from 'lucide-vue-next'
+import { toast } from 'vue-sonner'
 import { useAdminAuthStore } from '@/stores/auth'
 import StatCard from '@/components/common/StatCard.vue'
 import BadgeStatus from '@/components/common/BadgeStatus.vue'
-import { fetchDashboardOverview } from '@/api/dashboard'
-import type { DashboardMetrics, Order } from '@/types'
+import CustomSelect, { type CustomSelectOption } from '@/components/common/CustomSelect.vue'
+import RevenueChart, { type RevenuePoint } from '@/components/dashboard/RevenueChart.vue'
+import InteractionChart from '@/components/dashboard/InteractionChart.vue'
+import { fetchDashboardOverview, fetchBehaviorAnalytics } from '@/api/dashboard'
+import type { BehaviorAnalytics, DashboardMetrics, Order } from '@/types'
 
 const authStore = useAdminAuthStore()
 const isLoading = ref(true)
 
-const activeRange = ref<'7d' | '30d' | 'year'>('7d')
+type DashboardSection = 'revenue' | 'interactions' | 'orders' | 'all'
+const SECTION_STORAGE_KEY = 'techstore_admin_dashboard_section'
+const sectionOptions: (CustomSelectOption & { value: DashboardSection })[] = [
+  { value: 'revenue', label: 'Doanh thu & Số lượng đơn', description: 'Biểu đồ doanh thu theo thời gian', icon: BarChart3 },
+  { value: 'interactions', label: 'Tương tác & Top sản phẩm', description: 'Hành vi người dùng & xếp hạng', icon: Eye },
+  { value: 'orders', label: 'Đơn hàng & Phím tắt', description: 'Đơn mới nhất & trạng thái xử lý', icon: ShoppingBag },
+  { value: 'all', label: 'Hiển thị tất cả', description: 'Xem toàn bộ các khối thống kê', icon: LayoutGrid }
+]
+
+const rankingSortOptions: CustomSelectOption[] = [
+  { value: 'interactionScore', label: 'Theo điểm tương tác' },
+  { value: 'viewCount', label: 'Theo lượt xem' },
+  { value: 'wishlistCount', label: 'Theo lượt tym' },
+  { value: 'addToCartCount', label: 'Theo thêm giỏ' },
+  { value: 'purchaseCount', label: 'Theo lượt mua' }
+]
+
+function loadSavedSection(): DashboardSection {
+  const saved = localStorage.getItem(SECTION_STORAGE_KEY)
+  return sectionOptions.some(opt => opt.value === saved) ? (saved as DashboardSection) : 'revenue'
+}
+
+const activeSection = ref<DashboardSection>(loadSavedSection())
+
+watch(activeSection, value => localStorage.setItem(SECTION_STORAGE_KEY, value))
+
+function isSectionVisible(section: Exclude<DashboardSection, 'all'>): boolean {
+  return activeSection.value === 'all' || activeSection.value === section
+}
+
+function toLocalIsoDate(date: Date): string {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+function getDefaultDateOffset(daysAgo: number): string {
+  const d = new Date()
+  d.setDate(d.getDate() - daysAgo)
+  return toLocalIsoDate(d)
+}
+
+const activeRange = ref<'7d' | '30d' | 'year' | 'custom'>('7d')
 const timeRanges = [
   { id: '7d' as const, label: '7 ngày' },
   { id: '30d' as const, label: '30 ngày' },
-  { id: 'year' as const, label: 'Năm nay' }
+  { id: 'year' as const, label: 'Năm nay' },
+  { id: 'custom' as const, label: 'Tùy chỉnh' }
 ]
+const revenueFrom = ref<string>(getDefaultDateOffset(6))
+const revenueTo = ref<string>(getDefaultDateOffset(0))
+const revenueRangeError = computed(() => {
+  if (activeRange.value !== 'custom') return ''
+  if (!revenueFrom.value || !revenueTo.value) return 'Vui lòng chọn đủ ngày bắt đầu và kết thúc'
+  if (revenueFrom.value > revenueTo.value) return 'Ngày bắt đầu không được lớn hơn ngày kết thúc'
+  return ''
+})
 
 const formattedDate = computed(() => {
   return new Intl.DateTimeFormat('vi-VN', {
@@ -391,6 +626,50 @@ const metrics = ref<DashboardMetrics>({
 const recentOrders = ref<Order[]>([])
 const allOrders = ref<Order[]>([])
 
+const interactionDays = ref<7 | 14 | 30>(14)
+const interactionMode = ref<'preset' | 'custom'>('preset')
+const interactionFrom = ref<string>(getDefaultDateOffset(13))
+const interactionTo = ref<string>(getDefaultDateOffset(0))
+const interactionRangeError = ref<string>('')
+const MAX_ANALYTICS_DAYS = 90
+const interactionDayOptions = [
+  { days: 7 as const, label: '7 ngày' },
+  { days: 14 as const, label: '14 ngày' },
+  { days: 30 as const, label: '30 ngày' }
+]
+const interactionRangeLabel = computed(() => {
+  if (interactionMode.value === 'custom' && interactionFrom.value && interactionTo.value) {
+    return `Top sản phẩm nổi bật từ ${interactionFrom.value} đến ${interactionTo.value}`
+  }
+  return `Top sản phẩm nổi bật trong ${interactionDays.value} ngày qua`
+})
+const isLoadingAnalytics = ref(false)
+const rankingSortKey = ref<'interactionScore' | 'viewCount' | 'wishlistCount' | 'addToCartCount' | 'purchaseCount'>('interactionScore')
+const behaviorAnalytics = ref<BehaviorAnalytics>({
+  days: 14,
+  summary: {
+    totalViews: 0,
+    totalWishlists: 0,
+    totalAddToCart: 0,
+    totalPurchases: 0,
+    totalSearches: 0
+  },
+  dailySeries: [],
+  topProducts: []
+})
+
+const sortedTopProducts = computed(() => {
+  const key = rankingSortKey.value
+  return [...behaviorAnalytics.value.topProducts].sort((a, b) => Number(b[key]) - Number(a[key]))
+})
+
+function rankBadgeClass(index: number): string {
+  if (index === 0) return 'bg-amber-100 text-amber-800 border border-amber-300'
+  if (index === 1) return 'bg-zinc-200 text-zinc-800 border border-zinc-300'
+  if (index === 2) return 'bg-orange-100 text-orange-800 border border-orange-300'
+  return 'bg-zinc-100 text-zinc-500 border border-zinc-200'
+}
+
 // Real dynamic status distribution
 const statusCounts = computed(() => {
   const counts = {
@@ -401,28 +680,18 @@ const statusCounts = computed(() => {
     CANCELLED: 0
   }
   allOrders.value.forEach((o) => {
-    if (o.status && counts[o.status] !== undefined) {
-      counts[o.status]++
+    if (o.orderStatus && counts[o.orderStatus] !== undefined) {
+      counts[o.orderStatus]++
     }
   })
   return counts
 })
 
-// Dynamic Chart Calculations based on actual orders
-interface ChartPoint {
-  label: string
-  amount: number
-  count: number
-  x: number
-  y: number
-}
-
-const chartPoints = computed<ChartPoint[]>(() => {
-  const points: { label: string; amount: number; count: number }[] = []
+const revenuePoints = computed<RevenuePoint[]>(() => {
+  const points: RevenuePoint[] = []
   const now = new Date()
 
   if (activeRange.value === '7d') {
-    // 7 past days
     for (let i = 6; i >= 0; i--) {
       const d = new Date(now)
       d.setDate(d.getDate() - i)
@@ -435,8 +704,8 @@ const chartPoints = computed<ChartPoint[]>(() => {
       })
 
       const amount = dayOrders.reduce((sum, o) => {
-        if (o.status === 'DELIVERED' || o.paymentStatus === 'PAID') {
-          return sum + (o.totalAmount || 0)
+        if (o.orderStatus === 'DELIVERED' || o.paymentStatus === 'PAID') {
+          return sum + (o.finalAmount ?? o.totalAmount ?? 0)
         }
         return sum
       }, 0)
@@ -444,7 +713,6 @@ const chartPoints = computed<ChartPoint[]>(() => {
       points.push({ label, amount, count: dayOrders.length })
     }
   } else if (activeRange.value === '30d') {
-    // 6 intervals of 5 days
     for (let i = 5; i >= 0; i--) {
       const endD = new Date(now)
       endD.setDate(endD.getDate() - i * 5)
@@ -460,16 +728,63 @@ const chartPoints = computed<ChartPoint[]>(() => {
       })
 
       const amount = bucketOrders.reduce((sum, o) => {
-        if (o.status === 'DELIVERED' || o.paymentStatus === 'PAID') {
-          return sum + (o.totalAmount || 0)
+        if (o.orderStatus === 'DELIVERED' || o.paymentStatus === 'PAID') {
+          return sum + (o.finalAmount ?? o.totalAmount ?? 0)
         }
         return sum
       }, 0)
 
       points.push({ label, amount, count: bucketOrders.length })
     }
+  } else if (activeRange.value === 'custom') {
+    if (!revenueFrom.value || !revenueTo.value || revenueFrom.value > revenueTo.value) {
+      return points
+    }
+    const startD = new Date(`${revenueFrom.value}T00:00:00`)
+    const endD = new Date(`${revenueTo.value}T00:00:00`)
+    const diffDays = Math.floor((endD.getTime() - startD.getTime()) / 86_400_000) + 1
+
+    if (diffDays <= 31) {
+      for (let i = 0; i < diffDays; i++) {
+        const d = new Date(startD)
+        d.setDate(d.getDate() + i)
+        const dayStr = toLocalIsoDate(d)
+        const label = `${d.getDate()}/${d.getMonth() + 1}`
+
+        const dayOrders = allOrders.value.filter((o) => o.createdAt && o.createdAt.startsWith(dayStr))
+        const amount = dayOrders.reduce((sum, o) => {
+          if (o.orderStatus === 'DELIVERED' || o.paymentStatus === 'PAID') {
+            return sum + (o.finalAmount ?? o.totalAmount ?? 0)
+          }
+          return sum
+        }, 0)
+
+        points.push({ label, amount, count: dayOrders.length })
+      }
+    } else {
+      const cursor = new Date(startD.getFullYear(), startD.getMonth(), 1)
+      const endMonth = new Date(endD.getFullYear(), endD.getMonth(), 1)
+      while (cursor <= endMonth) {
+        const monthPrefix = `${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2, '0')}`
+        const label = `T${cursor.getMonth() + 1}/${String(cursor.getFullYear()).slice(-2)}`
+
+        const monthOrders = allOrders.value.filter((o) => {
+          if (!o.createdAt || !o.createdAt.startsWith(monthPrefix)) return false
+          const dayStr = o.createdAt.slice(0, 10)
+          return dayStr >= revenueFrom.value && dayStr <= revenueTo.value
+        })
+        const amount = monthOrders.reduce((sum, o) => {
+          if (o.orderStatus === 'DELIVERED' || o.paymentStatus === 'PAID') {
+            return sum + (o.finalAmount ?? o.totalAmount ?? 0)
+          }
+          return sum
+        }, 0)
+
+        points.push({ label, amount, count: monthOrders.length })
+        cursor.setMonth(cursor.getMonth() + 1)
+      }
+    }
   } else {
-    // 12 months of current year
     const currentYear = now.getFullYear()
     for (let m = 0; m < 12; m++) {
       const monthPrefix = `${currentYear}-${String(m + 1).padStart(2, '0')}`
@@ -481,8 +796,8 @@ const chartPoints = computed<ChartPoint[]>(() => {
       })
 
       const amount = monthOrders.reduce((sum, o) => {
-        if (o.status === 'DELIVERED' || o.paymentStatus === 'PAID') {
-          return sum + (o.totalAmount || 0)
+        if (o.orderStatus === 'DELIVERED' || o.paymentStatus === 'PAID') {
+          return sum + (o.finalAmount ?? o.totalAmount ?? 0)
         }
         return sum
       }, 0)
@@ -491,45 +806,7 @@ const chartPoints = computed<ChartPoint[]>(() => {
     }
   }
 
-  // Calculate SVG coordinates
-  const svgWidth = 700
-  const svgHeight = 180
-  const padX = 35
-  const padYTop = 20
-  const padYBottom = 25
-
-  const maxVal = Math.max(...points.map((p) => p.amount), 5000000)
-
-  return points.map((p, index) => {
-    const x = padX + (index / (points.length - 1)) * (svgWidth - 2 * padX)
-    const yRatio = p.amount / maxVal
-    const y = svgHeight - padYBottom - yRatio * (svgHeight - padYTop - padYBottom)
-    return {
-      ...p,
-      x: Math.round(x),
-      y: Math.round(y)
-    }
-  })
-})
-
-const chartMax = computed(() => {
-  const max = Math.max(...chartPoints.value.map((p) => p.amount), 5000000)
-  return Math.ceil(max / 1000000) * 1000000
-})
-
-const linePath = computed(() => {
-  if (chartPoints.value.length === 0) return ''
-  return chartPoints.value.reduce((acc, pt, idx) => {
-    return idx === 0 ? `M ${pt.x} ${pt.y}` : `${acc} L ${pt.x} ${pt.y}`
-  }, '')
-})
-
-const areaPath = computed(() => {
-  if (chartPoints.value.length === 0) return ''
-  const first = chartPoints.value[0]
-  const last = chartPoints.value[chartPoints.value.length - 1]
-  const baseline = 180 - 25
-  return `${linePath.value} L ${last.x} ${baseline} L ${first.x} ${baseline} Z`
+  return points
 })
 
 function formatCurrency(val: number): string {
@@ -546,10 +823,80 @@ function formatCompactCurrency(val: number): string {
   return `${val} ₫`
 }
 
+async function loadInteractionAnalytics(throwOnError = false) {
+  isLoadingAnalytics.value = true
+  try {
+    if (interactionMode.value === 'custom') {
+      behaviorAnalytics.value = await fetchBehaviorAnalytics(
+        interactionDays.value,
+        10,
+        interactionFrom.value,
+        interactionTo.value,
+        throwOnError
+      )
+    } else {
+      behaviorAnalytics.value = await fetchBehaviorAnalytics(
+        interactionDays.value,
+        10,
+        undefined,
+        undefined,
+        throwOnError
+      )
+    }
+    interactionRangeError.value = ''
+  } catch (err: any) {
+    const msg = err?.message || 'Không thể tải thống kê tương tác cho khoảng thời gian này'
+    interactionRangeError.value = msg
+    toast.error(msg)
+  } finally {
+    isLoadingAnalytics.value = false
+  }
+}
+
+function changeInteractionDays(days: 7 | 14 | 30) {
+  if (interactionMode.value === 'preset' && interactionDays.value === days) return
+  interactionMode.value = 'preset'
+  interactionRangeError.value = ''
+  interactionDays.value = days
+  loadInteractionAnalytics(true)
+}
+
+function enableCustomInteractionRange() {
+  interactionMode.value = 'custom'
+  interactionRangeError.value = ''
+}
+
+function validateCustomInteractionRange(): string {
+  if (!interactionFrom.value || !interactionTo.value) {
+    return 'Vui lòng chọn đầy đủ ngày bắt đầu và ngày kết thúc'
+  }
+  if (interactionFrom.value > interactionTo.value) {
+    return 'Ngày bắt đầu không được lớn hơn ngày kết thúc'
+  }
+  const startMs = new Date(`${interactionFrom.value}T00:00:00`).getTime()
+  const endMs = new Date(`${interactionTo.value}T00:00:00`).getTime()
+  const spanDays = Math.floor((endMs - startMs) / 86_400_000) + 1
+  if (spanDays > MAX_ANALYTICS_DAYS) {
+    return `Khoảng thời gian thống kê tối đa là ${MAX_ANALYTICS_DAYS} ngày (bạn đang chọn ${spanDays} ngày)`
+  }
+  return ''
+}
+
+function applyCustomInteractionRange() {
+  const err = validateCustomInteractionRange()
+  if (err) {
+    interactionRangeError.value = err
+    toast.error(err)
+    return
+  }
+  interactionRangeError.value = ''
+  loadInteractionAnalytics(true)
+}
+
 async function loadData() {
   isLoading.value = true
   try {
-    const overview = await fetchDashboardOverview()
+    const [overview] = await Promise.all([fetchDashboardOverview(), loadInteractionAnalytics()])
     metrics.value = overview.metrics
     recentOrders.value = overview.recentOrders
     allOrders.value = overview.allOrders

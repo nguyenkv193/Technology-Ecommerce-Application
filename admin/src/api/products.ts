@@ -1,5 +1,13 @@
 import apiClient from './client'
-import type { ApiResponse, PageResponse, Product } from '@/types'
+import type {
+  ApiResponse,
+  PageResponse,
+  Product,
+  ProductAttribute,
+  ProductImage,
+  ProductStatus,
+  ProductVariant
+} from '@/types'
 
 export interface ProductFilterParams {
   keyword?: string
@@ -16,24 +24,13 @@ export interface ProductFilterParams {
 export interface ProductFormData {
   name: string
   slug: string
-  shortDescription?: string
   description?: string
   categoryId: number
   brandId: number
-  originalPrice: number
-  salePrice: number
-  warrantyMonths?: number
-  primaryImageUrl?: string
-  imageUrls?: string[]
-  specs?: Array<{ specKey: string; specValue: string; displayOrder?: number }>
-  skus?: Array<{
-    skuCode: string
-    skuName: string
-    price: number
-    originalPrice?: number
-    stockQuantity: number
-    attributesJson?: string
-  }>
+  status?: ProductStatus
+  attributes?: ProductAttribute[]
+  variants: ProductVariant[]
+  images?: ProductImage[]
 }
 
 export async function fetchProducts(params: ProductFilterParams = {}): Promise<PageResponse<Product>> {

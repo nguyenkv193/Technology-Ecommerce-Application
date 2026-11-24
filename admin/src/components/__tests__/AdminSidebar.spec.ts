@@ -12,7 +12,7 @@ const router = createRouter({
     { path: '/categories', name: 'categories', component: { template: '<div>Categories</div>' } },
     { path: '/brands', name: 'brands', component: { template: '<div>Brands</div>' } },
     { path: '/orders', name: 'orders', component: { template: '<div>Orders</div>' } },
-    { path: '/system-ops', name: 'system-ops', component: { template: '<div>Ops</div>' } }
+    { path: '/users', name: 'users', component: { template: '<div>Users</div>' } }
   ]
 })
 
@@ -34,6 +34,6 @@ describe('AdminSidebar', () => {
     expect(text).toContain('Danh mục')
     expect(text).toContain('Thương hiệu')
     expect(text).toContain('Đơn hàng')
-    expect(text).toContain('Vận hành')
+    expect(text).toContain('Người dùng')
   })
 })

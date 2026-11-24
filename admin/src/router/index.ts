@@ -62,10 +62,10 @@ const routes: Array<RouteRecordRaw> = [
         meta: { title: 'Quản lý Đơn hàng' }
       },
       {
-        path: 'system-ops',
-        name: 'system-ops',
-        component: () => import('@/views/system/SystemOpsView.vue'),
-        meta: { title: 'Vận hành Hệ thống' }
+        path: 'users',
+        name: 'users',
+        component: () => import('@/views/users/UserListView.vue'),
+        meta: { title: 'Quản lý Người dùng' }
       }
     ]
   },

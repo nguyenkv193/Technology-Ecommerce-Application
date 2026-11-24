@@ -34,6 +34,12 @@ public class BrandResponse {
     @Schema(description = "Website chính thức")
     private String websiteUrl;
 
+    @Schema(description = "Quốc gia xuất xứ", example = "Hoa Kỳ")
+    private String originCountry;
+
+    @Schema(description = "Số lượng sản phẩm thuộc thương hiệu", example = "8")
+    private Long productCount;
+
     @Schema(description = "Trạng thái", example = "ACTIVE")
     private String status;
 
@@ -41,6 +47,10 @@ public class BrandResponse {
     private Instant createdAt;
 
     public static BrandResponse from(Brand brand) {
+        return from(brand, 0L);
+    }
+
+    public static BrandResponse from(Brand brand, Long productCount) {
         if (brand == null) return null;
         return BrandResponse.builder()
                 .id(brand.getId())
@@ -49,6 +59,8 @@ public class BrandResponse {
                 .description(brand.getDescription())
                 .logoUrl(brand.getLogoUrl())
                 .websiteUrl(brand.getWebsiteUrl())
+                .originCountry(brand.getOriginCountry())
+                .productCount(productCount != null ? productCount : 0L)
                 .status(brand.getStatus())
                 .createdAt(brand.getCreatedAt())
                 .build();

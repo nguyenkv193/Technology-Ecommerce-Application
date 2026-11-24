@@ -85,7 +85,6 @@ describe('ProfileView.vue', () => {
 
   it('lists addresses, sets default and deletes', async () => {
     const { wrapper } = await setup()
-    await wrapper.find('[data-testid="tab-addresses"]').trigger('click')
     expect(wrapper.findAll('[data-testid="address-item"]')).toHaveLength(1)
 
     vi.mocked(authApi.setDefaultAddress).mockResolvedValue({ success: true } as any)
@@ -105,14 +104,12 @@ describe('ProfileView.vue', () => {
     expect(wrapper.find('[data-testid="profile-avatar-initial"]').text()).toBe('N')
     expect(wrapper.find('[data-testid="active-tab-title"]').text()).toBe('Hồ sơ cá nhân')
     expect(wrapper.find('[data-testid="profile-form"]').exists()).toBe(true)
+    expect(wrapper.findAll('[data-testid="address-item"]')).toHaveLength(1)
 
     await wrapper.find('[data-testid="tab-password"]').trigger('click')
     expect(wrapper.find('[data-testid="active-tab-title"]').text()).toBe('Đổi mật khẩu')
     expect(wrapper.find('[data-testid="password-form"]').exists()).toBe(true)
     expect(wrapper.find('[data-testid="profile-form"]').exists()).toBe(false)
-
-    await wrapper.find('[data-testid="tab-addresses"]').trigger('click')
-    expect(wrapper.find('[data-testid="active-tab-title"]').text()).toBe('Sổ địa chỉ')
   })
 
   it('shows avatar image and removes it', async () => {

@@ -12,26 +12,52 @@
         <p class="text-xs text-zinc-500 mt-1 font-mono">Quản trị các hình ảnh banner quảng cáo trang chủ, hero slider và sự kiện khuyến mãi</p>
       </div>
 
-      <div class="flex items-center gap-2.5">
-        <!-- Filter by Position -->
-        <select
-          v-model="selectedPosition"
-          class="h-9 px-3 text-xs bg-white border border-zinc-200 rounded-lg text-zinc-700 focus:outline-none focus:ring-1 focus:ring-zinc-900 font-sans"
-        >
-          <option value="ALL">Tất cả vị trí</option>
-          <option value="HERO_SLIDER">Hero Slider (Chính giữa)</option>
-          <option value="SIDE_PROMO">Side Promo (Góc phải)</option>
-          <option value="BOTTOM_CARD">Bottom Card (Dưới cùng)</option>
-          <option value="POPUP">Popup khuyến mãi</option>
-        </select>
+      <button
+        type="button"
+        @click="openAddModal"
+        class="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-medium shadow-sm transition-all self-start sm:self-auto cursor-pointer"
+      >
+        <Plus class="w-3.5 h-3.5" />
+        <span>Thêm Banner</span>
+      </button>
+    </div>
 
+    <!-- Filters Bar -->
+    <div class="bg-white border border-zinc-200 rounded-xl p-2.5 flex flex-wrap items-center gap-2.5 shadow-xs">
+      <div class="relative flex-1 min-w-[220px]">
+        <Search class="w-3.5 h-3.5 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
+        <input
+          v-model="keyword"
+          type="text"
+          placeholder="Tìm theo tiêu đề banner, link đích..."
+          class="w-full h-9 bg-zinc-50/70 focus:bg-white border border-zinc-200 rounded-lg pl-9 pr-8 text-xs text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-zinc-900 transition-colors"
+        />
+        <button
+          v-if="keyword"
+          type="button"
+          @click="keyword = ''"
+          class="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 text-xs"
+        >
+          ✕
+        </button>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2">
+        <CustomSelect v-model="selectedPosition" :options="positionFilterOptions" />
+        <CustomSelect v-model="selectedStatus" :options="statusFilterOptions" align="right" />
         <button
           type="button"
-          @click="openAddModal"
-          class="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-medium shadow-sm transition-all self-start sm:self-auto cursor-pointer"
+          @click="loadBanners"
+          class="h-9 px-3.5 inline-flex items-center justify-center rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-900 text-white text-xs font-medium shadow-xs transition-colors cursor-pointer shrink-0"
         >
-          <Plus class="w-3.5 h-3.5" />
-          <span>Thêm Banner</span>
+          Tìm kiếm
+        </button>
+        <button
+          type="button"
+          @click="resetFilters"
+          class="h-9 px-3 inline-flex items-center justify-center rounded-lg bg-white hover:bg-zinc-50 border border-zinc-200 text-zinc-700 hover:text-zinc-900 text-xs font-medium shadow-xs transition-colors cursor-pointer shrink-0"
+        >
+          Đặt lại
         </button>
       </div>
     </div>
@@ -213,15 +239,11 @@
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="block text-xs font-semibold text-zinc-700 mb-1">Vị trí hiển thị</label>
-              <select
+              <CustomSelect
                 v-model="form.position"
-                class="w-full px-3 py-2 text-xs bg-zinc-50 border border-zinc-200 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-900"
-              >
-                <option value="HERO_SLIDER">Hero Slider (Chính giữa)</option>
-                <option value="SIDE_PROMO">Side Promo (Góc phải)</option>
-                <option value="BOTTOM_CARD">Bottom Card (Dưới cùng)</option>
-                <option value="POPUP">Popup</option>
-              </select>
+                :options="bannerPositionOptions"
+                :block="true"
+              />
             </div>
 
             <div>
@@ -238,24 +260,20 @@
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="block text-xs font-semibold text-zinc-700 mb-1">Trạng thái</label>
-              <select
+              <CustomSelect
                 v-model="form.status"
-                class="w-full px-3 py-2 text-xs bg-zinc-50 border border-zinc-200 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-900"
-              >
-                <option value="ACTIVE">Hoạt động (Hiển thị ngay)</option>
-                <option value="INACTIVE">Tạm ẩn</option>
-              </select>
+                :options="bannerStatusOptions"
+                :block="true"
+              />
             </div>
 
             <div>
               <label class="block text-xs font-semibold text-zinc-700 mb-1">Mở liên kết</label>
-              <select
+              <CustomSelect
                 v-model="form.targetType"
-                class="w-full px-3 py-2 text-xs bg-zinc-50 border border-zinc-200 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-900"
-              >
-                <option value="_self">Cùng tab (_self)</option>
-                <option value="_blank">Tab mới (_blank)</option>
-              </select>
+                :options="bannerTargetOptions"
+                :block="true"
+              />
             </div>
           </div>
 
@@ -283,13 +301,44 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { Plus, Edit3, Trash2, Loader2, X } from 'lucide-vue-next'
+import { Plus, Search, Edit3, Trash2, Loader2, X } from 'lucide-vue-next'
+import CustomSelect, { type CustomSelectOption } from '@/components/common/CustomSelect.vue'
 import type { Banner } from '@/types'
 import { fetchBanners, createBanner, updateBanner, deleteBanner, toggleBannerStatus } from '@/api/banners'
 
 const banners = ref<Banner[]>([])
 const isLoading = ref<boolean>(true)
+const keyword = ref('')
 const selectedPosition = ref<string>('ALL')
+const selectedStatus = ref<string>('ALL')
+
+const bannerPositionOptions: CustomSelectOption[] = [
+  { value: 'HERO_SLIDER', label: 'Hero Slider (Chính giữa)' },
+  { value: 'SIDE_PROMO', label: 'Side Promo (Góc phải)' },
+  { value: 'BOTTOM_CARD', label: 'Bottom Card (Dưới cùng)' },
+  { value: 'POPUP', label: 'Popup khuyến mãi' }
+]
+
+const positionFilterOptions: CustomSelectOption[] = [
+  { value: 'ALL', label: 'Tất cả vị trí' },
+  ...bannerPositionOptions
+]
+
+const bannerStatusOptions: CustomSelectOption[] = [
+  { value: 'ACTIVE', label: 'Hoạt động (Hiển thị ngay)' },
+  { value: 'INACTIVE', label: 'Tạm ẩn' }
+]
+
+const statusFilterOptions: CustomSelectOption[] = [
+  { value: 'ALL', label: 'Tất cả trạng thái' },
+  { value: 'ACTIVE', label: 'Hoạt động' },
+  { value: 'INACTIVE', label: 'Tạm ẩn' }
+]
+
+const bannerTargetOptions: CustomSelectOption[] = [
+  { value: '_self', label: 'Cùng tab (_self)' },
+  { value: '_blank', label: 'Tab mới (_blank)' }
+]
 
 const showModal = ref<boolean>(false)
 const isEditing = ref<boolean>(false)
@@ -307,9 +356,23 @@ const form = ref({
 })
 
 const filteredBanners = computed(() => {
-  if (selectedPosition.value === 'ALL') return banners.value
-  return banners.value.filter(b => b.position === selectedPosition.value)
+  const kw = keyword.value.trim().toLowerCase()
+  return banners.value.filter((b) => {
+    const matchesKw =
+      !kw ||
+      (b.title || '').toLowerCase().includes(kw) ||
+      (b.linkUrl || '').toLowerCase().includes(kw)
+    const matchesPos = selectedPosition.value === 'ALL' || b.position === selectedPosition.value
+    const matchesStatus = selectedStatus.value === 'ALL' || b.status === selectedStatus.value
+    return matchesKw && matchesPos && matchesStatus
+  })
 })
+
+function resetFilters() {
+  keyword.value = ''
+  selectedPosition.value = 'ALL'
+  selectedStatus.value = 'ALL'
+}
 
 const loadBanners = async () => {
   isLoading.value = true

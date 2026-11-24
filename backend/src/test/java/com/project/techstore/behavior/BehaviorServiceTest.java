@@ -1,5 +1,6 @@
 package com.project.techstore.behavior;
 
+import com.project.techstore.behavior.dto.BehaviorAnalyticsResponse;
 import com.project.techstore.behavior.dto.TrackBehaviorRequest;
 import com.project.techstore.behavior.dto.UserBehaviorResponse;
 import com.project.techstore.behavior.dto.UserInteractionExportDto;
@@ -7,6 +8,8 @@ import com.project.techstore.behavior.entity.BehaviorType;
 import com.project.techstore.behavior.entity.UserBehavior;
 import com.project.techstore.behavior.repository.UserBehaviorRepository;
 import com.project.techstore.behavior.service.BehaviorService;
+import com.project.techstore.common.exception.AppException;
+import com.project.techstore.common.exception.ErrorCode;
 import com.project.techstore.product.entity.Product;
 import com.project.techstore.product.repository.ProductRepository;
 import com.project.techstore.user.entity.User;
@@ -19,6 +22,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -93,5 +98,36 @@ class BehaviorServiceTest {
         assertEquals(Math.log1p(8.5), matrix.get(0).getScore(), 0.001);
         assertEquals(4L, matrix.get(0).getInteractionCount());
         verify(userBehaviorRepository).aggregateUserProductInteractions(1L);
+    }
+
+    @Test
+    void testGetAdminAnalyticsWithFromToRange() {
+        LocalDate from = LocalDate.of(2026, 11, 1);
+        LocalDate to = LocalDate.of(2026, 11, 5);
+
+        when(userBehaviorRepository.countByActionTypeBetween(any(), any()))
+                .thenReturn(List.<Object[]>of(new Object[]{BehaviorType.VIEW, 25L}));
+        when(userBehaviorRepository.findDailyActionCountsBetween(any(), any()))
+                .thenReturn(Collections.emptyList());
+        when(userBehaviorRepository.findTopInteractedProductsBetween(any(), any(), any()))
+                .thenReturn(Collections.emptyList());
+
+        BehaviorAnalyticsResponse res = behaviorService.getAdminAnalytics(14, 10, from, to);
+
+        assertEquals(5, res.getDays());
+        assertEquals(5, res.getDailySeries().size());
+        assertEquals("2026-11-01", res.getDailySeries().get(0).getDate());
+        assertEquals("2026-11-05", res.getDailySeries().get(4).getDate());
+        assertEquals(25L, res.getSummary().getTotalViews());
+    }
+
+    @Test
+    void testGetAdminAnalyticsRejectsInvalidDateRange() {
+        LocalDate from = LocalDate.of(2026, 11, 10);
+        LocalDate to = LocalDate.of(2026, 11, 5);
+
+        AppException ex = assertThrows(AppException.class,
+                () -> behaviorService.getAdminAnalytics(14, 10, from, to));
+        assertEquals(ErrorCode.INVALID_REQUEST, ex.getErrorCode());
     }
 }

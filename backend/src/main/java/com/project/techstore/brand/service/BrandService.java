@@ -7,13 +7,16 @@ import com.project.techstore.brand.repository.BrandRepository;
 import com.project.techstore.category.service.CategoryService;
 import com.project.techstore.common.exception.AppException;
 import com.project.techstore.common.exception.ErrorCode;
+import com.project.techstore.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -21,25 +24,38 @@ import java.util.List;
 public class BrandService {
 
     private final BrandRepository brandRepository;
+    private final ProductRepository productRepository;
 
     @Transactional(readOnly = true)
     public List<BrandResponse> getAllBrands() {
+        Map<Long, Long> productCounts = getBrandProductCounts();
         return brandRepository.findAll()
                 .stream()
-                .map(BrandResponse::from)
+                .map(brand -> BrandResponse.from(brand, productCounts.getOrDefault(brand.getId(), 0L)))
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public BrandResponse getById(Long id) {
-        return BrandResponse.from(getBrandEntity(id));
+        Brand brand = getBrandEntity(id);
+        return BrandResponse.from(brand, productRepository.countByBrandId(brand.getId()));
     }
 
     @Transactional(readOnly = true)
     public BrandResponse getBySlug(String slug) {
         Brand brand = brandRepository.findBySlug(slug)
                 .orElseThrow(() -> new AppException(ErrorCode.BRAND_NOT_FOUND, "Không tìm thấy thương hiệu với slug: " + slug));
-        return BrandResponse.from(brand);
+        return BrandResponse.from(brand, productRepository.countByBrandId(brand.getId()));
+    }
+
+    private Map<Long, Long> getBrandProductCounts() {
+        Map<Long, Long> counts = new HashMap<>();
+        for (Object[] row : productRepository.countProductsByBrand()) {
+            if (row[0] != null && row[1] != null) {
+                counts.put(((Number) row[0]).longValue(), ((Number) row[1]).longValue());
+            }
+        }
+        return counts;
     }
 
     @Transactional
@@ -62,12 +78,13 @@ public class BrandService {
                 .description(request.getDescription())
                 .logoUrl(request.getLogoUrl())
                 .websiteUrl(request.getWebsiteUrl())
+                .originCountry(StringUtils.hasText(request.getOriginCountry()) ? request.getOriginCountry().trim() : null)
                 .status("ACTIVE")
                 .build();
 
         Brand saved = brandRepository.save(brand);
         log.info("Đã tạo mới thương hiệu: {} (id={})", saved.getName(), saved.getId());
-        return BrandResponse.from(saved);
+        return BrandResponse.from(saved, 0L);
     }
 
     @Transactional
@@ -90,10 +107,13 @@ public class BrandService {
         if (request.getWebsiteUrl() != null) {
             brand.setWebsiteUrl(request.getWebsiteUrl());
         }
+        if (request.getOriginCountry() != null) {
+            brand.setOriginCountry(StringUtils.hasText(request.getOriginCountry()) ? request.getOriginCountry().trim() : null);
+        }
 
         Brand updated = brandRepository.save(brand);
         log.info("Đã cập nhật thương hiệu id={}", id);
-        return BrandResponse.from(updated);
+        return BrandResponse.from(updated, productRepository.countByBrandId(updated.getId()));
     }
 
     @Transactional

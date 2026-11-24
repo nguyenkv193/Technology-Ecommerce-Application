@@ -22,37 +22,55 @@
     </div>
 
     <!-- Filters Bar (Linear Style) -->
-    <div class="bg-white border border-zinc-200 rounded-xl p-3 flex flex-col md:flex-row gap-3 items-center justify-between shadow-xs">
+    <div class="bg-white border border-zinc-200 rounded-xl p-2.5 flex flex-wrap items-center gap-2.5 shadow-xs">
       <!-- Search Input -->
-      <div class="relative w-full md:w-80">
+      <div class="relative flex-1 min-w-[220px]">
         <Search class="w-3.5 h-3.5 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
         <input
           v-model="keyword"
           @keyup.enter="handleSearch"
           type="text"
           placeholder="Tìm theo tên sản phẩm, slug..."
-          class="w-full bg-white border border-zinc-200 rounded-lg pl-9 pr-8 py-2 text-xs text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900/10 transition-colors font-mono"
+          class="w-full h-9 bg-zinc-50/70 focus:bg-white border border-zinc-200 rounded-lg pl-9 pr-8 text-xs text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-zinc-900 transition-colors"
         />
         <button
           v-if="keyword"
-          @click="resetFilters"
+          @click="keyword = ''; handleSearch()"
           class="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 text-xs"
         >
           ✕
         </button>
       </div>
 
-      <!-- Quick Action Buttons -->
-      <div class="flex items-center gap-2 w-full md:w-auto justify-end font-mono">
+      <!-- Criteria Filters & Quick Action Buttons -->
+      <div class="flex flex-wrap items-center gap-2">
+        <CustomSelect
+          v-model="selectedCategoryId"
+          :options="categoryFilterOptions"
+          @change="handleSearch"
+        />
+        <CustomSelect
+          v-model="selectedBrandId"
+          :options="brandFilterOptions"
+          @change="handleSearch"
+        />
+        <CustomSelect
+          v-model="sortOption"
+          :options="sortOptions"
+          align="right"
+          @change="handleSearch"
+        />
         <button
+          type="button"
           @click="handleSearch"
-          class="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-medium shadow-xs transition-colors flex items-center gap-1.5"
+          class="h-9 px-3.5 inline-flex items-center justify-center rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-900 text-white text-xs font-medium shadow-xs transition-colors cursor-pointer shrink-0"
         >
-          <span>Lọc</span>
+          Tìm kiếm
         </button>
         <button
+          type="button"
           @click="resetFilters"
-          class="px-2.5 py-1.5 rounded-lg text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 text-xs transition-colors"
+          class="h-9 px-3 inline-flex items-center justify-center rounded-lg bg-white hover:bg-zinc-50 border border-zinc-200 text-zinc-700 hover:text-zinc-900 text-xs font-medium shadow-xs transition-colors cursor-pointer shrink-0"
         >
           Đặt lại
         </button>
@@ -96,8 +114,8 @@
               <td class="py-3 px-4">
                 <div class="w-10 h-10 rounded-lg bg-zinc-50 border border-zinc-200 flex items-center justify-center overflow-hidden shrink-0">
                   <img
-                    v-if="product.primaryImageUrl"
-                    :src="product.primaryImageUrl"
+                    v-if="product.thumbnailUrl"
+                    :src="product.thumbnailUrl"
                     :alt="product.name"
                     class="w-full h-full object-cover"
                   />
@@ -120,19 +138,22 @@
               </td>
               <td class="py-3 px-4">
                 <div class="font-semibold text-zinc-900 tabular-nums">
-                  {{ formatCurrency(product.salePrice) }}
+                  {{ formatCurrency(getProductMinPrice(product)) }}
+                  <span v-if="getProductMaxPrice(product) > getProductMinPrice(product)" class="text-zinc-500 font-normal">
+                    – {{ formatCurrency(getProductMaxPrice(product)) }}
+                  </span>
                 </div>
-                <div v-if="product.originalPrice > product.salePrice" class="text-[10px] text-zinc-400 line-through tabular-nums">
-                  {{ formatCurrency(product.originalPrice) }}
+                <div v-if="getProductOriginalPrice(product) > getProductMinPrice(product)" class="text-[10px] text-zinc-400 line-through tabular-nums">
+                  {{ formatCurrency(getProductOriginalPrice(product)) }}
                 </div>
               </td>
               <td class="py-3 px-4 text-center">
                 <span
                   class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium"
-                  :class="(product.stockQuantity ?? 0) > 5 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'"
+                  :class="(product.totalStock ?? 0) > 5 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'"
                 >
-                  <span class="w-1 h-1 rounded-full" :class="(product.stockQuantity ?? 0) > 5 ? 'bg-emerald-500' : 'bg-rose-500'"></span>
-                  <span>{{ product.stockQuantity ?? 0 }}</span>
+                  <span class="w-1 h-1 rounded-full" :class="(product.totalStock ?? 0) > 5 ? 'bg-emerald-500' : 'bg-rose-500'"></span>
+                  <span>{{ product.totalStock ?? 0 }}</span>
                 </span>
               </td>
               <td class="py-3 px-4 text-right">
@@ -196,20 +217,45 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { Plus, Search, Edit3, Trash2, Package, Loader2 } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 import ConfirmModal from '@/components/common/ConfirmModal.vue'
+import CustomSelect, { type CustomSelectOption } from '@/components/common/CustomSelect.vue'
 import { fetchProducts, deleteProduct } from '@/api/products'
-import type { Product } from '@/types'
+import { fetchCategories } from '@/api/categories'
+import { fetchBrands } from '@/api/brands'
+import type { Brand, Category, Product } from '@/types'
 
 const products = ref<Product[]>([])
+const categories = ref<Category[]>([])
+const brands = ref<Brand[]>([])
 const isLoading = ref(false)
 const keyword = ref('')
+const selectedCategoryId = ref<number | ''>('')
+const selectedBrandId = ref<number | ''>('')
+const sortOption = ref('createdAt:DESC')
 const currentPage = ref(0)
 const pageSize = ref(10)
 const totalPages = ref(1)
 const totalElements = ref(0)
+
+const categoryFilterOptions = computed<CustomSelectOption[]>(() => [
+  { value: '', label: 'Tất cả danh mục' },
+  ...categories.value.map((c) => ({ value: c.id, label: c.name }))
+])
+
+const brandFilterOptions = computed<CustomSelectOption[]>(() => [
+  { value: '', label: 'Tất cả thương hiệu' },
+  ...brands.value.map((b) => ({ value: b.id, label: b.name }))
+])
+
+const sortOptions: CustomSelectOption[] = [
+  { value: 'createdAt:DESC', label: 'Mới nhất' },
+  { value: 'name:ASC', label: 'Tên A–Z' },
+  { value: 'minPrice:ASC', label: 'Giá thấp → cao' },
+  { value: 'minPrice:DESC', label: 'Giá cao → thấp' }
+]
 
 const isConfirmOpen = ref(false)
 const isDeleting = ref(false)
@@ -219,11 +265,39 @@ function formatCurrency(val: number): string {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val || 0)
 }
 
+function getProductMinPrice(product: Product): number {
+  if (typeof product.minPrice === 'number') return product.minPrice
+  if (product.variants && product.variants.length > 0) {
+    return Math.min(...product.variants.map((v) => v.price || 0))
+  }
+  return 0
+}
+
+function getProductMaxPrice(product: Product): number {
+  if (typeof product.maxPrice === 'number') return product.maxPrice
+  if (product.variants && product.variants.length > 0) {
+    return Math.max(...product.variants.map((v) => v.price || 0))
+  }
+  return getProductMinPrice(product)
+}
+
+function getProductOriginalPrice(product: Product): number {
+  if (!product.variants || product.variants.length === 0) return 0
+  const minPrice = getProductMinPrice(product)
+  const matched = product.variants.find((v) => v.price === minPrice) ?? product.variants[0]
+  return matched?.originalPrice || 0
+}
+
 async function loadProducts() {
   isLoading.value = true
   try {
+    const [sortBy, sortDirection] = sortOption.value.split(':') as [string, 'ASC' | 'DESC']
     const res = await fetchProducts({
       keyword: keyword.value,
+      categoryId: selectedCategoryId.value || undefined,
+      brandId: selectedBrandId.value || undefined,
+      sortBy,
+      sortDirection,
       page: currentPage.value,
       size: pageSize.value
     })
@@ -235,6 +309,16 @@ async function loadProducts() {
   }
 }
 
+async function loadFilterOptions() {
+  try {
+    const [cats, brs] = await Promise.all([fetchCategories(), fetchBrands()])
+    categories.value = cats || []
+    brands.value = brs || []
+  } catch {
+    // Bỏ qua nếu không tải được danh mục/thương hiệu cho filter
+  }
+}
+
 function handleSearch() {
   currentPage.value = 0
   loadProducts()
@@ -242,6 +326,9 @@ function handleSearch() {
 
 function resetFilters() {
   keyword.value = ''
+  selectedCategoryId.value = ''
+  selectedBrandId.value = ''
+  sortOption.value = 'createdAt:DESC'
   currentPage.value = 0
   loadProducts()
 }
@@ -276,6 +363,7 @@ async function executeDelete() {
 }
 
 onMounted(() => {
+  loadFilterOptions()
   loadProducts()
 })
 </script>

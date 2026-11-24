@@ -116,27 +116,19 @@
               <span>Đơn hàng</span>
             </div>
           </router-link>
-        </div>
-      </div>
 
-      <!-- Section: Hệ thống -->
-      <div>
-        <div class="px-3 pb-1.5 text-[10px] font-semibold tracking-wider text-zinc-400 uppercase font-mono">
-          Hạ tầng
-        </div>
-        <div class="space-y-1">
           <router-link
-            to="/system-ops"
+            to="/users"
             class="flex items-center px-3 py-2 rounded-lg text-xs font-medium transition-all group"
             :class="[
-              isActive('/system-ops')
+              isActive('/users')
                 ? 'bg-zinc-100 text-zinc-900 font-semibold border border-zinc-200/80 shadow-xs'
                 : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50'
             ]"
           >
             <div class="flex items-center gap-2.5">
-              <Activity class="w-4 h-4 transition-colors" :class="isActive('/system-ops') ? 'text-zinc-900' : 'text-zinc-400 group-hover:text-zinc-700'" />
-              <span>Vận hành</span>
+              <Users class="w-4 h-4 transition-colors" :class="isActive('/users') ? 'text-zinc-900' : 'text-zinc-400 group-hover:text-zinc-700'" />
+              <span>Người dùng</span>
             </div>
           </router-link>
         </div>
@@ -177,7 +169,7 @@ import {
   Award,
   Image as ImageIcon,
   ShoppingCart,
-  Activity,
+  Users,
   Cpu,
   LogOut
 } from 'lucide-vue-next'

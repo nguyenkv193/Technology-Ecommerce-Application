@@ -11,20 +11,29 @@ const router = createRouter({
     { path: '/', component: { template: '<div>Dashboard</div>' } },
     { path: '/products/create', component: { template: '<div>Create Product</div>' } },
     { path: '/orders', component: { template: '<div>Orders</div>' } },
-    { path: '/system-ops', component: { template: '<div>Ops</div>' } }
+    { path: '/users', component: { template: '<div>Users</div>' } }
   ]
 })
 
 vi.mock('@/api/dashboard', () => ({
   fetchDashboardMetrics: vi.fn(),
   fetchRecentOrders: vi.fn(),
-  fetchDashboardOverview: vi.fn()
+  fetchDashboardOverview: vi.fn(),
+  fetchBehaviorAnalytics: vi.fn()
+}))
+
+vi.mock('vue-chartjs', () => ({
+  Line: {
+    name: 'Line',
+    template: '<div class="mock-chart" />'
+  }
 }))
 
 describe('DashboardView', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
     vi.clearAllMocks()
+    localStorage.removeItem('techstore_admin_dashboard_section')
   })
 
   it('renders dashboard metrics and quick action shortcuts', async () => {
@@ -32,17 +41,16 @@ describe('DashboardView', () => {
       id: 101,
       orderCode: 'ORD-101',
       userId: 1,
-      customerName: 'Le Minh',
-      customerEmail: 'leminh@example.com',
-      customerPhone: '0987654321',
+      recipientName: 'Le Minh',
+      phoneNumber: '0987654321',
       shippingAddress: 'Hanoi',
       paymentMethod: 'COD',
       paymentStatus: 'PAID',
-      status: 'PENDING' as const,
-      subtotal: 25000000,
+      orderStatus: 'PENDING' as const,
+      totalAmount: 25000000,
       shippingFee: 0,
       discountAmount: 0,
-      totalAmount: 25000000,
+      finalAmount: 25000000,
       createdAt: '2026-10-27T10:00:00Z',
       updatedAt: '2026-10-27T10:00:00Z'
     }
@@ -59,6 +67,32 @@ describe('DashboardView', () => {
       allOrders: [mockOrder]
     })
 
+    vi.mocked(dashboardApi.fetchBehaviorAnalytics).mockResolvedValue({
+      days: 14,
+      summary: {
+        totalViews: 120,
+        totalWishlists: 35,
+        totalAddToCart: 24,
+        totalPurchases: 12,
+        totalSearches: 18
+      },
+      dailySeries: [
+        { date: '2026-10-27', views: 50, wishlists: 12, addToCarts: 8, purchases: 4 }
+      ],
+      topProducts: [
+        {
+          productId: 1,
+          productName: 'MacBook Pro M3',
+          slug: 'macbook-pro-m3',
+          viewCount: 80,
+          wishlistCount: 20,
+          addToCartCount: 15,
+          purchaseCount: 6,
+          interactionScore: 225
+        }
+      ]
+    })
+
     const wrapper = mount(DashboardView, {
       global: {
         plugins: [router]
@@ -68,10 +102,38 @@ describe('DashboardView', () => {
     // Wait for async fetch
     await new Promise((r) => setTimeout(r, 50))
 
+    // Default section only shows the revenue block
+    expect(wrapper.text()).toContain('Doanh thu & Số lượng đơn')
+    expect(wrapper.text()).not.toContain('Thống kê tương tác người dùng')
+
+    const trigger = wrapper.find('[data-testid="dashboard-section-select"]')
+    await trigger.trigger('click')
+    await wrapper.find('[data-testid="dashboard-section-option-interactions"]').trigger('click')
+    expect(wrapper.text()).toContain('Thống kê tương tác người dùng')
+    expect(wrapper.text()).not.toContain('ORD-101')
+    expect(localStorage.getItem('techstore_admin_dashboard_section')).toBe('interactions')
+
+    // Test custom from-to range on interactions
+    await wrapper.find('[data-testid="interaction-custom-btn"]').trigger('click')
+    await wrapper.find('[data-testid="interaction-from"]').setValue('2026-01-01')
+    await wrapper.find('[data-testid="interaction-to"]').setValue('2026-10-15')
+    await wrapper.find('[data-testid="interaction-apply-btn"]').trigger('click')
+    expect(wrapper.find('[data-testid="interaction-range-error"]').text()).toContain('tối đa là 90 ngày')
+
+    await wrapper.find('[data-testid="interaction-from"]').setValue('2026-10-01')
+    await wrapper.find('[data-testid="interaction-to"]').setValue('2026-10-15')
+    await wrapper.find('[data-testid="interaction-apply-btn"]').trigger('click')
+    expect(dashboardApi.fetchBehaviorAnalytics).toHaveBeenLastCalledWith(14, 10, '2026-10-01', '2026-10-15', true)
+
+    await trigger.trigger('click')
+    await wrapper.find('[data-testid="dashboard-section-option-all"]').trigger('click')
+
     const text = wrapper.text()
     expect(text).toContain('Tổng doanh thu')
     expect(text).toContain('Tổng đơn hàng')
     expect(text).toContain('Đơn chờ xác nhận')
     expect(text).toContain('ORD-101')
+    expect(text).toContain('Thống kê tương tác người dùng')
+    expect(text).toContain('MacBook Pro M3')
   })
 })

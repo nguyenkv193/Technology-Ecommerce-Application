@@ -18,14 +18,17 @@ export interface PageResponse<T> {
 }
 
 export type Role = 'USER' | 'ADMIN' | 'STAFF'
+export type UserStatus = 'ACTIVE' | 'INACTIVE' | 'BLOCKED'
 
 export interface User {
   id: number
   email: string
   fullName: string
+  phone?: string
   phoneNumber?: string
+  authProvider?: 'LOCAL' | 'GOOGLE'
   role: Role
-  status?: 'ACTIVE' | 'INACTIVE' | 'BLOCKED'
+  status?: UserStatus
   avatarUrl?: string
   createdAt?: string
 }
@@ -58,65 +61,67 @@ export interface Brand {
   productCount?: number
 }
 
-export interface ProductSpec {
+export interface ProductAttribute {
   id?: number
-  specKey: string
-  specValue: string
-  displayOrder?: number
+  name: string
+  value: string
 }
 
 export interface ProductImage {
   id?: number
-  imageUrl: string
-  isPrimary?: boolean
-  displayOrder?: number
+  url: string
+  sortOrder?: number
+  isThumbnail?: boolean
 }
 
-export interface ProductSku {
+export interface ProductVariant {
   id?: number
-  skuCode: string
-  skuName: string
+  sku?: string
+  name: string
   price: number
   originalPrice?: number
-  stockQuantity: number
-  attributesJson?: string
+  colorName?: string
+  colorHex?: string
+  rewardPoints?: number
+  stock: number
   status?: string
 }
+
+export type ProductStatus = 'ACTIVE' | 'INACTIVE' | 'DRAFT' | 'OUT_OF_STOCK'
 
 export interface Product {
   id: number
   name: string
   slug: string
-  shortDescription?: string
   description?: string
+  status?: ProductStatus
   categoryId: number
   categoryName?: string
+  categorySlug?: string
   brandId: number
   brandName?: string
-  originalPrice: number
-  salePrice: number
-  warrantyMonths?: number
-  primaryImageUrl?: string
-  stockQuantity?: number
-  isActive?: boolean
-  isFeatured?: boolean
+  thumbnailUrl?: string
+  minPrice?: number
+  maxPrice?: number
+  totalStock?: number
   createdAt?: string
   updatedAt?: string
-  specs?: ProductSpec[]
+  attributes?: ProductAttribute[]
+  variants?: ProductVariant[]
   images?: ProductImage[]
-  skus?: ProductSku[]
 }
 
 export type OrderStatus = 'PENDING' | 'CONFIRMED' | 'SHIPPING' | 'DELIVERED' | 'CANCELLED'
 
 export interface OrderItem {
   id: number
-  productId: number
+  variantId?: number
+  productId?: number
   productName: string
-  skuId?: number
-  skuCode?: string
-  productImage?: string
-  unitPrice: number
+  variantName?: string
+  sku?: string
+  thumbnailUrl?: string
+  price: number
   quantity: number
   totalPrice: number
 }
@@ -125,18 +130,19 @@ export interface Order {
   id: number
   orderCode: string
   userId: number
-  customerName: string
-  customerEmail: string
-  customerPhone: string
+  recipientName: string
+  phoneNumber: string
   shippingAddress: string
-  paymentMethod: string
-  paymentStatus: string
-  status: OrderStatus
-  subtotal: number
+  note?: string
+  totalAmount: number
   shippingFee: number
   discountAmount: number
-  totalAmount: number
-  notes?: string
+  finalAmount: number
+  orderStatus: OrderStatus
+  paymentMethod: string
+  paymentStatus: string
+  paymentExpiresAt?: string
+  paidAt?: string
   createdAt: string
   updatedAt: string
   items?: OrderItem[]
@@ -148,6 +154,43 @@ export interface DashboardMetrics {
   pendingOrders: number
   totalProducts: number
   lowStockCount: number
+}
+
+export interface InteractionSummary {
+  totalViews: number
+  totalWishlists: number
+  totalAddToCart: number
+  totalPurchases: number
+  totalSearches: number
+}
+
+export interface DailyInteractionPoint {
+  date: string
+  views: number
+  wishlists: number
+  addToCarts: number
+  purchases: number
+}
+
+export interface TopInteractedProduct {
+  productId: number
+  productName: string
+  slug: string
+  categoryName?: string
+  thumbnailUrl?: string
+  minPrice?: number
+  viewCount: number
+  wishlistCount: number
+  addToCartCount: number
+  purchaseCount: number
+  interactionScore: number
+}
+
+export interface BehaviorAnalytics {
+  days: number
+  summary: InteractionSummary
+  dailySeries: DailyInteractionPoint[]
+  topProducts: TopInteractedProduct[]
 }
 
 
