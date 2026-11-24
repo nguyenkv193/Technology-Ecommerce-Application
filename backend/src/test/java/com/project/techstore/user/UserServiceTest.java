@@ -1,7 +1,9 @@
 package com.project.techstore.user;
 
+import com.project.techstore.common.dto.PageResponse;
 import com.project.techstore.common.exception.AppException;
 import com.project.techstore.common.exception.ErrorCode;
+import com.project.techstore.user.dto.AdminUpdateUserRequest;
 import com.project.techstore.user.dto.ChangePasswordRequest;
 import com.project.techstore.user.dto.UserProfileUpdateRequest;
 import com.project.techstore.user.dto.UserResponse;
@@ -16,8 +18,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -136,5 +142,47 @@ class UserServiceTest {
         AppException ex = assertThrows(AppException.class, () -> userService.changePassword(10L, request));
         assertEquals(ErrorCode.INVALID_REQUEST, ex.getErrorCode());
         verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void testGetAllUsersForAdmin() {
+        when(userRepository.findAll(any(Specification.class), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(sampleUser)));
+
+        PageResponse<UserResponse> res = userService.getAllUsersForAdmin("Nguyen", Role.USER, UserStatus.ACTIVE, 0, 10);
+
+        assertEquals(1, res.getTotalElements());
+        assertEquals("user@techstore.vn", res.getContent().get(0).getEmail());
+    }
+
+    @Test
+    void testAdminCannotBlockSelf() {
+        when(userRepository.findById(10L)).thenReturn(Optional.of(sampleUser));
+
+        AdminUpdateUserRequest request = AdminUpdateUserRequest.builder()
+                .status(UserStatus.BLOCKED)
+                .build();
+
+        AppException ex = assertThrows(AppException.class,
+                () -> userService.updateUserByAdmin(10L, 10L, request));
+        assertEquals(ErrorCode.INVALID_REQUEST, ex.getErrorCode());
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void testAdminUpdateUserRoleAndStatusSuccess() {
+        when(userRepository.findById(10L)).thenReturn(Optional.of(sampleUser));
+        when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        AdminUpdateUserRequest request = AdminUpdateUserRequest.builder()
+                .role(Role.STAFF)
+                .status(UserStatus.BLOCKED)
+                .build();
+
+        UserResponse updated = userService.updateUserByAdmin(1L, 10L, request);
+
+        assertEquals(Role.STAFF, updated.getRole());
+        assertEquals(UserStatus.BLOCKED, updated.getStatus());
+        verify(userRepository).save(sampleUser);
     }
 }

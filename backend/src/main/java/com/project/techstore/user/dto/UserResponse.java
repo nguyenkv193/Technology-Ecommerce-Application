@@ -1,5 +1,6 @@
 package com.project.techstore.user.dto;
 
+import com.project.techstore.user.entity.AuthProvider;
 import com.project.techstore.user.entity.Role;
 import com.project.techstore.user.entity.User;
 import com.project.techstore.user.entity.UserStatus;
@@ -33,6 +34,9 @@ public class UserResponse {
     @Schema(description = "Ảnh đại diện (URL hoặc Data URL)")
     private String avatarUrl;
 
+    @Schema(description = "Phương thức xác thực", example = "LOCAL")
+    private AuthProvider authProvider;
+
     @Schema(description = "Vai trò hệ thống", example = "USER")
     private Role role;
 
@@ -50,6 +54,7 @@ public class UserResponse {
                 .fullName(user.getFullName())
                 .phone(user.getPhone())
                 .avatarUrl(user.getAvatarUrl())
+                .authProvider(user.getAuthProvider())
                 .role(user.getRole())
                 .status(user.getStatus())
                 .createdAt(user.getCreatedAt())

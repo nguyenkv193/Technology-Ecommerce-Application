@@ -60,6 +60,12 @@ const routes: Array<RouteRecordRaw> = [
         name: 'orders',
         component: () => import('@/views/orders/OrderListView.vue'),
         meta: { title: 'Quản lý Đơn hàng' }
+      },
+      {
+        path: 'users',
+        name: 'users',
+        component: () => import('@/views/users/UserListView.vue'),
+        meta: { title: 'Quản lý Người dùng' }
       }
     ]
   },

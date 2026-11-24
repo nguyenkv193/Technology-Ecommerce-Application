@@ -18,14 +18,17 @@ export interface PageResponse<T> {
 }
 
 export type Role = 'USER' | 'ADMIN' | 'STAFF'
+export type UserStatus = 'ACTIVE' | 'INACTIVE' | 'BLOCKED'
 
 export interface User {
   id: number
   email: string
   fullName: string
+  phone?: string
   phoneNumber?: string
+  authProvider?: 'LOCAL' | 'GOOGLE'
   role: Role
-  status?: 'ACTIVE' | 'INACTIVE' | 'BLOCKED'
+  status?: UserStatus
   avatarUrl?: string
   createdAt?: string
 }

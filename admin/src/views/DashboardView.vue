@@ -421,6 +421,13 @@
               <span class="text-zinc-800 font-medium">Xử lý toàn bộ đơn hàng</span>
               <ChevronRight class="w-3.5 h-3.5 text-zinc-400" />
             </router-link>
+            <router-link
+              to="/users"
+              class="w-full flex items-center justify-between p-2.5 rounded-lg bg-zinc-50 border border-zinc-200/80 hover:border-zinc-300 hover:bg-zinc-100/70 transition-all text-xs"
+            >
+              <span class="text-zinc-800 font-medium">Quản lý tài khoản người dùng</span>
+              <ChevronRight class="w-3.5 h-3.5 text-zinc-400" />
+            </router-link>
           </div>
         </div>
       </div>

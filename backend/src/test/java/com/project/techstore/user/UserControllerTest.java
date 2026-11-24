@@ -2,10 +2,12 @@ package com.project.techstore.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.techstore.auth.security.JwtAuthenticationFilter;
+import com.project.techstore.common.dto.PageResponse;
 import com.project.techstore.user.controller.UserController;
 import com.project.techstore.user.dto.*;
 import com.project.techstore.user.entity.Role;
 import com.project.techstore.user.entity.User;
+import com.project.techstore.user.entity.UserStatus;
 import com.project.techstore.user.service.AddressService;
 import com.project.techstore.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
@@ -221,5 +223,59 @@ class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.isDefault").value(true));
+    }
+
+    @Test
+    void testGetAllUsersForAdmin() throws Exception {
+        UserResponse userDto = UserResponse.builder()
+                .id(2L)
+                .email("khach@techstore.vn")
+                .fullName("Nguyen Van Khach")
+                .role(Role.USER)
+                .status(UserStatus.ACTIVE)
+                .build();
+
+        PageResponse<UserResponse> page = PageResponse.<UserResponse>builder()
+                .content(List.of(userDto))
+                .page(0)
+                .size(10)
+                .totalElements(1)
+                .totalPages(1)
+                .last(true)
+                .build();
+
+        when(userService.getAllUsersForAdmin("khach", Role.USER, UserStatus.ACTIVE, 0, 10)).thenReturn(page);
+
+        mockMvc.perform(get("/api/v1/users/admin?keyword=khach&role=USER&status=ACTIVE&page=0&size=10")
+                        .with(user(sampleUser)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.content[0].email").value("khach@techstore.vn"));
+    }
+
+    @Test
+    void testUpdateUserByAdmin() throws Exception {
+        AdminUpdateUserRequest request = AdminUpdateUserRequest.builder()
+                .role(Role.STAFF)
+                .status(UserStatus.BLOCKED)
+                .build();
+
+        UserResponse updated = UserResponse.builder()
+                .id(2L)
+                .email("khach@techstore.vn")
+                .role(Role.STAFF)
+                .status(UserStatus.BLOCKED)
+                .build();
+
+        when(userService.updateUserByAdmin(eq(1L), eq(2L), any(AdminUpdateUserRequest.class))).thenReturn(updated);
+
+        mockMvc.perform(patch("/api/v1/users/admin/2")
+                        .with(user(sampleUser))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.role").value("STAFF"))
+                .andExpect(jsonPath("$.data.status").value("BLOCKED"));
     }
 }
