@@ -67,7 +67,7 @@ describe('DashboardView', () => {
       allOrders: [mockOrder]
     })
 
-    vi.mocked(dashboardApi.fetchBehaviorAnalytics).mockResolvedValueOnce({
+    vi.mocked(dashboardApi.fetchBehaviorAnalytics).mockResolvedValue({
       days: 14,
       summary: {
         totalViews: 120,
@@ -112,6 +112,13 @@ describe('DashboardView', () => {
     expect(wrapper.text()).toContain('Thống kê tương tác người dùng')
     expect(wrapper.text()).not.toContain('ORD-101')
     expect(localStorage.getItem('techstore_admin_dashboard_section')).toBe('interactions')
+
+    // Test custom from-to range on interactions
+    await wrapper.find('[data-testid="interaction-custom-btn"]').trigger('click')
+    await wrapper.find('[data-testid="interaction-from"]').setValue('2026-10-01')
+    await wrapper.find('[data-testid="interaction-to"]').setValue('2026-10-15')
+    await wrapper.find('[data-testid="interaction-apply-btn"]').trigger('click')
+    expect(dashboardApi.fetchBehaviorAnalytics).toHaveBeenLastCalledWith(14, 10, '2026-10-01', '2026-10-15')
 
     await trigger.trigger('click')
     await wrapper.find('[data-testid="dashboard-section-option-all"]').trigger('click')

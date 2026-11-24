@@ -79,16 +79,35 @@
           <p class="text-xs text-zinc-500 mt-0.5">Biểu đồ tổng hợp từ dữ liệu đơn hàng thực tế</p>
         </div>
 
-        <div class="flex items-center gap-1 p-1 rounded-lg bg-zinc-100 border border-zinc-200 text-xs font-mono self-start sm:self-auto">
-          <button
-            v-for="range in timeRanges"
-            :key="range.id"
-            @click="activeRange = range.id"
-            class="px-2.5 py-1 rounded-md transition-all text-[11px]"
-            :class="activeRange === range.id ? 'bg-white text-zinc-900 font-semibold shadow-xs' : 'text-zinc-600 hover:text-zinc-900'"
-          >
-            {{ range.label }}
-          </button>
+        <div class="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+          <div class="flex items-center gap-1 p-1 rounded-lg bg-zinc-100 border border-zinc-200 text-xs font-mono">
+            <button
+              v-for="range in timeRanges"
+              :key="range.id"
+              :data-testid="`revenue-range-${range.id}`"
+              @click="activeRange = range.id"
+              class="px-2.5 py-1 rounded-md transition-all text-[11px]"
+              :class="activeRange === range.id ? 'bg-white text-zinc-900 font-semibold shadow-xs' : 'text-zinc-600 hover:text-zinc-900'"
+            >
+              {{ range.label }}
+            </button>
+          </div>
+
+          <div v-if="activeRange === 'custom'" class="flex items-center gap-1.5 text-xs">
+            <input
+              v-model="revenueFrom"
+              type="date"
+              data-testid="revenue-from"
+              class="h-8 px-2 rounded-lg bg-white border border-zinc-200 text-xs text-zinc-700 focus:outline-none focus:border-zinc-900"
+            />
+            <span class="text-zinc-400">–</span>
+            <input
+              v-model="revenueTo"
+              type="date"
+              data-testid="revenue-to"
+              class="h-8 px-2 rounded-lg bg-white border border-zinc-200 text-xs text-zinc-700 focus:outline-none focus:border-zinc-900"
+            />
+          </div>
         </div>
       </div>
 
@@ -106,16 +125,51 @@
             <p class="text-xs text-zinc-500 mt-0.5">Theo dõi lượt xem (click), lượt tym, thêm giỏ hàng và mua hàng</p>
           </div>
 
-          <div class="flex items-center gap-1 p-1 rounded-lg bg-zinc-100 border border-zinc-200 text-xs font-mono self-start sm:self-auto">
-            <button
-              v-for="opt in interactionDayOptions"
-              :key="opt.days"
-              @click="changeInteractionDays(opt.days)"
-              class="px-2.5 py-1 rounded-md transition-all text-[11px]"
-              :class="interactionDays === opt.days ? 'bg-white text-zinc-900 font-semibold shadow-xs' : 'text-zinc-600 hover:text-zinc-900'"
-            >
-              {{ opt.label }}
-            </button>
+          <div class="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+            <div class="flex items-center gap-1 p-1 rounded-lg bg-zinc-100 border border-zinc-200 text-xs font-mono">
+              <button
+                v-for="opt in interactionDayOptions"
+                :key="opt.days"
+                @click="changeInteractionDays(opt.days)"
+                class="px-2.5 py-1 rounded-md transition-all text-[11px]"
+                :class="interactionMode === 'preset' && interactionDays === opt.days ? 'bg-white text-zinc-900 font-semibold shadow-xs' : 'text-zinc-600 hover:text-zinc-900'"
+              >
+                {{ opt.label }}
+              </button>
+              <button
+                type="button"
+                data-testid="interaction-custom-btn"
+                @click="enableCustomInteractionRange"
+                class="px-2.5 py-1 rounded-md transition-all text-[11px]"
+                :class="interactionMode === 'custom' ? 'bg-white text-zinc-900 font-semibold shadow-xs' : 'text-zinc-600 hover:text-zinc-900'"
+              >
+                Tùy chỉnh
+              </button>
+            </div>
+
+            <div v-if="interactionMode === 'custom'" class="flex items-center gap-1.5 text-xs">
+              <input
+                v-model="interactionFrom"
+                type="date"
+                data-testid="interaction-from"
+                class="h-8 px-2 rounded-lg bg-white border border-zinc-200 text-xs text-zinc-700 focus:outline-none focus:border-zinc-900"
+              />
+              <span class="text-zinc-400">–</span>
+              <input
+                v-model="interactionTo"
+                type="date"
+                data-testid="interaction-to"
+                class="h-8 px-2 rounded-lg bg-white border border-zinc-200 text-xs text-zinc-700 focus:outline-none focus:border-zinc-900"
+              />
+              <button
+                type="button"
+                data-testid="interaction-apply-btn"
+                @click="applyCustomInteractionRange"
+                class="h-8 px-2.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-[11px] font-medium transition-colors cursor-pointer"
+              >
+                Áp dụng
+              </button>
+            </div>
           </div>
         </div>
 
@@ -170,7 +224,9 @@
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-zinc-100">
           <div>
             <h2 class="text-sm font-semibold text-zinc-900 tracking-tight">Xếp hạng sản phẩm tương tác</h2>
-            <p class="text-xs text-zinc-500 mt-0.5">Top sản phẩm nổi bật trong {{ interactionDays }} ngày qua</p>
+            <p class="text-xs text-zinc-500 mt-0.5">
+              {{ interactionRangeLabel }}
+            </p>
           </div>
 
           <CustomSelect
@@ -458,6 +514,7 @@ import {
   CheckCircle2,
   Package
 } from 'lucide-vue-next'
+import { toast } from 'vue-sonner'
 import { useAdminAuthStore } from '@/stores/auth'
 import StatCard from '@/components/common/StatCard.vue'
 import BadgeStatus from '@/components/common/BadgeStatus.vue'
@@ -500,12 +557,28 @@ function isSectionVisible(section: Exclude<DashboardSection, 'all'>): boolean {
   return activeSection.value === 'all' || activeSection.value === section
 }
 
-const activeRange = ref<'7d' | '30d' | 'year'>('7d')
+function toLocalIsoDate(date: Date): string {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+function getDefaultDateOffset(daysAgo: number): string {
+  const d = new Date()
+  d.setDate(d.getDate() - daysAgo)
+  return toLocalIsoDate(d)
+}
+
+const activeRange = ref<'7d' | '30d' | 'year' | 'custom'>('7d')
 const timeRanges = [
   { id: '7d' as const, label: '7 ngày' },
   { id: '30d' as const, label: '30 ngày' },
-  { id: 'year' as const, label: 'Năm nay' }
+  { id: 'year' as const, label: 'Năm nay' },
+  { id: 'custom' as const, label: 'Tùy chỉnh' }
 ]
+const revenueFrom = ref<string>(getDefaultDateOffset(6))
+const revenueTo = ref<string>(getDefaultDateOffset(0))
 
 const formattedDate = computed(() => {
   return new Intl.DateTimeFormat('vi-VN', {
@@ -528,11 +601,20 @@ const recentOrders = ref<Order[]>([])
 const allOrders = ref<Order[]>([])
 
 const interactionDays = ref<7 | 14 | 30>(14)
+const interactionMode = ref<'preset' | 'custom'>('preset')
+const interactionFrom = ref<string>(getDefaultDateOffset(13))
+const interactionTo = ref<string>(getDefaultDateOffset(0))
 const interactionDayOptions = [
   { days: 7 as const, label: '7 ngày' },
   { days: 14 as const, label: '14 ngày' },
   { days: 30 as const, label: '30 ngày' }
 ]
+const interactionRangeLabel = computed(() => {
+  if (interactionMode.value === 'custom' && interactionFrom.value && interactionTo.value) {
+    return `Top sản phẩm nổi bật từ ${interactionFrom.value} đến ${interactionTo.value}`
+  }
+  return `Top sản phẩm nổi bật trong ${interactionDays.value} ngày qua`
+})
 const isLoadingAnalytics = ref(false)
 const rankingSortKey = ref<'interactionScore' | 'viewCount' | 'wishlistCount' | 'addToCartCount' | 'purchaseCount'>('interactionScore')
 const behaviorAnalytics = ref<BehaviorAnalytics>({
@@ -626,6 +708,54 @@ const revenuePoints = computed<RevenuePoint[]>(() => {
 
       points.push({ label, amount, count: bucketOrders.length })
     }
+  } else if (activeRange.value === 'custom') {
+    if (!revenueFrom.value || !revenueTo.value || revenueFrom.value > revenueTo.value) {
+      return points
+    }
+    const startD = new Date(`${revenueFrom.value}T00:00:00`)
+    const endD = new Date(`${revenueTo.value}T00:00:00`)
+    const diffDays = Math.floor((endD.getTime() - startD.getTime()) / 86_400_000) + 1
+
+    if (diffDays <= 31) {
+      for (let i = 0; i < diffDays; i++) {
+        const d = new Date(startD)
+        d.setDate(d.getDate() + i)
+        const dayStr = toLocalIsoDate(d)
+        const label = `${d.getDate()}/${d.getMonth() + 1}`
+
+        const dayOrders = allOrders.value.filter((o) => o.createdAt && o.createdAt.startsWith(dayStr))
+        const amount = dayOrders.reduce((sum, o) => {
+          if (o.orderStatus === 'DELIVERED' || o.paymentStatus === 'PAID') {
+            return sum + (o.finalAmount ?? o.totalAmount ?? 0)
+          }
+          return sum
+        }, 0)
+
+        points.push({ label, amount, count: dayOrders.length })
+      }
+    } else {
+      const cursor = new Date(startD.getFullYear(), startD.getMonth(), 1)
+      const endMonth = new Date(endD.getFullYear(), endD.getMonth(), 1)
+      while (cursor <= endMonth) {
+        const monthPrefix = `${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2, '0')}`
+        const label = `T${cursor.getMonth() + 1}/${String(cursor.getFullYear()).slice(-2)}`
+
+        const monthOrders = allOrders.value.filter((o) => {
+          if (!o.createdAt || !o.createdAt.startsWith(monthPrefix)) return false
+          const dayStr = o.createdAt.slice(0, 10)
+          return dayStr >= revenueFrom.value && dayStr <= revenueTo.value
+        })
+        const amount = monthOrders.reduce((sum, o) => {
+          if (o.orderStatus === 'DELIVERED' || o.paymentStatus === 'PAID') {
+            return sum + (o.finalAmount ?? o.totalAmount ?? 0)
+          }
+          return sum
+        }, 0)
+
+        points.push({ label, amount, count: monthOrders.length })
+        cursor.setMonth(cursor.getMonth() + 1)
+      }
+    }
   } else {
     const currentYear = now.getFullYear()
     for (let m = 0; m < 12; m++) {
@@ -668,15 +798,44 @@ function formatCompactCurrency(val: number): string {
 async function loadInteractionAnalytics() {
   isLoadingAnalytics.value = true
   try {
-    behaviorAnalytics.value = await fetchBehaviorAnalytics(interactionDays.value, 10)
+    if (interactionMode.value === 'custom') {
+      behaviorAnalytics.value = await fetchBehaviorAnalytics(
+        interactionDays.value,
+        10,
+        interactionFrom.value,
+        interactionTo.value
+      )
+    } else {
+      behaviorAnalytics.value = await fetchBehaviorAnalytics(interactionDays.value, 10)
+    }
   } finally {
     isLoadingAnalytics.value = false
   }
 }
 
 function changeInteractionDays(days: 7 | 14 | 30) {
-  if (interactionDays.value === days) return
+  if (interactionMode.value === 'preset' && interactionDays.value === days) return
+  interactionMode.value = 'preset'
   interactionDays.value = days
+  loadInteractionAnalytics()
+}
+
+function enableCustomInteractionRange() {
+  interactionMode.value = 'custom'
+  if (interactionFrom.value && interactionTo.value && interactionFrom.value <= interactionTo.value) {
+    loadInteractionAnalytics()
+  }
+}
+
+function applyCustomInteractionRange() {
+  if (!interactionFrom.value || !interactionTo.value) {
+    toast.error('Vui lòng chọn đầy đủ ngày bắt đầu và ngày kết thúc')
+    return
+  }
+  if (interactionFrom.value > interactionTo.value) {
+    toast.error('Ngày bắt đầu không được lớn hơn ngày kết thúc')
+    return
+  }
   loadInteractionAnalytics()
 }
 

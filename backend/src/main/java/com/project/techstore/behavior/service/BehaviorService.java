@@ -9,6 +9,8 @@ import com.project.techstore.behavior.dto.UserInteractionExportDto;
 import com.project.techstore.behavior.entity.BehaviorType;
 import com.project.techstore.behavior.entity.UserBehavior;
 import com.project.techstore.behavior.repository.UserBehaviorRepository;
+import com.project.techstore.common.exception.AppException;
+import com.project.techstore.common.exception.ErrorCode;
 import com.project.techstore.product.dto.ProductResponse;
 import com.project.techstore.product.entity.Product;
 import com.project.techstore.product.repository.ProductRepository;
@@ -186,13 +188,38 @@ public class BehaviorService {
 
     @Transactional(readOnly = true)
     public BehaviorAnalyticsResponse getAdminAnalytics(int days, int limit) {
-        int safeDays = Math.max(1, Math.min(days, 90));
+        return getAdminAnalytics(days, limit, null, null);
+    }
+
+    @Transactional(readOnly = true)
+    public BehaviorAnalyticsResponse getAdminAnalytics(int days, int limit, LocalDate from, LocalDate to) {
         int safeLimit = Math.max(1, Math.min(limit, 50));
 
         ZoneId vnZone = ZoneId.of("Asia/Ho_Chi_Minh");
-        LocalDate today = LocalDate.now(vnZone);
-        LocalDate startDate = today.minusDays(safeDays - 1L);
+        LocalDate startDate;
+        LocalDate endDate;
+        int safeDays;
+
+        if (from != null || to != null) {
+            LocalDate today = LocalDate.now(vnZone);
+            endDate = to != null ? to : today;
+            startDate = from != null ? from : endDate.minusDays(Math.max(1, Math.min(days, 90)) - 1L);
+            if (startDate.isAfter(endDate)) {
+                throw new AppException(ErrorCode.INVALID_REQUEST, "Ngày bắt đầu không được lớn hơn ngày kết thúc");
+            }
+            long spanDays = java.time.temporal.ChronoUnit.DAYS.between(startDate, endDate) + 1;
+            if (spanDays > 90) {
+                throw new AppException(ErrorCode.INVALID_REQUEST, "Khoảng thời gian thống kê tối đa là 90 ngày");
+            }
+            safeDays = (int) spanDays;
+        } else {
+            safeDays = Math.max(1, Math.min(days, 90));
+            endDate = LocalDate.now(vnZone);
+            startDate = endDate.minusDays(safeDays - 1L);
+        }
+
         Instant since = startDate.atStartOfDay(vnZone).toInstant();
+        Instant until = endDate.plusDays(1).atStartOfDay(vnZone).toInstant();
 
         // 1. Summary counts
         long totalViews = 0;
@@ -201,7 +228,7 @@ public class BehaviorService {
         long totalPurchases = 0;
         long totalSearches = 0;
 
-        for (Object[] row : userBehaviorRepository.countByActionTypeSince(since)) {
+        for (Object[] row : userBehaviorRepository.countByActionTypeBetween(since, until)) {
             BehaviorType type = (BehaviorType) row[0];
             long count = ((Number) row[1]).longValue();
             switch (type) {
@@ -227,7 +254,7 @@ public class BehaviorService {
                     .build());
         }
 
-        for (Object[] row : userBehaviorRepository.findDailyActionCountsSince(since)) {
+        for (Object[] row : userBehaviorRepository.findDailyActionCountsBetween(since, until)) {
             String dayStr = String.valueOf(row[0]);
             String actionStr = String.valueOf(row[1]);
             long count = ((Number) row[2]).longValue();
@@ -243,7 +270,7 @@ public class BehaviorService {
         }
 
         // 3. Top interacted products
-        List<Object[]> topRows = userBehaviorRepository.findTopInteractedProductsSince(since, PageRequest.of(0, safeLimit));
+        List<Object[]> topRows = userBehaviorRepository.findTopInteractedProductsBetween(since, until, PageRequest.of(0, safeLimit));
         List<Long> productIds = topRows.stream().map(r -> ((Number) r[0]).longValue()).toList();
         Map<Long, ProductResponse> productMap = new HashMap<>();
         if (!productIds.isEmpty()) {

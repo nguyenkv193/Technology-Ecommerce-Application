@@ -7,10 +7,20 @@ export interface DashboardOverview {
   allOrders: Order[]
 }
 
-export async function fetchBehaviorAnalytics(days = 30, limit = 10): Promise<BehaviorAnalytics> {
+export async function fetchBehaviorAnalytics(
+  days = 30,
+  limit = 10,
+  from?: string,
+  to?: string
+): Promise<BehaviorAnalytics> {
   try {
     const res = await apiClient.get<ApiResponse<BehaviorAnalytics>>('/behaviors/admin/analytics', {
-      params: { days, limit }
+      params: {
+        days,
+        limit,
+        from: from || undefined,
+        to: to || undefined
+      }
     })
     return (
       res.data?.data || {

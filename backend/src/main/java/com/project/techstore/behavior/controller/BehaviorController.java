@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -77,9 +78,11 @@ public class BehaviorController {
     @Operation(summary = "Thống kê tương tác người dùng và bảng xếp hạng sản phẩm được tương tác nhiều nhất (Admin)")
     public ResponseEntity<ApiResponse<BehaviorAnalyticsResponse>> getAdminAnalytics(
             @RequestParam(defaultValue = "30") @Min(1) @Max(90) int days,
-            @RequestParam(defaultValue = "10") @Min(1) @Max(50) int limit
+            @RequestParam(defaultValue = "10") @Min(1) @Max(50) int limit,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to
     ) {
-        return ResponseEntity.ok(ApiResponse.success(behaviorService.getAdminAnalytics(days, limit)));
+        return ResponseEntity.ok(ApiResponse.success(behaviorService.getAdminAnalytics(days, limit, from, to)));
     }
 
     @GetMapping("/recommendation-training-data")
