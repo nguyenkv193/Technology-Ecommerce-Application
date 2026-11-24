@@ -11,7 +11,14 @@
         </p>
       </div>
 
-      <div class="flex items-center gap-2.5 shrink-0">
+      <div class="flex flex-wrap items-center gap-2.5 shrink-0">
+        <select
+          v-model="activeSection"
+          data-testid="dashboard-section-select"
+          class="h-9 px-3 text-xs font-medium bg-white border border-zinc-200 rounded-lg text-zinc-700 shadow-xs focus:outline-none focus:border-zinc-900 cursor-pointer"
+        >
+          <option v-for="opt in sectionOptions" :key="opt.id" :value="opt.id">{{ opt.label }}</option>
+        </select>
         <router-link
           to="/products/create"
           class="px-3.5 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-medium shadow-sm flex items-center gap-2 transition-all"
@@ -63,7 +70,7 @@
     </div>
 
     <!-- Dynamic Revenue Chart -->
-    <div class="p-5 rounded-xl bg-white border border-zinc-200 shadow-sm relative overflow-hidden">
+    <div v-if="isSectionVisible('revenue')" class="p-5 rounded-xl bg-white border border-zinc-200 shadow-sm relative overflow-hidden">
       <!-- Chart Header & Range Filter -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
         <div>
@@ -89,7 +96,7 @@
     </div>
 
     <!-- User Interaction Analytics & Top Products -->
-    <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
+    <div v-if="isSectionVisible('interactions')" class="grid grid-cols-1 xl:grid-cols-12 gap-6">
       <!-- Interaction Trend Chart (7 cols) -->
       <div class="xl:col-span-7 p-5 rounded-xl bg-white border border-zinc-200 shadow-sm space-y-4">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -243,7 +250,7 @@
     </div>
 
     <!-- 2-Column Bottom Layout -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div v-if="isSectionVisible('orders')" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <!-- Recent Orders Table (2 Cols) -->
       <div class="lg:col-span-2 bg-white border border-zinc-200 rounded-xl p-5 shadow-sm space-y-4">
         <div class="flex items-center justify-between pb-3 border-b border-zinc-100">
@@ -436,7 +443,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import {
   DollarSign,
   ShoppingBag,
@@ -462,6 +469,27 @@ import type { BehaviorAnalytics, DashboardMetrics, Order } from '@/types'
 
 const authStore = useAdminAuthStore()
 const isLoading = ref(true)
+
+type DashboardSection = 'revenue' | 'interactions' | 'orders' | 'all'
+const SECTION_STORAGE_KEY = 'techstore_admin_dashboard_section'
+const sectionOptions: { id: DashboardSection; label: string }[] = [
+  { id: 'revenue', label: 'Doanh thu & Số lượng đơn' },
+  { id: 'interactions', label: 'Tương tác & Top sản phẩm' },
+  { id: 'orders', label: 'Đơn hàng & Phím tắt' },
+  { id: 'all', label: 'Hiển thị tất cả' }
+]
+
+function loadSavedSection(): DashboardSection {
+  const saved = localStorage.getItem(SECTION_STORAGE_KEY)
+  return sectionOptions.some(opt => opt.id === saved) ? (saved as DashboardSection) : 'revenue'
+}
+
+const activeSection = ref<DashboardSection>(loadSavedSection())
+watch(activeSection, value => localStorage.setItem(SECTION_STORAGE_KEY, value))
+
+function isSectionVisible(section: Exclude<DashboardSection, 'all'>): boolean {
+  return activeSection.value === 'all' || activeSection.value === section
+}
 
 const activeRange = ref<'7d' | '30d' | 'year'>('7d')
 const timeRanges = [

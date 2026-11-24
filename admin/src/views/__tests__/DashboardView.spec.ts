@@ -33,6 +33,7 @@ describe('DashboardView', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
     vi.clearAllMocks()
+    localStorage.removeItem('techstore_admin_dashboard_section')
   })
 
   it('renders dashboard metrics and quick action shortcuts', async () => {
@@ -100,6 +101,18 @@ describe('DashboardView', () => {
 
     // Wait for async fetch
     await new Promise((r) => setTimeout(r, 50))
+
+    // Default section only shows the revenue block
+    expect(wrapper.text()).toContain('Doanh thu & Số lượng đơn')
+    expect(wrapper.text()).not.toContain('Thống kê tương tác người dùng')
+
+    const select = wrapper.find('[data-testid="dashboard-section-select"]')
+    await select.setValue('interactions')
+    expect(wrapper.text()).toContain('Thống kê tương tác người dùng')
+    expect(wrapper.text()).not.toContain('ORD-101')
+    expect(localStorage.getItem('techstore_admin_dashboard_section')).toBe('interactions')
+
+    await select.setValue('all')
 
     const text = wrapper.text()
     expect(text).toContain('Tổng doanh thu')
