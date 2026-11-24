@@ -37,4 +37,14 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     Optional<Product> findBySlug(String slug);
 
     boolean existsBySlug(String slug);
+
+    @Query("SELECT p.category.id, COUNT(p) FROM Product p GROUP BY p.category.id")
+    List<Object[]> countProductsByCategory();
+
+    @Query("SELECT p.brand.id, COUNT(p) FROM Product p GROUP BY p.brand.id")
+    List<Object[]> countProductsByBrand();
+
+    long countByCategoryId(Long categoryId);
+
+    long countByBrandId(Long brandId);
 }

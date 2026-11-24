@@ -33,6 +33,9 @@ public class Brand extends BaseEntity {
     @Column(name = "website_url", length = 500)
     private String websiteUrl;
 
+    @Column(name = "origin_country", length = 100)
+    private String originCountry;
+
     @Column(name = "status", nullable = false, length = 50)
     @Builder.Default
     private String status = "ACTIVE";

@@ -29,4 +29,7 @@ public class BrandRequest {
 
     @Schema(description = "Website chính thức", example = "https://apple.com")
     private String websiteUrl;
+
+    @Schema(description = "Quốc gia xuất xứ", example = "Hoa Kỳ")
+    private String originCountry;
 }

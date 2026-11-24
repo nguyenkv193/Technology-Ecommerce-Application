@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 
 @Data
 @Builder
@@ -44,18 +45,31 @@ public class CategoryResponse {
     @Schema(description = "Trạng thái", example = "ACTIVE")
     private String status;
 
+    @Schema(description = "Số lượng sản phẩm thuộc danh mục", example = "12")
+    private Long productCount;
+
     @Schema(description = "Thời gian tạo")
     private Instant createdAt;
 
     public static CategoryResponse from(Category category, boolean includeSubCategories) {
+        return from(category, includeSubCategories, Map.of());
+    }
+
+    public static CategoryResponse from(Category category, boolean includeSubCategories, Map<Long, Long> productCounts) {
         if (category == null) return null;
 
         List<CategoryResponse> subs = null;
+        long subProductCount = 0L;
         if (includeSubCategories && category.getSubCategories() != null) {
             subs = category.getSubCategories().stream()
-                    .map(sub -> CategoryResponse.from(sub, false))
+                    .map(sub -> CategoryResponse.from(sub, false, productCounts))
                     .toList();
+            subProductCount = subs.stream()
+                    .mapToLong(sub -> sub.getProductCount() != null ? sub.getProductCount() : 0L)
+                    .sum();
         }
+
+        long directCount = productCounts.getOrDefault(category.getId(), 0L);
 
         return CategoryResponse.builder()
                 .id(category.getId())
@@ -67,6 +81,7 @@ public class CategoryResponse {
                 .imageUrl(category.getImageUrl())
                 .subCategories(subs)
                 .status(category.getStatus())
+                .productCount(directCount + subProductCount)
                 .createdAt(category.getCreatedAt())
                 .build();
     }

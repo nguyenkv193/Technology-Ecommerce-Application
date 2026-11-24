@@ -7,6 +7,7 @@ import com.project.techstore.brand.repository.BrandRepository;
 import com.project.techstore.brand.service.BrandService;
 import com.project.techstore.common.exception.AppException;
 import com.project.techstore.common.exception.ErrorCode;
+import com.project.techstore.product.repository.ProductRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,6 +28,9 @@ class BrandServiceTest {
     @Mock
     private BrandRepository brandRepository;
 
+    @Mock
+    private ProductRepository productRepository;
+
     @InjectMocks
     private BrandService brandService;
 
@@ -38,6 +42,7 @@ class BrandServiceTest {
                 .name("Apple")
                 .slug("apple")
                 .description("Tập đoàn Apple")
+                .originCountry("Hoa Kỳ")
                 .status("ACTIVE")
                 .build();
         sampleBrand.setId(1L);
@@ -46,23 +51,28 @@ class BrandServiceTest {
     @Test
     void testGetAllBrands() {
         when(brandRepository.findAll()).thenReturn(List.of(sampleBrand));
+        when(productRepository.countProductsByBrand()).thenReturn(List.<Object[]>of(new Object[]{1L, 5L}));
 
         List<BrandResponse> list = brandService.getAllBrands();
 
         assertNotNull(list);
         assertEquals(1, list.size());
         assertEquals("Apple", list.get(0).getName());
+        assertEquals("Hoa Kỳ", list.get(0).getOriginCountry());
+        assertEquals(5L, list.get(0).getProductCount());
     }
 
     @Test
     void testGetByIdSuccess() {
         when(brandRepository.findById(1L)).thenReturn(Optional.of(sampleBrand));
+        when(productRepository.countByBrandId(1L)).thenReturn(5L);
 
         BrandResponse res = brandService.getById(1L);
 
         assertNotNull(res);
         assertEquals(1L, res.getId());
         assertEquals("Apple", res.getName());
+        assertEquals(5L, res.getProductCount());
     }
 
     @Test

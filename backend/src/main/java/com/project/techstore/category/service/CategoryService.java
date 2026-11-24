@@ -6,6 +6,7 @@ import com.project.techstore.category.entity.Category;
 import com.project.techstore.category.repository.CategoryRepository;
 import com.project.techstore.common.exception.AppException;
 import com.project.techstore.common.exception.ErrorCode;
+import com.project.techstore.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -13,8 +14,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.text.Normalizer;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 @Slf4j
@@ -23,26 +26,38 @@ import java.util.regex.Pattern;
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final ProductRepository productRepository;
 
     @Transactional(readOnly = true)
     public List<CategoryResponse> getAllRootCategories() {
+        Map<Long, Long> productCounts = getCategoryProductCounts();
         return categoryRepository.findByParentIsNullOrderByCreatedAtDesc()
                 .stream()
-                .map(cat -> CategoryResponse.from(cat, true))
+                .map(cat -> CategoryResponse.from(cat, true, productCounts))
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public CategoryResponse getById(Long id) {
         Category category = getCategoryEntity(id);
-        return CategoryResponse.from(category, true);
+        return CategoryResponse.from(category, true, getCategoryProductCounts());
     }
 
     @Transactional(readOnly = true)
     public CategoryResponse getBySlug(String slug) {
         Category category = categoryRepository.findBySlug(slug)
                 .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND, "Không tìm thấy danh mục với slug: " + slug));
-        return CategoryResponse.from(category, true);
+        return CategoryResponse.from(category, true, getCategoryProductCounts());
+    }
+
+    private Map<Long, Long> getCategoryProductCounts() {
+        Map<Long, Long> counts = new HashMap<>();
+        for (Object[] row : productRepository.countProductsByCategory()) {
+            if (row[0] != null && row[1] != null) {
+                counts.put(((Number) row[0]).longValue(), ((Number) row[1]).longValue());
+            }
+        }
+        return counts;
     }
 
     @Transactional

@@ -58,18 +58,35 @@ export async function fetchBehaviorAnalytics(
 
 export async function fetchDashboardOverview(): Promise<DashboardOverview> {
   try {
-    const [productsRes, ordersRes] = await Promise.all([
-      apiClient.get<ApiResponse<PageResponse<Product>>>('/products?page=0&size=1'),
+    const [productsRes, firstOrdersRes] = await Promise.all([
+      apiClient.get<ApiResponse<PageResponse<Product>>>('/products?page=0&size=200'),
       apiClient.get<ApiResponse<PageResponse<Order>>>('/orders?page=0&size=100')
     ])
 
-    const totalProducts = productsRes.data?.data?.totalElements || 0
-    const orders = ordersRes.data?.data?.content || []
-    const totalOrders = ordersRes.data?.data?.totalElements || orders.length
+    const productsPage = productsRes.data?.data
+    const products = productsPage?.content || []
+    const totalProducts = productsPage?.totalElements || products.length
+
+    const firstOrdersPage = firstOrdersRes.data?.data
+    const orders = [...(firstOrdersPage?.content || [])]
+    const totalOrders = firstOrdersPage?.totalElements || orders.length
+    const totalOrderPages = Math.min(firstOrdersPage?.totalPages || 1, 10)
+
+    if (totalOrderPages > 1) {
+      const remainingPages = await Promise.all(
+        Array.from({ length: totalOrderPages - 1 }, (_, idx) =>
+          apiClient.get<ApiResponse<PageResponse<Order>>>(`/orders?page=${idx + 1}&size=100`)
+        )
+      )
+      remainingPages.forEach((res) => {
+        const content = res.data?.data?.content || []
+        orders.push(...content)
+      })
+    }
 
     let totalRevenue = 0
     let pendingOrders = 0
-    let lowStockCount = 0
+    const lowStockCount = products.filter((p) => (p.totalStock ?? 0) <= 5).length
 
     orders.forEach((ord) => {
       // Calculate revenue from completed or paid orders
