@@ -22,19 +22,19 @@
     </div>
 
     <!-- Filters -->
-    <div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
-      <div class="relative flex-1 max-w-md">
+    <div class="bg-white border border-zinc-200 rounded-xl p-2.5 flex flex-wrap items-center gap-2.5 shadow-xs">
+      <div class="relative flex-1 min-w-[220px]">
         <Search class="w-3.5 h-3.5 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
         <input
           v-model="keyword"
           type="text"
           placeholder="Tìm theo họ tên, email, số điện thoại..."
           @keyup.enter="handleSearch"
-          class="w-full pl-9 pr-3 py-2 rounded-lg bg-white border border-zinc-200 text-xs text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:border-zinc-400"
+          class="w-full h-9 pl-9 pr-3 rounded-lg bg-zinc-50/70 focus:bg-white border border-zinc-200 text-xs text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:border-zinc-900 transition-colors"
         />
       </div>
 
-      <div class="flex flex-wrap items-center gap-2 font-mono">
+      <div class="flex flex-wrap items-center gap-2">
         <CustomSelect
           v-model="selectedRole"
           :options="roleFilterOptions"
@@ -44,12 +44,13 @@
         <CustomSelect
           v-model="selectedStatus"
           :options="statusFilterOptions"
+          align="right"
           @change="handleFilterChange"
         />
 
         <button
           @click="handleSearch"
-          class="px-3.5 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-medium transition-colors"
+          class="h-9 px-3.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-medium transition-colors cursor-pointer"
         >
           Tìm kiếm
         </button>

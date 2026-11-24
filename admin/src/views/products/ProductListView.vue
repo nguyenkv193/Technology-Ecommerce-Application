@@ -22,16 +22,16 @@
     </div>
 
     <!-- Filters Bar (Linear Style) -->
-    <div class="bg-white border border-zinc-200 rounded-xl p-3 flex flex-col lg:flex-row gap-3 items-stretch lg:items-center justify-between shadow-xs">
+    <div class="bg-white border border-zinc-200 rounded-xl p-2.5 flex flex-wrap items-center gap-2.5 shadow-xs">
       <!-- Search Input -->
-      <div class="relative w-full lg:w-72">
+      <div class="relative flex-1 min-w-[220px]">
         <Search class="w-3.5 h-3.5 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
         <input
           v-model="keyword"
           @keyup.enter="handleSearch"
           type="text"
           placeholder="Tìm theo tên sản phẩm, slug..."
-          class="w-full bg-white border border-zinc-200 rounded-lg pl-9 pr-8 py-2 text-xs text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900/10 transition-colors"
+          class="w-full h-9 bg-zinc-50/70 focus:bg-white border border-zinc-200 rounded-lg pl-9 pr-8 text-xs text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-zinc-900 transition-colors"
         />
         <button
           v-if="keyword"
@@ -43,7 +43,7 @@
       </div>
 
       <!-- Criteria Filters & Quick Action Buttons -->
-      <div class="flex flex-wrap items-center gap-2 justify-end">
+      <div class="flex flex-wrap items-center gap-2">
         <CustomSelect
           v-model="selectedCategoryId"
           :options="categoryFilterOptions"
@@ -67,8 +67,9 @@
           <span>Lọc</span>
         </button>
         <button
+          v-if="keyword || selectedCategoryId || selectedBrandId || sortOption !== 'createdAt:DESC'"
           @click="resetFilters"
-          class="h-9 px-2.5 rounded-lg text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 text-xs transition-colors cursor-pointer"
+          class="h-9 px-2.5 rounded-lg text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 text-xs transition-colors cursor-pointer"
         >
           Đặt lại
         </button>
