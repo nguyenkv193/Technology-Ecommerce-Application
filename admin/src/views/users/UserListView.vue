@@ -35,27 +35,17 @@
       </div>
 
       <div class="flex flex-wrap items-center gap-2 font-mono">
-        <select
+        <CustomSelect
           v-model="selectedRole"
+          :options="roleFilterOptions"
           @change="handleFilterChange"
-          class="px-3 py-2 rounded-lg bg-white border border-zinc-200 text-xs text-zinc-700 focus:outline-none focus:border-zinc-400"
-        >
-          <option value="">Tất cả vai trò</option>
-          <option value="USER">USER</option>
-          <option value="STAFF">STAFF</option>
-          <option value="ADMIN">ADMIN</option>
-        </select>
+        />
 
-        <select
+        <CustomSelect
           v-model="selectedStatus"
+          :options="statusFilterOptions"
           @change="handleFilterChange"
-          class="px-3 py-2 rounded-lg bg-white border border-zinc-200 text-xs text-zinc-700 focus:outline-none focus:border-zinc-400"
-        >
-          <option value="">Tất cả trạng thái</option>
-          <option value="ACTIVE">Hoạt động</option>
-          <option value="BLOCKED">Đã khóa</option>
-          <option value="INACTIVE">Chưa kích hoạt</option>
-        </select>
+        />
 
         <button
           @click="handleSearch"
@@ -67,7 +57,7 @@
     </div>
 
     <!-- Data Table -->
-    <div class="bg-white border border-zinc-200 rounded-xl overflow-hidden shadow-sm">
+    <div class="bg-white border border-zinc-200 rounded-xl shadow-sm">
       <div class="overflow-x-auto">
         <table class="w-full text-left text-xs text-zinc-700">
           <thead class="text-[11px] font-mono font-medium text-zinc-500 uppercase bg-zinc-50/80 border-b border-zinc-200">
@@ -137,16 +127,13 @@
                 </span>
               </td>
               <td class="py-3 px-4">
-                <select
-                  :value="user.role"
+                <CustomSelect
+                  :model-value="user.role"
+                  :options="roleOptions"
+                  size="sm"
                   :disabled="isSelf(user.id) || updatingUserId === user.id"
-                  @change="handleRoleChange(user, ($event.target as HTMLSelectElement).value as Role)"
-                  class="px-2 py-1 rounded-md bg-white border border-zinc-200 text-xs font-mono text-zinc-800 disabled:opacity-50 disabled:bg-zinc-50 focus:outline-none focus:border-zinc-400"
-                >
-                  <option value="USER">USER</option>
-                  <option value="STAFF">STAFF</option>
-                  <option value="ADMIN">ADMIN</option>
-                </select>
+                  @change="handleRoleChange(user, $event as Role)"
+                />
               </td>
               <td class="py-3 px-4">
                 <span
@@ -228,8 +215,27 @@ import { RefreshCw, Search, Loader2 } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 import { fetchAdminUsers, updateAdminUser } from '@/api/users'
 import ConfirmModal from '@/components/common/ConfirmModal.vue'
+import CustomSelect, { type CustomSelectOption } from '@/components/common/CustomSelect.vue'
 import { useAdminAuthStore } from '@/stores/auth'
 import type { Role, User, UserStatus } from '@/types'
+
+const roleOptions: CustomSelectOption[] = [
+  { value: 'USER', label: 'USER' },
+  { value: 'STAFF', label: 'STAFF' },
+  { value: 'ADMIN', label: 'ADMIN' }
+]
+
+const roleFilterOptions: CustomSelectOption[] = [
+  { value: '', label: 'Tất cả vai trò' },
+  ...roleOptions
+]
+
+const statusFilterOptions: CustomSelectOption[] = [
+  { value: '', label: 'Tất cả trạng thái' },
+  { value: 'ACTIVE', label: 'Hoạt động' },
+  { value: 'BLOCKED', label: 'Đã khóa' },
+  { value: 'INACTIVE', label: 'Chưa kích hoạt' }
+]
 
 const authStore = useAdminAuthStore()
 

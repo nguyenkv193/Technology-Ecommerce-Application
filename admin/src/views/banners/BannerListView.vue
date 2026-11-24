@@ -14,16 +14,11 @@
 
       <div class="flex items-center gap-2.5">
         <!-- Filter by Position -->
-        <select
+        <CustomSelect
           v-model="selectedPosition"
-          class="h-9 px-3 text-xs bg-white border border-zinc-200 rounded-lg text-zinc-700 focus:outline-none focus:ring-1 focus:ring-zinc-900 font-sans"
-        >
-          <option value="ALL">Tất cả vị trí</option>
-          <option value="HERO_SLIDER">Hero Slider (Chính giữa)</option>
-          <option value="SIDE_PROMO">Side Promo (Góc phải)</option>
-          <option value="BOTTOM_CARD">Bottom Card (Dưới cùng)</option>
-          <option value="POPUP">Popup khuyến mãi</option>
-        </select>
+          :options="positionFilterOptions"
+          align="right"
+        />
 
         <button
           type="button"
@@ -213,15 +208,11 @@
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="block text-xs font-semibold text-zinc-700 mb-1">Vị trí hiển thị</label>
-              <select
+              <CustomSelect
                 v-model="form.position"
-                class="w-full px-3 py-2 text-xs bg-zinc-50 border border-zinc-200 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-900"
-              >
-                <option value="HERO_SLIDER">Hero Slider (Chính giữa)</option>
-                <option value="SIDE_PROMO">Side Promo (Góc phải)</option>
-                <option value="BOTTOM_CARD">Bottom Card (Dưới cùng)</option>
-                <option value="POPUP">Popup</option>
-              </select>
+                :options="bannerPositionOptions"
+                :block="true"
+              />
             </div>
 
             <div>
@@ -238,24 +229,20 @@
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="block text-xs font-semibold text-zinc-700 mb-1">Trạng thái</label>
-              <select
+              <CustomSelect
                 v-model="form.status"
-                class="w-full px-3 py-2 text-xs bg-zinc-50 border border-zinc-200 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-900"
-              >
-                <option value="ACTIVE">Hoạt động (Hiển thị ngay)</option>
-                <option value="INACTIVE">Tạm ẩn</option>
-              </select>
+                :options="bannerStatusOptions"
+                :block="true"
+              />
             </div>
 
             <div>
               <label class="block text-xs font-semibold text-zinc-700 mb-1">Mở liên kết</label>
-              <select
+              <CustomSelect
                 v-model="form.targetType"
-                class="w-full px-3 py-2 text-xs bg-zinc-50 border border-zinc-200 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-zinc-900"
-              >
-                <option value="_self">Cùng tab (_self)</option>
-                <option value="_blank">Tab mới (_blank)</option>
-              </select>
+                :options="bannerTargetOptions"
+                :block="true"
+              />
             </div>
           </div>
 
@@ -284,12 +271,35 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { Plus, Edit3, Trash2, Loader2, X } from 'lucide-vue-next'
+import CustomSelect, { type CustomSelectOption } from '@/components/common/CustomSelect.vue'
 import type { Banner } from '@/types'
 import { fetchBanners, createBanner, updateBanner, deleteBanner, toggleBannerStatus } from '@/api/banners'
 
 const banners = ref<Banner[]>([])
 const isLoading = ref<boolean>(true)
 const selectedPosition = ref<string>('ALL')
+
+const bannerPositionOptions: CustomSelectOption[] = [
+  { value: 'HERO_SLIDER', label: 'Hero Slider (Chính giữa)' },
+  { value: 'SIDE_PROMO', label: 'Side Promo (Góc phải)' },
+  { value: 'BOTTOM_CARD', label: 'Bottom Card (Dưới cùng)' },
+  { value: 'POPUP', label: 'Popup khuyến mãi' }
+]
+
+const positionFilterOptions: CustomSelectOption[] = [
+  { value: 'ALL', label: 'Tất cả vị trí' },
+  ...bannerPositionOptions
+]
+
+const bannerStatusOptions: CustomSelectOption[] = [
+  { value: 'ACTIVE', label: 'Hoạt động (Hiển thị ngay)' },
+  { value: 'INACTIVE', label: 'Tạm ẩn' }
+]
+
+const bannerTargetOptions: CustomSelectOption[] = [
+  { value: '_self', label: 'Cùng tab (_self)' },
+  { value: '_blank', label: 'Tab mới (_blank)' }
+]
 
 const showModal = ref<boolean>(false)
 const isEditing = ref<boolean>(false)

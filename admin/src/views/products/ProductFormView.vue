@@ -234,15 +234,11 @@
 
           <div>
             <label class="block text-xs font-medium text-zinc-700 mb-1.5">Trạng thái sản phẩm</label>
-            <select
+            <CustomSelect
               v-model="form.status"
-              class="w-full bg-white border border-zinc-200 rounded-lg px-3.5 py-2 text-xs font-mono text-zinc-900 focus:outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900/10 transition-colors"
-            >
-              <option value="ACTIVE">ACTIVE (Đang mở bán)</option>
-              <option value="INACTIVE">INACTIVE (Ngừng kinh doanh)</option>
-              <option value="DRAFT">DRAFT (Bản nháp)</option>
-              <option value="OUT_OF_STOCK">OUT_OF_STOCK (Hết hàng)</option>
-            </select>
+              :options="productStatusOptions"
+              :block="true"
+            />
           </div>
         </div>
 
@@ -255,30 +251,22 @@
           <div class="space-y-3.5">
             <div>
               <label class="block text-xs font-medium text-zinc-700 mb-1.5">Danh mục sản phẩm *</label>
-              <select
-                v-model.number="form.categoryId"
-                required
-                class="w-full bg-white border border-zinc-200 rounded-lg px-3.5 py-2 text-xs text-zinc-900 focus:outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900/10 transition-colors"
-              >
-                <option value="" disabled>-- Chọn danh mục --</option>
-                <option v-for="c in categories" :key="c.id" :value="c.id">
-                  {{ c.name }}
-                </option>
-              </select>
+              <CustomSelect
+                v-model="form.categoryId"
+                :options="categoryOptions"
+                placeholder="-- Chọn danh mục --"
+                :block="true"
+              />
             </div>
 
             <div>
               <label class="block text-xs font-medium text-zinc-700 mb-1.5">Thương hiệu *</label>
-              <select
-                v-model.number="form.brandId"
-                required
-                class="w-full bg-white border border-zinc-200 rounded-lg px-3.5 py-2 text-xs text-zinc-900 focus:outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900/10 transition-colors"
-              >
-                <option value="" disabled>-- Chọn thương hiệu --</option>
-                <option v-for="b in brands" :key="b.id" :value="b.id">
-                  {{ b.name }}
-                </option>
-              </select>
+              <CustomSelect
+                v-model="form.brandId"
+                :options="brandOptions"
+                placeholder="-- Chọn thương hiệu --"
+                :block="true"
+              />
             </div>
           </div>
         </div>
@@ -326,6 +314,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { Loader2, ArrowLeft, Plus, Trash2 } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 import ProductSpecsEditor from '@/components/products/ProductSpecsEditor.vue'
+import CustomSelect, { type CustomSelectOption } from '@/components/common/CustomSelect.vue'
 import { fetchProductById, createProduct, updateProduct, type ProductFormData } from '@/api/products'
 import { fetchCategories } from '@/api/categories'
 import { fetchBrands } from '@/api/brands'
@@ -341,6 +330,21 @@ const isLoadingData = ref(false)
 const isSaving = ref(false)
 const categories = ref<Category[]>([])
 const brands = ref<Brand[]>([])
+
+const productStatusOptions: CustomSelectOption[] = [
+  { value: 'ACTIVE', label: 'ACTIVE (Đang mở bán)' },
+  { value: 'INACTIVE', label: 'INACTIVE (Ngừng kinh doanh)' },
+  { value: 'DRAFT', label: 'DRAFT (Bản nháp)' },
+  { value: 'OUT_OF_STOCK', label: 'OUT_OF_STOCK (Hết hàng)' }
+]
+
+const categoryOptions = computed<CustomSelectOption[]>(() =>
+  categories.value.map(c => ({ value: c.id, label: c.name }))
+)
+
+const brandOptions = computed<CustomSelectOption[]>(() =>
+  brands.value.map(b => ({ value: b.id, label: b.name }))
+)
 
 function createDefaultVariant(): ProductVariant {
   return {

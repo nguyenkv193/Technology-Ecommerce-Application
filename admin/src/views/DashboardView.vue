@@ -12,58 +12,14 @@
       </div>
 
       <div class="flex flex-wrap items-center gap-2.5 shrink-0">
-        <!-- Custom Section Dropdown -->
-        <div ref="sectionDropdownRef" class="relative">
-          <button
-            type="button"
-            data-testid="dashboard-section-select"
-            @click="isSectionMenuOpen = !isSectionMenuOpen"
-            class="h-9 px-3 bg-white hover:bg-zinc-50 border border-zinc-200 rounded-lg text-xs font-medium text-zinc-800 shadow-xs flex items-center gap-2 transition-all cursor-pointer"
-          >
-            <component :is="currentSectionOption.icon" class="w-3.5 h-3.5 text-zinc-500" />
-            <span>{{ currentSectionOption.label }}</span>
-            <ChevronDown
-              class="w-3.5 h-3.5 text-zinc-400 transition-transform duration-150"
-              :class="{ 'rotate-180': isSectionMenuOpen }"
-            />
-          </button>
-
-          <Transition
-            enter-active-class="transition duration-150 ease-out"
-            enter-from-class="opacity-0 scale-95 -translate-y-1"
-            enter-to-class="opacity-100 scale-100 translate-y-0"
-            leave-active-class="transition duration-100 ease-in"
-            leave-from-class="opacity-100 scale-100 translate-y-0"
-            leave-to-class="opacity-0 scale-95 -translate-y-1"
-          >
-            <div
-              v-if="isSectionMenuOpen"
-              data-testid="dashboard-section-menu"
-              class="absolute right-0 mt-1.5 w-64 bg-white border border-zinc-200 rounded-xl shadow-lg p-1.5 z-30 space-y-0.5"
-            >
-              <button
-                v-for="opt in sectionOptions"
-                :key="opt.id"
-                type="button"
-                :data-testid="`dashboard-section-option-${opt.id}`"
-                @click="selectSection(opt.id)"
-                class="w-full flex items-start gap-2.5 px-2.5 py-2 rounded-lg text-left transition-colors cursor-pointer"
-                :class="activeSection === opt.id ? 'bg-zinc-100 text-zinc-900' : 'hover:bg-zinc-50 text-zinc-700'"
-              >
-                <component
-                  :is="opt.icon"
-                  class="w-4 h-4 mt-0.5 shrink-0"
-                  :class="activeSection === opt.id ? 'text-zinc-900' : 'text-zinc-400'"
-                />
-                <div class="min-w-0 flex-1">
-                  <div class="text-xs font-medium leading-tight">{{ opt.label }}</div>
-                  <div class="text-[11px] text-zinc-400 mt-0.5 leading-tight">{{ opt.description }}</div>
-                </div>
-                <Check v-if="activeSection === opt.id" class="w-3.5 h-3.5 text-zinc-900 mt-0.5 shrink-0" />
-              </button>
-            </div>
-          </Transition>
-        </div>
+        <CustomSelect
+          v-model="activeSection"
+          :options="sectionOptions"
+          align="right"
+          menu-width-class="w-64"
+          trigger-test-id="dashboard-section-select"
+          option-test-id-prefix="dashboard-section-option"
+        />
         <router-link
           to="/products/create"
           class="px-3.5 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-medium shadow-sm flex items-center gap-2 transition-all"
@@ -217,16 +173,12 @@
             <p class="text-xs text-zinc-500 mt-0.5">Top sản phẩm nổi bật trong {{ interactionDays }} ngày qua</p>
           </div>
 
-          <select
+          <CustomSelect
             v-model="rankingSortKey"
-            class="h-8 px-2.5 text-[11px] font-mono bg-zinc-50 border border-zinc-200 rounded-lg text-zinc-700 focus:outline-none focus:border-zinc-900 self-start sm:self-auto"
-          >
-            <option value="interactionScore">Theo điểm tương tác</option>
-            <option value="viewCount">Theo lượt xem</option>
-            <option value="wishlistCount">Theo lượt tym</option>
-            <option value="addToCartCount">Theo thêm giỏ</option>
-            <option value="purchaseCount">Theo lượt mua</option>
-          </select>
+            :options="rankingSortOptions"
+            align="right"
+            size="sm"
+          />
         </div>
 
         <div v-if="isLoadingAnalytics" class="py-12 text-center text-zinc-500 text-xs">
@@ -488,7 +440,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount, watch, type Component } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import {
   DollarSign,
   ShoppingBag,
@@ -497,8 +449,6 @@ import {
   Plus,
   RefreshCw,
   ChevronRight,
-  ChevronDown,
-  Check,
   BarChart3,
   LayoutGrid,
   Loader2,
@@ -511,6 +461,7 @@ import {
 import { useAdminAuthStore } from '@/stores/auth'
 import StatCard from '@/components/common/StatCard.vue'
 import BadgeStatus from '@/components/common/BadgeStatus.vue'
+import CustomSelect, { type CustomSelectOption } from '@/components/common/CustomSelect.vue'
 import RevenueChart, { type RevenuePoint } from '@/components/dashboard/RevenueChart.vue'
 import InteractionChart from '@/components/dashboard/InteractionChart.vue'
 import { fetchDashboardOverview, fetchBehaviorAnalytics } from '@/api/dashboard'
@@ -521,44 +472,29 @@ const isLoading = ref(true)
 
 type DashboardSection = 'revenue' | 'interactions' | 'orders' | 'all'
 const SECTION_STORAGE_KEY = 'techstore_admin_dashboard_section'
-const sectionOptions: { id: DashboardSection; label: string; description: string; icon: Component }[] = [
-  { id: 'revenue', label: 'Doanh thu & Số lượng đơn', description: 'Biểu đồ doanh thu theo thời gian', icon: BarChart3 },
-  { id: 'interactions', label: 'Tương tác & Top sản phẩm', description: 'Hành vi người dùng & xếp hạng', icon: Eye },
-  { id: 'orders', label: 'Đơn hàng & Phím tắt', description: 'Đơn mới nhất & trạng thái xử lý', icon: ShoppingBag },
-  { id: 'all', label: 'Hiển thị tất cả', description: 'Xem toàn bộ các khối thống kê', icon: LayoutGrid }
+const sectionOptions: (CustomSelectOption & { value: DashboardSection })[] = [
+  { value: 'revenue', label: 'Doanh thu & Số lượng đơn', description: 'Biểu đồ doanh thu theo thời gian', icon: BarChart3 },
+  { value: 'interactions', label: 'Tương tác & Top sản phẩm', description: 'Hành vi người dùng & xếp hạng', icon: Eye },
+  { value: 'orders', label: 'Đơn hàng & Phím tắt', description: 'Đơn mới nhất & trạng thái xử lý', icon: ShoppingBag },
+  { value: 'all', label: 'Hiển thị tất cả', description: 'Xem toàn bộ các khối thống kê', icon: LayoutGrid }
+]
+
+const rankingSortOptions: CustomSelectOption[] = [
+  { value: 'interactionScore', label: 'Theo điểm tương tác' },
+  { value: 'viewCount', label: 'Theo lượt xem' },
+  { value: 'wishlistCount', label: 'Theo lượt tym' },
+  { value: 'addToCartCount', label: 'Theo thêm giỏ' },
+  { value: 'purchaseCount', label: 'Theo lượt mua' }
 ]
 
 function loadSavedSection(): DashboardSection {
   const saved = localStorage.getItem(SECTION_STORAGE_KEY)
-  return sectionOptions.some(opt => opt.id === saved) ? (saved as DashboardSection) : 'revenue'
+  return sectionOptions.some(opt => opt.value === saved) ? (saved as DashboardSection) : 'revenue'
 }
 
 const activeSection = ref<DashboardSection>(loadSavedSection())
-const isSectionMenuOpen = ref(false)
-const sectionDropdownRef = ref<HTMLElement | null>(null)
-
-const currentSectionOption = computed(
-  () => sectionOptions.find(opt => opt.id === activeSection.value) ?? sectionOptions[0]
-)
 
 watch(activeSection, value => localStorage.setItem(SECTION_STORAGE_KEY, value))
-
-function selectSection(section: DashboardSection) {
-  activeSection.value = section
-  isSectionMenuOpen.value = false
-}
-
-function handleDropdownClickOutside(event: MouseEvent) {
-  if (sectionDropdownRef.value && !sectionDropdownRef.value.contains(event.target as Node)) {
-    isSectionMenuOpen.value = false
-  }
-}
-
-function handleDropdownEscape(event: KeyboardEvent) {
-  if (event.key === 'Escape') {
-    isSectionMenuOpen.value = false
-  }
-}
 
 function isSectionVisible(section: Exclude<DashboardSection, 'all'>): boolean {
   return activeSection.value === 'all' || activeSection.value === section
@@ -757,13 +693,6 @@ async function loadData() {
 }
 
 onMounted(() => {
-  document.addEventListener('click', handleDropdownClickOutside)
-  document.addEventListener('keydown', handleDropdownEscape)
   loadData()
-})
-
-onBeforeUnmount(() => {
-  document.removeEventListener('click', handleDropdownClickOutside)
-  document.removeEventListener('keydown', handleDropdownEscape)
 })
 </script>
