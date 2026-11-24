@@ -45,7 +45,7 @@
               type="text"
               data-testid="order-search-input"
               @keyup.enter="handleSearch"
-              placeholder="Tìm theo mã đơn, người nhận, SĐT..."
+              placeholder="Tìm theo mã đơn hàng, tên sản phẩm..."
               class="w-full h-9 bg-zinc-50/70 focus:bg-white border border-zinc-200 rounded-lg pl-9 pr-8 text-xs text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-zinc-900 transition-colors"
             />
             <button

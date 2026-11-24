@@ -30,8 +30,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("SELECT o FROM Order o WHERE o.user.id = :userId " +
             "AND (:status IS NULL OR o.orderStatus = :status) " +
             "AND (LOWER(o.orderCode) LIKE :keywordPattern " +
-            "OR LOWER(o.recipientName) LIKE :keywordPattern " +
-            "OR o.phoneNumber LIKE :keywordPattern) " +
+            "OR EXISTS (SELECT 1 FROM OrderItem i WHERE i.order = o AND LOWER(i.productName) LIKE :keywordPattern)) " +
             "ORDER BY o.createdAt DESC")
     Page<Order> searchUserOrders(
             @Param("userId") Long userId,
