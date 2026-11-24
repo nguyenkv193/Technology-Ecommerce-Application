@@ -136,7 +136,7 @@ class OrderControllerTest {
                 .last(true)
                 .build();
 
-        when(orderService.getUserOrders(1L, 0, 10)).thenReturn(pageResponse);
+        when(orderService.getUserOrders(1L, null, null, 0, 10)).thenReturn(pageResponse);
 
         mockMvc.perform(get("/api/v1/orders?page=0&size=10").with(user(sampleUser)))
                 .andExpect(status().isOk())
@@ -144,7 +144,7 @@ class OrderControllerTest {
                 .andExpect(jsonPath("$.data.content[0].orderCode").value("ORD-20261017-001"))
                 .andExpect(jsonPath("$.data.totalElements").value(1));
 
-        verify(orderService).getUserOrders(1L, 0, 10);
+        verify(orderService).getUserOrders(1L, null, null, 0, 10);
     }
 
     @Test

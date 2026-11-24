@@ -29,6 +29,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -153,8 +154,21 @@ public class OrderService {
 
     @Transactional(readOnly = true)
     public PageResponse<OrderResponse> getUserOrders(Long userId, int page, int size) {
+        return getUserOrders(userId, null, null, page, size);
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<OrderResponse> getUserOrders(Long userId, OrderStatus status, String keyword, int page, int size) {
         Pageable pageable = PageRequest.of(Math.max(0, page), Math.max(1, size));
-        Page<Order> orderPage = orderRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
+        Page<Order> orderPage;
+        if (StringUtils.hasText(keyword)) {
+            String pattern = "%" + keyword.trim().toLowerCase() + "%";
+            orderPage = orderRepository.searchUserOrders(userId, status, pattern, pageable);
+        } else if (status != null) {
+            orderPage = orderRepository.findByUserIdAndOrderStatusOrderByCreatedAtDesc(userId, status, pageable);
+        } else {
+            orderPage = orderRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
+        }
         return PageResponse.of(orderPage.map(OrderResponse::from));
     }
 

@@ -24,6 +24,23 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     Page<Order> findByUserIdOrderByCreatedAtDesc(Long userId, Pageable pageable);
 
     @EntityGraph(attributePaths = {"items", "user"})
+    Page<Order> findByUserIdAndOrderStatusOrderByCreatedAtDesc(Long userId, OrderStatus orderStatus, Pageable pageable);
+
+    @EntityGraph(attributePaths = {"items", "user"})
+    @Query("SELECT o FROM Order o WHERE o.user.id = :userId " +
+            "AND (:status IS NULL OR o.orderStatus = :status) " +
+            "AND (LOWER(o.orderCode) LIKE :keywordPattern " +
+            "OR LOWER(o.recipientName) LIKE :keywordPattern " +
+            "OR o.phoneNumber LIKE :keywordPattern) " +
+            "ORDER BY o.createdAt DESC")
+    Page<Order> searchUserOrders(
+            @Param("userId") Long userId,
+            @Param("status") OrderStatus status,
+            @Param("keywordPattern") String keywordPattern,
+            Pageable pageable
+    );
+
+    @EntityGraph(attributePaths = {"items", "user"})
     Optional<Order> findWithDetailsById(Long id);
 
     @EntityGraph(attributePaths = {"items", "user"})
