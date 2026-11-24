@@ -60,12 +60,6 @@ const routes: Array<RouteRecordRaw> = [
         name: 'orders',
         component: () => import('@/views/orders/OrderListView.vue'),
         meta: { title: 'Quản lý Đơn hàng' }
-      },
-      {
-        path: 'system-ops',
-        name: 'system-ops',
-        component: () => import('@/views/system/SystemOpsView.vue'),
-        meta: { title: 'Vận hành Hệ thống' }
       }
     ]
   },

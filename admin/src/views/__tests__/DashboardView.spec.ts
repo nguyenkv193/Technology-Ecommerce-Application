@@ -10,8 +10,7 @@ const router = createRouter({
   routes: [
     { path: '/', component: { template: '<div>Dashboard</div>' } },
     { path: '/products/create', component: { template: '<div>Create Product</div>' } },
-    { path: '/orders', component: { template: '<div>Orders</div>' } },
-    { path: '/system-ops', component: { template: '<div>Ops</div>' } }
+    { path: '/orders', component: { template: '<div>Orders</div>' } }
   ]
 })
 
