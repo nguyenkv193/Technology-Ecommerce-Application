@@ -46,10 +46,16 @@
         <CustomSelect v-model="selectedCountry" :options="countryFilterOptions" />
         <CustomSelect v-model="productPresenceFilter" :options="presenceOptions" align="right" />
         <button
-          v-if="keyword || selectedCountry !== 'ALL' || productPresenceFilter !== 'ALL'"
+          type="button"
+          @click="loadBrands"
+          class="h-9 px-3.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-medium shadow-xs transition-colors cursor-pointer"
+        >
+          Tìm kiếm
+        </button>
+        <button
           type="button"
           @click="resetFilters"
-          class="h-9 px-2.5 rounded-lg text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 text-xs transition-colors cursor-pointer"
+          class="h-9 px-3 rounded-lg bg-white hover:bg-zinc-50 border border-zinc-200 text-zinc-700 hover:text-zinc-900 text-xs font-medium shadow-xs transition-colors cursor-pointer"
         >
           Đặt lại
         </button>
